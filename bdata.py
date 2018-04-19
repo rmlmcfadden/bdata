@@ -3,9 +3,9 @@
 # Derek Fujimoto
 # July 2017
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import mudpy as mp
 import numpy as np
@@ -366,10 +366,10 @@ class bdata(object):
                 raise ValueError("Run number out of range") 
                 
             # look for environment variable
-            if spect_dir == "bnmr/" and self.evar_bnmr in os.environ.keys():
+            if spect_dir == "bnmr/" and self.evar_bnmr in list(os.environ.keys()):
                 filename = os.environ[self.evar_bnmr]
                 
-            elif spect_dir == "bnqr/" and self.evar_bnqr in os.environ.keys():
+            elif spect_dir == "bnqr/" and self.evar_bnqr in list(os.environ.keys()):
                 filename = os.environ[self.evar_bnqr]
                 
             # some common defaults if no environment variable
@@ -433,7 +433,7 @@ class bdata(object):
             # Read histograms
             n_hist = mp.get_hists(fh)[1]
             self.hist_list = []
-            for i in xrange(1,n_hist+1):
+            for i in range(1,n_hist+1):
                 self.hist_list.append(bhist())
                 self.hist_list[-1].id_number = i
                 self.hist_list[-1].htype = mp.get_hist_type(fh,i)
@@ -462,7 +462,7 @@ class bdata(object):
             # Read scalers
             n_scaler = mp.get_scalers(fh)[1]
             self.scaler_list = []
-            for i in xrange(1,n_scaler+1):
+            for i in range(1,n_scaler+1):
                 self.scaler_list.append(bscaler())
                 self.scaler_list[-1].counts = mp.get_scaler_counts(fh,i)
                 self.scaler_list[-1].id_number = i
@@ -474,7 +474,7 @@ class bdata(object):
             # Read independent variables
             n_var = mp.get_ivars(fh)[1]
             self.var_list = []
-            for i in xrange(1,n_var+1):
+            for i in range(1,n_var+1):
                 self.var_list.append(bvar())
                 self.var_list[-1].id_number = i
                 self.var_list[-1].low = mp.get_ivar_low(fh,i)
@@ -586,7 +586,7 @@ class bdata(object):
                         2*np.sqrt((d2*d3)/denom2**3)]
         
         # remove nan            
-        for i in xrange(2):
+        for i in range(2):
             asym_hel[i][np.isnan(asym_hel[i])] = 0.
             asym_hel_err[i][np.isnan(asym_hel_err[i])] = 0.
         
@@ -637,7 +637,7 @@ class bdata(object):
         # combine scans: values with same frequency 
         unique_freq = np.unique(freq)
         
-        sum_scans = [[] for i in xrange(len(d))]
+        sum_scans = [[] for i in range(len(d))]
         
         for f in unique_freq: 
             tag = freq==f
@@ -831,14 +831,14 @@ class bdata(object):
         """
             Nice printing of parameters.
         """
-        if self.__dict__.keys():
+        if list(self.__dict__.keys()):
             itemlist = [[key,self.__dict__[key]] \
                 if not hasattr(self.__dict__[key],'__iter__') or \
                     self.__dict__[key].__class__ == bdict\
                 else [key,self.__dict__[key].__class__] \
-                for key in self.__dict__.keys()]
+                for key in list(self.__dict__.keys())]
                             
-            m = max(map(len, list(self.__dict__.keys()))) + 1
+            m = max(list(map(len, list(self.__dict__.keys())))) + 1
             s = '\n'.join([k.rjust(m) + ': ' + repr(v)
                               for k, v in sorted(itemlist)])
             return s
@@ -964,9 +964,9 @@ class bdata(object):
         
         # check for additonal options (1F)
         if omit != '':
-            further_options = map(str.strip,omit.split(' '))
+            further_options = list(map(str.strip,omit.split(' ')))
         else:
-            further_options = map(str.strip,option.split(' ')[1:])
+            further_options = list(map(str.strip,option.split(' ')[1:]))
         option = option.split(' ')[0].strip()
         
         # Option reduction
@@ -994,12 +994,12 @@ class bdata(object):
             bkgd /= n_prebeam
             
             # subtract background from counts, remove negative count values
-            for i in xrange(len(d)):
+            for i in range(len(d)):
                 d[i] = d[i]-bkgd[i]
                 d[i][d[i]<0] = 0.
             
             # delete prebeam entries
-            for i in xrange(len(d)):
+            for i in range(len(d)):
                 d[i] = np.delete(d[i],np.arange(n_prebeam))
                 
             # get helicity data
@@ -1066,7 +1066,7 @@ class bdata(object):
                     bin_ranges.extend(np.arange(one,two+1))
             
             # kill bins
-            for i in xrange(len(d)):
+            for i in range(len(d)):
 
                 # get good bin range
                 if len(bin_ranges) > 0:
@@ -1266,8 +1266,8 @@ class bcontainer(object):
     """
 
     def __repr__(self):
-        if self.__dict__.keys():
-            m = max(map(len, list(self.__dict__.keys()))) + 1
+        if list(self.__dict__.keys()):
+            m = max(list(map(len, list(self.__dict__.keys())))) + 1
             s = ''
             s += '\n'.join([k.rjust(m) + ': ' + repr(v)
                               for k, v in sorted(self.__dict__.items())])
@@ -1291,9 +1291,9 @@ class bdict(dict):
     __delattr__ = dict.__delitem__
     
     def __repr__(self):
-        if self.keys():
+        if list(self.keys()):
             s = self.__class__.__name__+': {'
-            for k in self.keys():
+            for k in list(self.keys()):
                 s+="'"+k+"'"+', '
             s = s[:-2]
             s+='}'
