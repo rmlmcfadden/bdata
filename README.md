@@ -53,7 +53,8 @@ Set the location of the data archive via environment variables "BNMR_ARCHIVE" an
 
 ## bdata.asym() docstring
 
-        """Calculate and return the asymmetry for various run types. 
+        """
+        Calculate and return the asymmetry for various run types. 
            
         usage: asym(option="",omit="",rebin=1)
             
