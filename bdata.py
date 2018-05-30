@@ -12,6 +12,7 @@ import numpy as np
 import socket, os, time, sys
 import datetime
 import matplotlib.pyplot as plt
+import warnings
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -510,9 +511,9 @@ class bdata(object):
                 else:
                     self.epics[self.dkeys[v.title]] = v
             except (KeyError,IndexError):
-                    message = "Warning: " + v.title + " not found in dkeys. "+\
-                    "Data is stored in list, but not sorted to dictionary."
-                    print(message)
+                    message = '"' + v.title + '" not found in dkeys. '+\
+                                "Data in list, but not sorted to dict."
+                    warnings.warn(message,RuntimeWarning,stacklevel=2)
                     
         # Sort histograms into dictionaries by title and convert to doubles
         self.hist = bdict()
@@ -678,8 +679,8 @@ class bdata(object):
             beam_off = int(self.ppg['beam_off_ms'].mean)
         
         except KeyError:
-            print("Not all dictionary variables read out to proper locations")
-            return -1
+            raise RuntimeError("Not all dictionary variables read out to "+\
+                               "proper locations")
             
         # setup output
         out = bdict()
