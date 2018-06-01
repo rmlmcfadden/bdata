@@ -832,16 +832,23 @@ class bdata(object):
         """
             Nice printing of parameters.
         """
-        if list(self.__dict__.keys()):
-            itemlist = [[key,self.__dict__[key]] \
-                if not hasattr(self.__dict__[key],'__iter__') or \
-                    self.__dict__[key].__class__ == bdict\
-                else [key,self.__dict__[key].__class__] \
-                for key in list(self.__dict__.keys())]
+        
+        d = self.__dict__
+        
+        if list(d.keys()):
+            items = []
+            
+            for key in d.keys():
+                if not hasattr(d[key],'__iter__') or d[key].__class__ == bdict:
+                    items.append([key,d[key]])                
+                elif d[key].__class__ == str:
+                    items.append([key,d[key]])                
+                else:
+                    items.append([key,d[key].__class__])
+                
                             
-            m = max(list(map(len, list(self.__dict__.keys())))) + 1
-            s = '\n'.join([k.rjust(m) + ': ' + repr(v)
-                              for k, v in sorted(itemlist)])
+            m = max(map(len,d.keys())) + 1
+            s = '\n'.join([k.rjust(m)+': '+repr(v) for k, v in sorted(items)])
             return s
         else:
             return self.__class__.__name__ + "()"
@@ -1268,7 +1275,7 @@ class bcontainer(object):
 
     def __repr__(self):
         if list(self.__dict__.keys()):
-            m = max(list(map(len, list(self.__dict__.keys())))) + 1
+            m = max(map(len,self.__dict__.keys())) + 1
             s = ''
             s += '\n'.join([k.rjust(m) + ': ' + repr(v)
                               for k, v in sorted(self.__dict__.items())])
@@ -1294,7 +1301,7 @@ class bdict(dict):
     def __repr__(self):
         if list(self.keys()):
             s = self.__class__.__name__+': {'
-            for k in list(self.keys()):
+            for k in self.keys():
                 s+="'"+k+"'"+', '
             s = s[:-2]
             s+='}'
