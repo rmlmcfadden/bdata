@@ -3,10 +3,6 @@
 # Derek Fujimoto
 # July 2017
 
-
-
-
-
 import mudpy as mp
 import numpy as np
 import socket, os, time, sys
@@ -854,10 +850,10 @@ class bdata(object):
             return self.__class__.__name__ + "()"
 
 # =========================================================================== #
-    def asym(self,option="",omit="",rebin=1):
+    def asym(self,option="",omit="",rebin=1,nbm=False):
         """Calculate and return the asymmetry for various run types. 
            
-        usage: asym(option="",omit="",rebin=1)
+        usage: asym(option="",omit="",rebin=1,nbm=False)
             
         Inputs:
             options: see below for details
@@ -865,6 +861,7 @@ class bdata(object):
                     feasible. See options description below.
             rebin: SLR only. Weighted average over 'rebin' bins to reduce array 
                 length by a factor of rebin. 
+            nbm: use counts in neutral beam monitors
             
         Asymmetry calculation outline: 
         
@@ -990,7 +987,11 @@ class bdata(object):
             option = ""
         
         # get data
-        d = self.__get_area_data__() # 1+ 2+ 1- 2- 
+        if nbm:
+            d = [self.hist['NBMF+'].data,self.hist['NBMB+'].data,
+                 self.hist['NBMF-'].data,self.hist['NBMB-'].data]
+        else:
+            d = self.__get_area_data__() # 1+ 2+ 1- 2- 
         
         # SLR -----------------------------------------------------------------
         if self.mode in ["20"]:
