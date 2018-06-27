@@ -9,38 +9,45 @@ Requires the installation of mudpy. See mudpy docstring for installation instruc
 
 Constructor: **bdata(run_number,year=0,filename='')**
     
-```
+```python
 bd = bdata(40001)           # read run 40001 from the default year. 
 bd = bdata(40001,year=2009) # read run 40001 from 2009.
 bd = bdata(0,filename='file.msr') # read file from local memory, run number unused 
 ```        
 
-If year==0 then default is the current year. For scripts analysing a specific data set, it is advised that this be set so that the script does not break as time passes. 
+If `year=0` then default is the current year. For scripts analysing a specific data set, it is advised that this be set so that the script does not break as time passes. 
 
 ## Example Usage
 
 1 Asymmetry: 
 
-```
+```python
 bd.asym() # for details and options see bdata.asym docstring. 
 ```        
 
 2 Beam energy: 
 
-```
+```python
 bd.beam_kev()   # returns beam energy in keV
 ```
 
 3 Pulse-off time for SLR measurements: 
-        pulse_off_s()
-                                      
+
+```python
+pulse_off_s()
+```                             
 
 4 For a nicely-formatted list of all data fields call the fields method: 
-        bd.fields()
+
+```python
+bd.fields()
+```
         
 Note that the object representation has been nicely formatted as well, so that typing
-        
-        bd
+   
+```python
+bd
+```
         
 into the interpreter produces nice output. 
 
