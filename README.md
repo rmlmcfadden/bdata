@@ -17,6 +17,11 @@ bd = bdata(0,filename='file.msr') # read file from local memory, run number unus
 
 If `year=0` then default is the current year. For scripts analysing a specific data set, it is advised that this be set so that the script does not break as time passes. 
 
+## Installation 
+
+* Compile mudpy: `python3 setup_mudpy.py build_ext --inplace`
+* Add bdata to your python path (do so in .bashrc or .bash_profile)
+
 ## Example Usage
 
 1 Asymmetry: 
