@@ -20,7 +20,18 @@ If `year=0` then default is the current year. For scripts analysing a specific d
 ## Installation 
 
 * Compile mudpy: `python3 setup_mudpy.py build_ext --inplace`
-* Add bdata to your python path (do so in .bashrc or .bash_profile)
+* Add bdata to your python path (do so in ~/.bashrc or ~/.bash_profile)
+    * `export PYTHONPATH=$PYTHONPATH:/path/bdata/`
+* Add environment variables for finding data files
+    * `export BNMR_ARCHIVE=/path/bnmr/`
+    * `export BNQR_ARCHIVE=/path/bnqr/`
+
+
+### Dependencies
+
+* Cython
+* numpy
+* matplotlib
 
 ## Example Usage
 
