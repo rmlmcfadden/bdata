@@ -7,7 +7,6 @@ import mudpy as mp
 import numpy as np
 import socket, os, time, sys
 import datetime
-import matplotlib.pyplot as plt
 import warnings
 
 if sys.version_info[0] >= 3:
