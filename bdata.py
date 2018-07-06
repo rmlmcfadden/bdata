@@ -244,6 +244,7 @@ class bdata(object):
             "/rfamp/fwd_max"                            :"rfamp_fwd",
             "/rfamp/fwd_power"                          :"rfamp_fpwr",
             "/rfamp/refl_max"                           :"rfamp_rfl",
+            "/rfamp/RF_gain"                            :"rfamp_rfgain",
             "/rf_level_cont/dac_set"                    :"rf_dac",
                                                     
             "/Sample/current_read_1"                    :"smpl_current",
@@ -253,6 +254,7 @@ class bdata(object):
             "/Sample1/read_A"                           :"smpl_read_A",
             "/Sample/read_B"                            :"smpl_read_B",
             "/Sample1/read_B"                           :"smpl_read_B",
+            "/Sample/read_C"                            :"smpl_read_C",
             "/Sample/set_current"                       :"smpl_set_current",
             "/Sample/setpoint"                          :"smpl_set",
             "/Sample1/setpoint"                         :"smpl_set",
