@@ -105,7 +105,7 @@ import array
 ### ======================================================================= ###
 # FILE IO
 ### ======================================================================= ###
-cdef extern from "./mud_src/mud_friendly.c":
+cdef extern from "../mud_src/mud_friendly.c":
     int MUD_openRead(char* file_name, unsigned int* pType)
     void MUD_closeRead(int file_handle)
 
@@ -121,7 +121,7 @@ def close_read(file_handle):
 ### ======================================================================= ###
 # RUN DESCRIPTION
 ### ======================================================================= ###
-cdef extern from "./mud_src/mud_friendly.c":
+cdef extern from "../mud_src/mud_friendly.c":
     int MUD_getRunDesc(int fh, unsigned int* pType)
     int MUD_getExptNumber(int fh, unsigned int* pExpNumber)
     int MUD_getRunNumber(int fh, unsigned int* pRunNumber)
@@ -238,7 +238,7 @@ def get_experimenter(file_handle):
 ### ======================================================================= ###
 # COMMENTS
 ### ======================================================================= ###
-cdef extern from "./mud_src/mud_friendly.c":
+cdef extern from "../mud_src/mud_friendly.c":
     int MUD_getComments(int fh, unsigned int* pType, \
                         unsigned int* number_of_comments)
     int MUD_getCommentPrev(int fh, int num, unsigned int* pPrev )
@@ -294,7 +294,7 @@ def get_comment_body(file_handle,comment_id_number):
 ### ======================================================================= ###
 # HISTOGRAMS
 ### ======================================================================= ###
-cdef extern from "./mud_src/mud_friendly.c":
+cdef extern from "../mud_src/mud_friendly.c":
     int MUD_getHists( int fh, unsigned int* pType, unsigned int* pNum )
     int MUD_getHistType( int fh, int num, unsigned int* pType )
     int MUD_getHistNumBytes( int fh, int num, unsigned int* pNumBytes )
@@ -421,7 +421,7 @@ def get_hist_data_pointer(file_handle,hist_id_number):
 ### ======================================================================= ###
 # SCALARS
 ### ======================================================================= ###
-cdef extern from "./mud_src/mud_friendly.c":
+cdef extern from "../mud_src/mud_friendly.c":
     int MUD_getScalers( int fh, unsigned int* pType, unsigned int* pNum )
     int MUD_getScalerLabel( int fh, int num, char* label, int strdim )
     int MUD_getScalerCounts( int fh, int num, unsigned int* pCounts )
@@ -448,7 +448,7 @@ def get_scaler_counts(file_handle,scalar_id_number):
 ### ======================================================================= ###
 # INDEPENDENT VARIABLES
 ### ======================================================================= ###
-cdef extern from "./mud_src/mud_friendly.c":
+cdef extern from "../mud_src/mud_friendly.c":
     int MUD_getIndVars(int fh, unsigned int* pType, \
                        unsigned int* number_of_variables)
     int MUD_getIndVarLow( int fh, int num, double* pLow )

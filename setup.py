@@ -6,9 +6,9 @@ import numpy
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-# mudpy module
-mpy = Extension("bdata",
-                sources=["mudpy.pyx",
+# module extension
+ext = Extension("bdata.mudpy",
+                sources=["./bdata/mudpy.pyx",
                         "./mud_src/mud.c",
                         "./mud_src/mud_gen.c",
                         "./mud_src/mud_encode.c",
@@ -16,9 +16,6 @@ mpy = Extension("bdata",
                         "./mud_src/mud_tri_ti.c",
                         "./mud_src/mud_all.c"])
    
-# bdata module
-#~ bdt = Extension("bdata",sources=['bdata'])
-
 setuptools.setup(
     name="bdata",
     version="1.1",
@@ -35,6 +32,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ),
     install_requires=['markdown','cython','numpy','datetime'],
-    ext_modules = cythonize([mpy],include_path = [numpy.get_include()]),
+    ext_modules = cythonize([ext],include_path = [numpy.get_include()]),
 )
 
