@@ -25,12 +25,6 @@ If `year=0` then default is the current year. For scripts analysing a specific d
     * `export BNMR_ARCHIVE=/path/bnmr/`
     * `export BNQR_ARCHIVE=/path/bnqr/`
 
-### Dependencies
-
-* Cython
-* numpy
-* matplotlib
-
 ## Example Usage
 
 1 Asymmetry: 
