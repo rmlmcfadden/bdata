@@ -1,2 +1,4 @@
 include README.md
-recursive-include mud_src
+include mud_src/*
+include LICENSE
+include bdata/mudpy.pyx
