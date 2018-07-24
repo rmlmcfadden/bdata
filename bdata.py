@@ -3,7 +3,7 @@
 # Derek Fujimoto
 # July 2017
 
-import mudpy as mp
+import bdata.mudpy as mp
 import numpy as np
 import socket, os, time, sys
 import datetime
