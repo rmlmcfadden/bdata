@@ -19,13 +19,11 @@ If `year=0` then default is the current year. For scripts analysing a specific d
 
 ## Installation 
 
+* Make sure you put the package somewhere on your PYTHONPATH
 * Compile mudpy: `python3 setup_mudpy.py build_ext --inplace`
-* Add bdata to your python path (do so in ~/.bashrc or ~/.bash_profile)
-    * `export PYTHONPATH=$PYTHONPATH:/path/bdata/`
 * Add environment variables for finding data files
     * `export BNMR_ARCHIVE=/path/bnmr/`
     * `export BNQR_ARCHIVE=/path/bnqr/`
-
 
 ### Dependencies
 
@@ -156,7 +154,7 @@ Return value depends on option provided:
         all options can include a space deliminated list of bins or 
         ranges of bins which will be omitted. ex: "raw 1 2 5-20 3"
 
-    "":     dictionary of 2D numpy arrays keyed by {p,n,c,freq} for each 
+    "":     dictionary of 2D numpy arrays keyed by {p,n,c,freq_hz} for each 
                 helicity and combination [val,err]. Default return state 
                 for unrecognized options.
     "r":    Dictionary of 2D numpy arrays keyed by {p,n} for each 
@@ -167,14 +165,14 @@ Return value depends on option provided:
     "p":    get pos helicity states as tuple, combined by frequency 
                 (freq,val,err)
     "n":    similar to p but for negative helicity states
-    "c":    get combined helicity states as tuple (freq,val,err)
+    "c":    get combined helicity states as tuple (freq_hz,val,err)
 
 
     2E DESCRIPTIONS ---------------------------------------------------
 
         Takes no options. Returns a dictionary with the keys: 
 
-    'dif_p':    [val,err][frequency] of pos. helicity asymmetry 
+    'dif_p':    [val,err][frequency_hz] of pos. helicity asymmetry 
     'dif_n':    [ve][f] of negative helicity asymmetry
     'dif_c':    [ve][f] of combined helicity asymmetry
 
