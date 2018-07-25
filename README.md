@@ -19,9 +19,8 @@ If `year=0` then default is the current year. For scripts analysing a specific d
 
 ## Installation 
 
-* Make sure you put the package somewhere on your PYTHONPATH
-* Compile mudpy: `python3 setup_mudpy.py build_ext --inplace`
-* Add environment variables for finding data files
+* Install using pip: `pip install bdata`
+* Export environment variables for finding data files (add to `.bashrc` or similar)
     * `export BNMR_ARCHIVE=/path/bnmr/`
     * `export BNQR_ARCHIVE=/path/bnqr/`
 
