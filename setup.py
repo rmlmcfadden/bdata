@@ -18,7 +18,7 @@ ext = Extension("bdata.mudpy",
    
 setuptools.setup(
     name="bdata",
-    version="1.1.1",
+    version="1.1.2",
     author="Derek Fujimoto",
     author_email="fujimoto@phas.ubc.ca",
     description="BNMR MUD file reader and asymmetry calculator",
