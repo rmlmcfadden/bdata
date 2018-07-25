@@ -851,20 +851,23 @@ class bdata(object):
             return self.__class__.__name__ + "()"
 
 # =========================================================================== #
-    def asym(self,option="",omit="",rebin=1,nbm=False):
+    def asym(self,option="",omit="",rebin=1,hist_select=''):
         """Calculate and return the asymmetry for various run types. 
            
-        usage: asym(option="",omit="",rebin=1,nbm=False)
+        usage: asym(option="",omit="",rebin=1,hist_select='')
             
         Inputs:
-            options: see below for details
-            omit: 1f bins to omit if space seperated string in options is not 
-                    feasible. See options description below.
-            rebin: SLR only. Weighted average over 'rebin' bins to reduce array 
-                length by a factor of rebin. 
-            nbm: use counts in neutral beam monitors
+            options:        see below for details
+            omit:           1f bins to omit if space seperated string in options 
+                                is not feasible. See options description below.
+            rebin:          SLR only. Weighted average over 'rebin' bins to 
+                                reduce array length by a factor of rebin. 
+            hist_select:    string to specify which histograms get combined into 
+                                making the asymmetry calculation. Deliminate 
+                                with [,] or [;]. Histogram names cannot 
+                                therefore contain either of these characters.
             
-        Asymmetry calculation outline: 
+        Asymmetry calculation outline (with default detectors): 
         
             Split helicity      (NMR): (F-B)/(F+B) for each
             Combined helicity   (NMR): (r-1)/(r+1)
@@ -874,6 +877,17 @@ class bdata(object):
             Combined helicity   (NQR): (r-1)/(r+1)
                 where r = sqrt([(L+)(R-)]/[(R+)(L-)])
             
+        Histogram Selection 
+        
+            If we wished to do a simple asymmetry calculation in the form of 
+                                    
+                                    (F-B)/(F+B)
+            
+            for each helicity, then 
+                                        |--|  |--|   paired helicities
+                        hist_select = 'F+,B+,F-,B-'
+                                       |-----|       paired counter location
+                                          |-----|
         Status of Data Corrections:
             SLR: 
                 Removes prebeam bins. 
@@ -988,9 +1002,23 @@ class bdata(object):
             option = ""
         
         # get data
-        if nbm:
-            d = [self.hist['NBMF+'].data,self.hist['NBMB+'].data,
-                 self.hist['NBMF-'].data,self.hist['NBMB-'].data]
+        if hist_select != '':
+            
+            # split into parts
+            hist_select_temp = []
+            for histname in hist_select.split(','):
+                hist_select_temp.extend(histname.split(';'))
+            hist_select = [h.strip() for h in hist_select_temp]
+            
+            # check for user error
+            if len(hist_select) != 4:
+                raise RuntimeError('hist_select must be a string of four '+\
+                            '[,]-seperated or [;]-seperated histogram names')
+            print(hist_select)
+            # get data
+            d = [self.hist[h].data for h in hist_select]
+            
+        # get default data
         else:
             d = self.__get_area_data__() # 1+ 2+ 1- 2- 
         
@@ -1027,10 +1055,10 @@ class bdata(object):
 
             # mode switching
             if option == '+':
-                return np.array([time,self.__rebin__(h[0],rebin)])
+                return np.vstack([time,self.__rebin__(h[0],rebin)])
                 
             elif option == '-':
-                return np.array([time,self.__rebin__(h[1],rebin)])
+                return np.vstack([time,self.__rebin__(h[1],rebin)])
 
             elif option == 'h':
                 out = bdict()
@@ -1041,7 +1069,7 @@ class bdata(object):
 
             elif option == 'c':
                 c = np.array(self.__get_asym_comb__(d))
-                return np.array([time,self.__rebin__(c,rebin)])
+                return np.vstack([time,self.__rebin__(c,rebin)])
 
             else:
                 c = np.array(self.__get_asym_comb__(d))
