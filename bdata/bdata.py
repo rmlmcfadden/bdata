@@ -458,16 +458,16 @@ class bdata(object):
                     self.hist_list[-1].title = mp.get_hist_title(fh,i)
                 
             # Read scalers
-            n_scaler = mp.get_scalers(fh)[1]
-            self.scaler_list = []
-            for i in range(1,n_scaler+1):
-                self.scaler_list.append(bscaler())
-                self.scaler_list[-1].counts = mp.get_scaler_counts(fh,i)
-                self.scaler_list[-1].id_number = i
-                try:
-                    self.scaler_list[-1].title = str(mp.get_scaler_label(fh,i))
-                except UnicodeEncodeError as e:
-                    self.scaler_list[-1].title = repr(e)
+            #~ n_scaler = mp.get_scalers(fh)[1]
+            #~ self.scaler_list = []
+            #~ for i in range(1,n_scaler+1):
+                #~ self.scaler_list.append(bscaler())
+                #~ self.scaler_list[-1].counts = mp.get_scaler_counts(fh,i)
+                #~ self.scaler_list[-1].id_number = i
+                #~ try:
+                    #~ self.scaler_list[-1].title = str(mp.get_scaler_label(fh,i))
+                #~ except UnicodeEncodeError as e:
+                    #~ self.scaler_list[-1].title = repr(e)
            
             # Read independent variables
             n_var = mp.get_ivars(fh)[1]
@@ -519,10 +519,10 @@ class bdata(object):
             self.hist[h.title].data = self.hist[h.title].data.astype(float)
         
         # Sort scalers into dictionaries by title
-        self.sclr = bdict()
-        for s in self.scaler_list:
-            new_key = s.title.split("%")[-1].replace(" ","")
-            self.sclr[new_key] = s
+        #~ self.sclr = bdict()
+        #~ for s in self.scaler_list:
+            #~ new_key = s.title.split("%")[-1].replace(" ","")
+            #~ self.sclr[new_key] = s
             
         # set the date
         self.start_date = time.ctime(self.start_time)
