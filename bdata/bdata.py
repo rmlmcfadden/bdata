@@ -199,7 +199,8 @@ class bdata(object):
             "use defaults for midbnmr"          :"defaults",
              
         # CAMP
-            "/PVac/adc_read"                            :"vac",
+            "/biasV/input1"                             :"rb_cell_bias",
+        
             "/CryoEx_MassFlow/read_flow"                :"cryo_read",
             "/CryoEx_MassFlow/set_flow"                 :"cryo_set",
             "/Cryo_level/He_level"                      :"cryo_he",
@@ -239,6 +240,8 @@ class bdata(object):
             "/Needle_Valve/set_position"                :"needle_set",
             "/Needle/read_position"                     :"needle_pos",
             "/Needle/set_position"                      :"needle_set",
+            
+            "/PVac/adc_read"                            :"vac",
                                                     
             "/rfamp/fwd_max"                            :"rfamp_fwd",
             "/rfamp/fwd_power"                          :"rfamp_fpwr",
