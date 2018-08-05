@@ -199,7 +199,8 @@ class bdata(object):
             "use defaults for midbnmr"          :"defaults",
              
         # CAMP
-            "/biasV/input1"                             :"rb_cell_bias",
+            "/biasV/input1"                             :"rb_cell_bias_set",
+            "/biasV/output1"                            :"rb_cell_bias_read",
         
             "/CryoEx_MassFlow/read_flow"                :"cryo_read",
             "/CryoEx_MassFlow/set_flow"                 :"cryo_set",
