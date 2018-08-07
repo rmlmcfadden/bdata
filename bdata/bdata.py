@@ -1049,7 +1049,7 @@ class bdata(object):
                 h = np.array(self.__get_asym_hel__(d))
                 
             # rebin time
-            time = np.arange(len(d[0]))*self.ppg['dwelltime'].mean/1000
+            time = (np.arange(len(d[0]))+0.5)*self.ppg['dwelltime'].mean/1000
             if rebin > 1:
                 new_len = len(d[0]/rebin)
                 new_time = []
