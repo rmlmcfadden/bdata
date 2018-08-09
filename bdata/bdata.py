@@ -1189,7 +1189,7 @@ class bdata(object):
         
         # get platform bias 
         if self.area == 'BNMR':
-            platform = epics.nmr_bias_p.mean
+            platform = epics.nmr_bias.mean
         elif self.area == 'BNQR':
             platform = epics.nqr_bias.mean/1000.
         else:
