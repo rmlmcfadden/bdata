@@ -265,7 +265,7 @@ class bdata(object):
             "/sample2/heat_range"                       :"smpl2_heat",
             "/sample2/sample_read"                      :"smpl2_read",
             "/sample_volts/reading"                     :"smpl_volts",
-            "/Shield/read_1"                            :"sheild_read1",
+            "/Shield/read_1"                            :"shield_read1",
             "/signal_gen/amplitude"                     :"sig_gen_amp",
             "/signal_gen/frequency"                     :"sig_gen_freq",
             "/signal_gen/power_level"                   :"sig_gen_pwr",
@@ -276,14 +276,14 @@ class bdata(object):
             "/stealth/rev_power"                        :"stealth_rev_pwr",
             
         # EPICS
-            "BNMR:HVBIAS:P"                             :"nmr_bias_p",
-            "BNMR:HVBIAS:PO"                            :"nmr_bias_p",
-            "BNMR:HVBIAS:POS"                           :"nmr_bias_p",
-            "BNMR:HVBIAS:POS:"                          :"nmr_bias_p",
-            "BNMR:HVBIAS:POS:R"                         :"nmr_bias_p",
-            "BNMR:HVBIAS:POS:RDVO"                      :"nmr_bias_p",
-            "BNMR:HVBIAS:POS:RDVOL"                     :"nmr_bias_p",
-            "BNMR:HVBIAS:POS:RDVOL1"                    :"nmr_bias_p",
+            "BNMR:HVBIAS:P"                             :"nmr_bias",
+            "BNMR:HVBIAS:PO"                            :"nmr_bias",
+            "BNMR:HVBIAS:POS"                           :"nmr_bias",
+            "BNMR:HVBIAS:POS:"                          :"nmr_bias",
+            "BNMR:HVBIAS:POS:R"                         :"nmr_bias",
+            "BNMR:HVBIAS:POS:RDVO"                      :"nmr_bias",
+            "BNMR:HVBIAS:POS:RDVOL"                     :"nmr_bias",
+            "BNMR:HVBIAS:POS:RDVOL1"                    :"nmr_bias",
                                                   
             "BNMR:HVBIAS:N"                             :"nmr_bias_n",
             "BNMR:HVBIAS:NE"                            :"nmr_bias_n",
@@ -297,18 +297,17 @@ class bdata(object):
             "BNQR:HVBIAS:RD"                            :"nqr_bias",
             "BNQR:HVBIAS:RDVOL"                         :"nqr_bias",
                                                   
-            "ITE:BIAS:RDVO"                             :"ite_bias",  
-            "ITE:BIAS:RDVOL"                            :"ite_bias",  
-            "ITE:BIAS:RDVOLER"                          :"ite_bias",  
-            "ITE:BIAS:RDVOLVOL"                         :"ite_bias",
-            
-            "ITW:BIAS:R"                                :"itw_bias",
-            "ITW:BIAS:RD"                               :"itw_bias",
-            "ITW:BIAS:RDV"                              :"itw_bias",
-            "ITW:BIAS:RDVO"                             :"itw_bias",
-            "ITW:BIAS:RDVOL"                            :"itw_bias",
-            "ITW:BIAS:RDVOL1"                           :"itw_bias",
-            "ITW:BIAS:RDVOLVOL"                         :"itw_bias",
+            "ITE:BIAS:RDVO"                             :"target_bias",  
+            "ITE:BIAS:RDVOL"                            :"target_bias",  
+            "ITE:BIAS:RDVOLER"                          :"target_bias",  
+            "ITE:BIAS:RDVOLVOL"                         :"target_bias",
+            "ITW:BIAS:R"                                :"target_bias",
+            "ITW:BIAS:RD"                               :"target_bias",
+            "ITW:BIAS:RDV"                              :"target_bias",
+            "ITW:BIAS:RDVO"                             :"target_bias",
+            "ITW:BIAS:RDVOL"                            :"target_bias",
+            "ITW:BIAS:RDVOL1"                           :"target_bias",
+            "ITW:BIAS:RDVOLVOL"                         :"target_bias",
                                                   
             "ILE2:BIAS15:R"                             :"bias15",
             "ILE2:BIAS15:RD"                            :"bias15",
@@ -1183,19 +1182,18 @@ class bdata(object):
         epics = self.epics
         
         # get inital beam energy in keV
-        try: 
-            beam = epics.itw_bias.mean/1000.
-        except AttributeError:
-            try:
-                beam = epics.ite_bias.mean/1000.
-            except AttributeError:
-                raise AttributeError("No itw or ite bias logged in file.")
+        beam = epics.target_bias.mean/1000.
             
         # get RB cell voltage
         bias15 = epics.bias15.mean/1000.
         
         # get platform bias 
-        platform = epics.nmr_bias_p.mean
+        if self.area == 'BNMR':
+            platform = epics.nmr_bias_p.mean
+        elif self.area == 'BNQR':
+            platform = epics.nqr_bias.mean/1000.
+        else:
+            raise RuntimeError('Area not recognized')
         
         return beam-bias15-platform # keV
 
