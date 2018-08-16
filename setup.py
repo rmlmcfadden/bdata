@@ -15,10 +15,10 @@ ext = Extension("bdata.mudpy",
                         "./mud_src/mud_new.c",
                         "./mud_src/mud_tri_ti.c",
                         "./mud_src/mud_all.c"])
-   
+
 setuptools.setup(
     name="bdata",
-    version="1.1.3",
+    version="1.1.4",
     author="Derek Fujimoto",
     author_email="fujimoto@phas.ubc.ca",
     description="BNMR/BNQR MUD file reader and asymmetry calculator",
@@ -31,7 +31,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
-    install_requires=['markdown','cython','numpy','datetime'],
+    install_requires=['markdown>=2.6','cython>=0.28','numpy>=1.14'],
     ext_modules = cythonize([ext],include_path = [numpy.get_include()]),
 )
 
