@@ -752,7 +752,7 @@ class bdata(object):
         out['time'] = time
             
         # get data
-        data = np.array(self.__get_area_data__()) # [[fp], [bp], [fm], [bm]]
+        data = np.array(self.__get_area_data__()) # [[fp], [bfm], [bp], [bm]]
         
         # discared initial bad bins, and beam-off trailing bins
         data = data[:,start_bin:len(freq)*ndwell+start_bin]
@@ -761,8 +761,8 @@ class bdata(object):
         nsplit = len(data[0])/ndwell
         
         fp = np.array(np.split(data[0],nsplit))
-        bp = np.array(np.split(data[1],nsplit))
-        fm = np.array(np.split(data[2],nsplit))
+        fm = np.array(np.split(data[1],nsplit))
+        bp = np.array(np.split(data[2],nsplit))
         bm = np.array(np.split(data[3],nsplit))
         
         # get raw asymmetries 
