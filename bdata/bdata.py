@@ -646,9 +646,9 @@ class bdata(object):
         # just  use AL0
         try:
             a = a[2:4]
-        else:
+        except IndexError:
             a = a[:2]
-
+            
         # sum counts in alpha detectors
         asum = np.zeros(a[0].size)
         for i in a: asum += i
