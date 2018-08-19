@@ -541,29 +541,29 @@ class bdata(object):
         
         if self.mode == '1n':
             data = [self.hist['NBMF+'].data,\
-                    self.hist['NBMB+'].data,\
                     self.hist['NBMF-'].data,\
+                    self.hist['NBMB+'].data,\
                     self.hist['NBMB-'].data]
             
         elif self.area == 'BNMR':
             data = [self.hist['F+'].data,\
-                    self.hist['B+'].data,\
                     self.hist['F-'].data,\
+                    self.hist['B+'].data,\
                     self.hist['B-'].data]
         
         elif self.area == 'BNQR':
             data = [self.hist['R+'].data,\
-                    self.hist['L+'].data,\
                     self.hist['R-'].data,\
+                    self.hist['L+'].data,\
                     self.hist['L-'].data]
         else:
             data = []
         
         if self.mode == '2h':
-            data.extend([self.hist['AL1+'].data,self.hist['AL0+'].data,
-                        self.hist['AL1-'].data,self.hist['AL0-'].data,
-                        self.hist['AL3+'].data,self.hist['AL2+'].data,
-                        self.hist['AL3-'].data,self.hist['AL2-'].data])
+            data.extend([self.hist['AL1+'].data,self.hist['AL1-'].data,
+                        self.hist['AL0+'].data,self.hist['AL0-'].data,
+                        self.hist['AL3+'].data,self.hist['AL3-'].data,
+                        self.hist['AL2+'].data,self.hist['AL2-'].data])
         
         # copy
         return [np.copy(d) for d in data]
@@ -575,7 +575,7 @@ class bdata(object):
         """
         
         # get data 1+ 2+ 1- 2-
-        d0 = d[0]; d1 = d[1]; d2 = d[2]; d3 = d[3]
+        d0 = d[0]; d1 = d[2]; d2 = d[1]; d3 = d[3]
 
         # pre-calcs
         denom1 = d0+d1; 
@@ -609,7 +609,7 @@ class bdata(object):
         """
         
         # get data
-        d0 = d[0]; d1 = d[1]; d2 = d[2]; d3 = d[3]
+        d0 = d[0]; d1 = d[2]; d2 = d[1]; d3 = d[3]
         
         # pre-calcs
         r_denom = d0*d3
@@ -671,7 +671,7 @@ class bdata(object):
         """
             Find asymmetry from cryo oven with alpha detectors. 
             a: list of alpha detector histograms (each helicity)  
-            b: list of beta  detector histograms (each helicity)  1+ 2+ 1- 2-
+            b: list of beta  detector histograms (each helicity)  1+ 1- 2+ 2-
         """
 
         # beta in coincidence with alpha
@@ -954,18 +954,18 @@ class bdata(object):
                                     (F-B)/(F+B)
             
             for each helicity, then 
-                                        |--|  |--|   paired helicities
-                        hist_select = 'F+,B+,F-,B-'
-                                       |-----|       paired counter location
-                                          |-----|
+                                       |--|  |--|   paired counter location
+                        hist_select = 'F+,F-,B+,B-'
+                                        |-----|       paired helicities
+                                           |-----|
             
             for alpha diffusion calculations append the two alpha counters
             
-                hist_select = 'R+,L+,R-,L-,A+,A-
+                hist_select = 'R+,R-,L+,L-,A+,A-
             
             for alpha tagged calculations do the following
             
-                hist_select = 'R+,L+,R-,L-,TR+,TL+,TR-,TL-,nTR+,nTL+,nTR-,nTL'
+                hist_select = 'R+,R-,L+,L-,TR+,TR-,TL+,TL-,nTR+,nTR-,nTL+,nTL-'
                     
                 where TR is the right counter tagged (coincident) with alphas, 
                       TL is the left  counter tagged with alphas, 
@@ -1025,8 +1025,8 @@ class bdata(object):
             "p":    2D np array of up helicity state [time_s,val,err].
             "n":    2D np array of down helicity state [time_s,val,err].
             "c":    2D np array of combined asymmetry [time_s,val,err].
-            "adif": 2D np array of alpha diffusion ratio [time_s,val,err].
-            "atag": dictionary of alpha tagged asymmetries key:[val,err]. 
+            "ad":   2D np array of alpha diffusion ratio [time_s,val,err].
+            "at":   dictionary of alpha tagged asymmetries key:[val,err]. 
                     Keys:
                         
                         'time_s'               : 1D array of times in seconds   
