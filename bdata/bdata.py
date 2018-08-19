@@ -538,6 +538,7 @@ class bdata(object):
         List pattern: [type1_hel+,type2_hel+,type1_hel-,type2_hel-]
         where type1/2 = F/B or R/L in that order.
         """
+        
         if self.mode == '1n':
             data = [self.hist['NBMF+'].data,\
                     self.hist['NBMB+'].data,\
@@ -557,6 +558,12 @@ class bdata(object):
                     self.hist['L-'].data]
         else:
             data = []
+        
+        if self.mode == '2h':
+            data.extend([self.hist['AL1+'].data,self.hist['AL0+'].data,
+                        self.hist['AL1-'].data,self.hist['AL0-'].data,
+                        self.hist['AL3+'].data,self.hist['AL2+'].data,
+                        self.hist['AL3-'].data,self.hist['AL2-'].data])
         
         # copy
         return [np.copy(d) for d in data]
@@ -594,8 +601,7 @@ class bdata(object):
         # exit
         return [[asym_hel[1],asym_hel_err[1]],  # something may be wrong with 
                 [asym_hel[0],asym_hel_err[0]]]  # written file, I shouldn't have 
-                                                # to switch theses
-                
+                                                # to switch these
 # =========================================================================== #
     def __get_asym_comb__(self,d):
         """
@@ -628,6 +634,64 @@ class bdata(object):
         asym_comb_err[np.isnan(asym_comb_err)] = 0.
         
         return [asym_comb,asym_comb_err]
+
+# =========================================================================== #
+    def __get_asym_alpha__(self,a,b):
+        """
+            Find alpha diffusion ratios from cryo oven with alpha detectors. 
+            a: list of alpha detector histograms (each helicity)
+            b: list of beta  detector histograms (each helicity)
+        """
+
+        # just  use AL0
+        a = a[:2]
+
+        # sum counts in alpha detectors
+        asum = np.zeros(a[0].size)
+        for i in a: asum += i
+        
+        # sum counts in beta detectors
+        bsum = np.zeros(b[0].size)
+        for i in b: bsum += i
+        
+        # check for dividing by zero 
+        asum[asum == 0] = np.nan
+        bsum[bsum == 0] = np.nan
+        
+        # asym calcs
+        asym = asum/bsum
+        
+        # errors
+        dasym = asym*np.sqrt(1/asum + 1/bsum)
+        
+        return [asym,dasym]
+
+# =========================================================================== #
+    def __get_asym_alpha_tag__(self,a,b):
+        """
+            Find asymmetry from cryo oven with alpha detectors. 
+            a: list of alpha detector histograms (each helicity)  
+            b: list of beta  detector histograms (each helicity)  1+ 2+ 1- 2-
+        """
+
+        # beta in coincidence with alpha
+        coin = a[:4]
+        
+        # beta coincidence with no alpha
+        no_coin = a[4:8]
+
+        # get split helicity asym from 
+        hel_coin =      self.__get_asym_hel__(coin)
+        hel_no_coin =   self.__get_asym_hel__(no_coin)
+        hel_reg =       self.__get_asym_hel__(b)
+        
+        # get combined helicities
+        com_coin =      self.__get_asym_comb__(coin)
+        com_no_coin =   self.__get_asym_comb__(no_coin)
+        com_reg =       self.__get_asym_comb__(b)
+
+        # make output
+        return (hel_coin,hel_no_coin,hel_reg,com_coin,com_no_coin,com_reg)
 
 # =========================================================================== #
     def __get_1f_sum_scans__(self,d,freq):
@@ -870,7 +934,7 @@ class bdata(object):
                                 with [,] or [;]. Histogram names cannot 
                                 therefore contain either of these characters.
             
-        Asymmetry calculation outline (with default detectors): 
+        Asymmetry calculation outline (with default detectors) ---------------
         
             Split helicity      (NMR): (F-B)/(F+B) for each
             Combined helicity   (NMR): (r-1)/(r+1)
@@ -880,7 +944,10 @@ class bdata(object):
             Combined helicity   (NQR): (r-1)/(r+1)
                 where r = sqrt([(L+)(R-)]/[(R+)(L-)])
             
-        Histogram Selection 
+            Alpha diffusion     (NQR) sum(AL0)/sum(L+R)
+            Alpha tagged        (NQR) same as NQR, but using the tagged counters
+            
+        Histogram Selection ---------------------------------------------------
         
             If we wished to do a simple asymmetry calculation in the form of 
                                     
@@ -891,8 +958,23 @@ class bdata(object):
                         hist_select = 'F+,B+,F-,B-'
                                        |-----|       paired counter location
                                           |-----|
-        Status of Data Corrections:
-            SLR: 
+            
+            for alpha diffusion calculations append the two alpha counters
+            
+                hist_select = 'R+,L+,R-,L-,A+,A-
+            
+            for alpha tagged calculations do the following
+            
+                hist_select = 'R+,L+,R-,L-,TR+,TL+,TR-,TL-,nTR+,nTL+,nTR-,nTL'
+                    
+                where TR is the right counter tagged (coincident) with alphas, 
+                      TL is the left  counter tagged with alphas, 
+                     nTR is the right counter tagged with !alphas (absence of), 
+                     nLR is the right counter tagged with !alphas, 
+                                          
+                  
+        Status of Data Corrections --------------------------------------------
+            SLR/2H: 
                 Removes prebeam bins. 
                 Subtract mean of prebeam bins from raw counts 
                     (does not treat error propagation from this. Errors are 
@@ -930,7 +1012,7 @@ class bdata(object):
                         and the two bins after the center bin (in time). For 
                         each find the value of the asymmetry at the center time 
                         position. Take the difference: post-prior
-                
+                    
         Return value depends on option provided:
         
             SLR DESCRIPTIONS --------------------------------------------------
@@ -943,6 +1025,18 @@ class bdata(object):
             "p":    2D np array of up helicity state [time_s,val,err].
             "n":    2D np array of down helicity state [time_s,val,err].
             "c":    2D np array of combined asymmetry [time_s,val,err].
+            "adif": 2D np array of alpha diffusion ratio [time_s,val,err].
+            "atag": dictionary of alpha tagged asymmetries key:[val,err]. 
+                    Keys:
+                        
+                        'time_s'               : 1D array of times in seconds   
+                        'p_wiA','n_wiA','c_wiA': coincident with alpha
+                        'p_noA','n_noA','c_noA': coincident with no alpha
+                        'p_noT','n_noT','c_noT': untagged
+                        
+                where p,n,c refer to pos helicity, neg helicity, combined 
+                helicity respectively. Only in 2h mode. 
+                        
             
             1F DESCRIPTIONS ---------------------------------------------------
             
@@ -995,14 +1089,15 @@ class bdata(object):
         # Option reduction
         option = option.lower()
         if option == ""                                     : pass
-        elif option in ['+','up','u','p','pos','positive']  : option = '+'
-        elif option in ['-','down','d','n','neg','negative']: option = '-'
-        elif option in "combined"                           : option = "c"
-        elif option in "helicity"                           : option = 'h'
-        elif option in "raw"                                : option = 'r'
+        elif option in ['+','up','u','p','pos','positive']  : option = 'positive'
+        elif option in ['-','down','d','n','neg','negative']: option = 'negative'
+        elif option in ["c","com","combined"]               : option = "combined"
+        elif option in ["h","hel","helicity"]               : option = 'helicity'
+        elif option in ["r","raw"]                          : option = 'raw'
+        elif option in ['adif','ad','adiff']                : option = 'alpha_diffusion'
+        elif option in ['atag','at']                        : option = 'alpha_tagged'
         else:
-            print("Option not recognized. Using default.")
-            option = ""
+            raise RuntimeError("Option not recognized.")
         
         # get data
         if hist_select != '':
@@ -1014,37 +1109,49 @@ class bdata(object):
             hist_select = [h.strip() for h in hist_select_temp]
             
             # check for user error
-            if len(hist_select) != 4:
-                raise RuntimeError('hist_select must be a string of four '+\
-                            '[,]-seperated or [;]-seperated histogram names')
-            print(hist_select)
+            if len(hist_select) <= 4:
+                raise RuntimeError('hist_select must be a string of at least '+\
+                        'four [,]-seperated or [;]-seperated histogram names')
+            
             # get data
             d = [self.hist[h].data for h in hist_select]
+            d_all = d
             
         # get default data
         else:
-            d = self.__get_area_data__() # 1+ 2+ 1- 2- 
+            d = self.__get_area_data__() # 1+ 2+ 1- 2-
+            d_all = d
+            
+        # get alpha diffusion data
+        if self.mode == '2h':
+            d_alpha = d[4:]
+            d = d[:4]
         
         # SLR -----------------------------------------------------------------
-        if self.mode in ["20"]:
+        if self.mode in ["20",'2h']:
             
             # calculate background
             n_prebeam = int(self.ppg['prebeam'].mean)
-            bkgd = np.sum(np.array(d)[:,:n_prebeam],axis=1)
+            bkgd = np.sum(np.asarray(d_all)[:,:n_prebeam],axis=1)
             bkgd_err = np.sqrt(bkgd)/n_prebeam
             bkgd /= n_prebeam
             
-            # subtract background from counts, remove negative count values
+            # subtract background from counts, remove negative count values,
+            # delete prebeam entries
             for i in range(len(d)):
                 d[i] = d[i]-bkgd[i]
                 d[i][d[i]<0] = 0.
-            
-            # delete prebeam entries
-            for i in range(len(d)):
                 d[i] = np.delete(d[i],np.arange(n_prebeam))
+
+            # do alpha background subtractions
+            if self.mode == '2h':    
+                for i in range(len(d_alpha)):
+                    d_alpha[i] = d_alpha[i]-bkgd[i+len(d)]
+                    d_alpha[i][d_alpha[i]<0] = 0.
+                    d_alpha[i] = np.delete(d_alpha[i],np.arange(n_prebeam))
                 
             # get helicity data
-            if option != 'c':
+            if option != 'combined':
                 h = np.array(self.__get_asym_hel__(d))
                 
             # rebin time
@@ -1057,23 +1164,54 @@ class bdata(object):
                 time = np.array(new_time)
 
             # mode switching
-            if option == '+':
+            if option == 'positive': # ---------------------------------------
                 return np.vstack([time,self.__rebin__(h[0],rebin)])
                 
-            elif option == '-':
+            elif option == 'negative': # -------------------------------------
                 return np.vstack([time,self.__rebin__(h[1],rebin)])
 
-            elif option == 'h':
+            elif option == 'helicity': # -------------------------------------
                 out = bdict()
                 out['p'] = self.__rebin__(h[0],rebin)
                 out['n'] = self.__rebin__(h[1],rebin)
                 out['time_s'] = time
                 return out
 
-            elif option == 'c':
+            elif option == 'combined': # -------------------------------------
                 c = np.array(self.__get_asym_comb__(d))
                 return np.vstack([time,self.__rebin__(c,rebin)])
-
+                
+            elif option == 'alpha_diffusion': # ------------------------------
+                try:
+                    asym = self.__get_asym_alpha__(d_alpha,d)
+                except UnboundLocalError as err:
+                    if self.mode != '2h':
+                        raise RuntimeError('Run is not in 2h mode.')
+                return np.vstack([time,self.__rebin__(asym,rebin)])
+            
+            elif option == 'alpha_tagged': # ---------------------------------
+                try:
+                    asym = self.__get_asym_alpha_tag__(d_alpha,d)  
+                except UnboundLocalError as err:
+                    if self.mode != '2h':
+                        raise RuntimeError('Run is not in 2h mode.')
+                    else:
+                        raise err
+                
+                out = bdict()
+                out['p_wiA'] = self.__rebin__(asym[0][0],rebin)
+                out['n_wiA'] = self.__rebin__(asym[0][1],rebin)
+                out['p_noA'] = self.__rebin__(asym[1][0],rebin)
+                out['n_noA'] = self.__rebin__(asym[1][1],rebin)
+                out['p_noT'] = self.__rebin__(asym[2][0],rebin)
+                out['n_noT'] = self.__rebin__(asym[2][1],rebin)
+                out['c_wiA'] = self.__rebin__(asym[3],rebin)
+                out['c_noA'] = self.__rebin__(asym[4],rebin)
+                out['c_noT'] = self.__rebin__(asym[5],rebin)
+                out['time_s'] = time
+                
+                return out
+            
             else:
                 c = np.array(self.__get_asym_comb__(d))
                 
@@ -1122,7 +1260,7 @@ class bdata(object):
             freq = self.hist[xlabel].data
             
             # mode switching
-            if option =='r':
+            if option =='raw':
                 a = self.__get_asym_hel__(d)
                 out = bdict()
                 out['p'] = np.array(a[0])
@@ -1132,7 +1270,7 @@ class bdata(object):
             else:
                 freq,d = self.__get_1f_sum_scans__(d,freq)
                                        
-            if option == 'h':
+            if option == 'helicity':
                 a = self.__get_asym_hel__(d)
                 out = bdict()
                 out['p'] = np.array([a[0][0],a[0][1]])
@@ -1140,15 +1278,15 @@ class bdata(object):
                 out[xlab] = np.array(freq)
                 return out
             
-            elif option == '+':
+            elif option == 'positive':
                 a = self.__get_asym_hel__(d)
                 return (np.array(freq),np.array(a[0][0]),np.array(a[0][1]))
             
-            elif option == '-':
+            elif option == 'negative':
                 a = self.__get_asym_hel__(d)
                 return (np.array(freq),np.array(a[1][0]),np.array(a[1][1]))
             
-            elif option in ['c']:
+            elif option in ['combined']:
                 a = self.__get_asym_comb__(d)
                 return (np.array(freq),np.array(a[0]),np.array(a[1]))
             else:
