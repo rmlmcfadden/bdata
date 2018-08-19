@@ -644,7 +644,10 @@ class bdata(object):
         """
 
         # just  use AL0
-        a = a[:2]
+        try:
+            a = a[2:4]
+        else:
+            a = a[:2]
 
         # sum counts in alpha detectors
         asum = np.zeros(a[0].size)
@@ -924,7 +927,7 @@ class bdata(object):
         usage: asym(option="",omit="",rebin=1,hist_select='')
             
         Inputs:
-            options:        see below for details
+            option:         see below for details
             omit:           1f bins to omit if space seperated string in options 
                                 is not feasible. See options description below.
             rebin:          SLR only. Weighted average over 'rebin' bins to 
@@ -1013,7 +1016,7 @@ class bdata(object):
                         each find the value of the asymmetry at the center time 
                         position. Take the difference: post-prior
                     
-        Return value depends on option provided:
+        Option List
         
             SLR DESCRIPTIONS --------------------------------------------------
             
