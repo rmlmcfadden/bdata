@@ -23,6 +23,7 @@
  *   v1.2   08-Oct-2000  [D. Arseneau] Add MUD_setSizes
  *   v1.3   22-Apr-2003  [D. Arseneau] Add MUD_openInOut
  *          25-Nov-2009  [D. Arseneau] Handle larger size_t
+ *          04-May-2016  [D. Arseneau] Edits for C++ use
  */
 
 
@@ -925,6 +926,7 @@ MUD_addToGroup( MUD_SEC_GRP* pMUD_grp, void* pMUD )
 
     if( pMUD == NULL ) return;
 
+    /* possible addition: ((MUD_SEC*)pMUD)->core.pNext = NULL; */
     ((MUD_SEC*)pMUD)->core.size = MUD_getSize( pMUD );
 
     for( ppMUD = &pMUD_grp->pMem; 

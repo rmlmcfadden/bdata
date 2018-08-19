@@ -2,9 +2,9 @@
 #define _MUD_H_
 /*
  * mud.h  Declarations for MUD 
- * v1.2
+ * v1.3
  *
- *   Copyright (C) 1994-2009 TRIUMF (Vancouver, Canada)
+ *   Copyright (C) 1994-2017 TRIUMF (Vancouver, Canada)
  *
  *   Authors: T. Whidden, D. Arseneau, S. Daviel
  *   
@@ -23,6 +23,7 @@
  * 11-oct-2000   DJA  add MUD_FMT_RAL_ID; MUD_setSizes
  * 22-Apr-2003   DJA  add MUD_openReadWrite, MUD_openInOut
  * 25-Nov-2009   DJA  64-bit linux
+ * 25-Jun-2017   DJA  Allow use in C++ (ROOT); shared lib.
  */
 
 #ifdef __cplusplus
@@ -175,7 +176,7 @@ typedef char* 			caddr_t;
 #define _swap32( l )                    (((UINT32)l>>16)+((UINT32)l<<16))
 #define _swap16( s )                    (((UINT16)s>>8)+((UINT16)s<<8))
 #endif
-#define _free(objp)			if(objp!=NULL){free(objp);objp=NULL;}
+#define _free(objp)			if((void*)(objp)!=(void*)NULL){free((void*)(objp));objp=NULL;}
 #define  _roundUp( n, r )		( (r) * (int)( ((n)+(r)-1) / (r) ) )
 
 #define zalloc( n )			memset((void*)malloc(n),0,n)
@@ -183,6 +184,7 @@ typedef char* 			caddr_t;
 #define strdup( s )			strcpy((char*)malloc(strlen(s)+1),s)
 #endif /* vms || mips&&!sgi */
 /*#endif */
+typedef int (*MUD_PROC)();
 
 typedef enum {
     MUD_ENCODE = 0,
@@ -199,18 +201,6 @@ typedef enum {
     MUD_GRP = 3
 } MUD_IO_OPT;
 
-/*
- *  BUF (Normally) for internal use only
- */
-
-typedef struct {
-    caddr_t buf;
-    int     pos;
-    unsigned int size;
-} BUF;
-
-
-typedef int (*MUD_PROC)(MUD_OPT, BUF*, void*);
 
 typedef struct {
     struct _MUD_SEC*	pNext;	    /* pointer to next section */
@@ -220,6 +210,7 @@ typedef struct {
     UINT32	sizeOf;		    /* sizeof struct (used for FORTRAN) */
     MUD_PROC	proc;		    /* section handling procedure */
 } MUD_CORE;
+
 
 typedef struct _MUD_INDEX {
     struct _MUD_INDEX*	pNext;	    /* pointer to next section */
@@ -234,6 +225,16 @@ typedef struct _SEEK_ENTRY {
     UINT32 secID;
     UINT32 instanceID;
 } SEEK_ENTRY;
+
+
+/*
+ *  (Normally) for internal use only
+ */
+typedef struct {
+    caddr_t buf;
+    int     pos;
+    unsigned int size;
+} BUF;
 
 
 typedef struct _MUD_SEC {
