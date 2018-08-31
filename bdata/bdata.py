@@ -1112,7 +1112,7 @@ class bdata(object):
             hist_select = [h.strip() for h in hist_select_temp]
             
             # check for user error
-            if len(hist_select) <= 4:
+            if len(hist_select) < 4:
                 raise RuntimeError('hist_select must be a string of at least '+\
                         'four [,]-seperated or [;]-seperated histogram names')
             
