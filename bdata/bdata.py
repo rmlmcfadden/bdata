@@ -642,7 +642,7 @@ class bdata(object):
             a: list of alpha detector histograms (each helicity)
             b: list of beta  detector histograms (each helicity)
         """
-
+        
         # just  use AL0
         try:
             a = a[2:4]
@@ -650,12 +650,10 @@ class bdata(object):
             a = a[:2]
             
         # sum counts in alpha detectors
-        asum = np.zeros(a[0].size)
-        for i in a: asum += i
+        asum = np.sum(a,axis=0)
         
         # sum counts in beta detectors
-        bsum = np.zeros(b[0].size)
-        for i in b: bsum += i
+        bsum = np.sum(b,axis=0)
         
         # check for dividing by zero 
         asum[asum == 0] = np.nan
