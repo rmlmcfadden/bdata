@@ -900,11 +900,11 @@ class bdata(object):
         """
         
         d = self.__dict__
-        
-        if list(d.keys()):
+        dkeys = list(d.keys())
+        if dkeys:
             items = []
-            
-            for key in d.keys():
+            dkeys.sort()
+            for key in dkeys:
                 if not hasattr(d[key],'__iter__') or d[key].__class__ == bdict:
                     items.append([key,d[key]])                
                 elif d[key].__class__ == str:
@@ -913,7 +913,7 @@ class bdata(object):
                     items.append([key,d[key].__class__])
                 
                             
-            m = max(map(len,d.keys())) + 1
+            m = max(map(len,dkeys)) + 1
             s = '\n'.join([k.rjust(m)+': '+repr(v) for k, v in sorted(items)])
             return s
         else:
