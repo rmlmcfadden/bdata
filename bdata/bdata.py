@@ -258,6 +258,7 @@ class bdata(object):
             "/Sample/read_B"                            :"smpl_read_B",
             "/Sample1/read_B"                           :"smpl_read_B",
             "/Sample/read_C"                            :"smpl_read_C",
+            "/Sample/read_D"                            :"smpl_read_D",
             "/Sample/set_current"                       :"smpl_set_current",
             "/Sample/setpoint"                          :"smpl_set",
             "/Sample1/setpoint"                         :"smpl_set",
@@ -1470,7 +1471,9 @@ class bdict(dict):
     __delattr__ = dict.__delitem__
     
     def __repr__(self):
-        if list(self.keys()):
+        klist = list(self.keys())
+        if klist:
+            klist.sort()
             s = self.__class__.__name__+': {'
             for k in self.keys():
                 s+="'"+k+"'"+', '
@@ -1499,7 +1502,51 @@ class bvar(bcontainer):
             description
             units
     """
-
+        
+    # arithmatic operators
+    def __add__(self,other):        return self.mean+other
+    def __sub__(self,other):        return self.mean-other
+    def __mul__(self,other):        return self.mean*other
+    def __truediv__(self,other):    return self.mean/other
+    def __floordiv__(self,other):   return self.mean//other
+    def __mod__(self,other):        return self.mean%other
+    def __divmod__(self,other):     return divmod(self.mean,other)
+    def __pow__(self,other):        return pow(self.mean,other)
+    def __lshift__(self,other):     return self.mean<<other
+    def __rshift__(self,other):     return self.mean>>other
+    def __neg__(self):              return -self.mean
+    def __pos__(self):              return +self.mean
+    def __abs__(self):              return abs(self.mean)
+    def __invert__(self):           return ~self.mean
+    def __round__(self):            return round(self.mean)
+    
+    # casting operators
+    def __complex__(self):          return complex(self.mean)
+    def __int__(self):              return int(self.mean)
+    def __float__(self):            return float(self.mean)
+    def __str__(self):              return str(self.mean)
+    
+    # logic operators
+    def __eq__(self,other):     
+        if isinstance(other,bvar):  return self==other
+        else:                       return self.mean==other
+    def __lt__(self,other):     
+        if isinstance(other,bvar):  return self.mean<other.mean
+        else:                       return self.mean<other
+    def __le__(self,other):
+        if isinstance(other,bvar):  return self.mean<=other.mean
+        else:                       return self.mean<=other
+    def __gt__(self,other):
+        if isinstance(other,bvar):  return self.mean>other.mean
+        else:                       return self.mean>other
+    def __ge__(self,other):
+        if isinstance(other,bvar):  return self.mean>=other.mean
+        else:                       return self.mean>=other
+    
+    def __and__(self,other):        return self.mean&other
+    def __xor__(self,other):        return self.mean^other
+    def __or__(self,other):         return self.mean|other
+    
 # =========================================================================== #
 class bscaler(bcontainer):
     """
@@ -1534,3 +1581,42 @@ class bhist(bcontainer):
             background2
     """
     
+    # arithmatic operators
+    def __add__(self,other):        return self.data+other
+    def __sub__(self,other):        return self.data-other
+    def __mul__(self,other):        return self.data*other
+    def __truediv__(self,other):    return self.data/other
+    def __floordiv__(self,other):   return self.data//other
+    def __mod__(self,other):        return self.data%other
+    def __divmod__(self,other):     return np.divmod(self.data,other)
+    def __pow__(self,other):        return np.pow(self.data,other)
+    def __lshift__(self,other):     return self.data<<other
+    def __rshift__(self,other):     return self.data>>other
+    def __neg__(self):              return -self.data
+    def __abs__(self):              return np.abs(self.data)
+    def __invert__(self):           return ~self.data
+    def __round__(self):            return np.round(self.data)
+    
+    # casting operators
+    def astype(self,type):          return self.data.astype(type)
+    
+    # logic operators
+    def __eq__(self,other):     
+        if isinstance(other,bvar):  return self==other
+        else:                       return self.data==other
+    def __lt__(self,other):     
+        if isinstance(other,bvar):  return self.data<other.data
+        else:                       return self.data<other
+    def __le__(self,other):
+        if isinstance(other,bvar):  return self.data<=other.data
+        else:                       return self.data<=other
+    def __gt__(self,other):
+        if isinstance(other,bvar):  return self.data>other.data
+        else:                       return self.data>other
+    def __ge__(self,other):
+        if isinstance(other,bvar):  return self.data>=other.data
+        else:                       return self.data>=other
+    
+    def __and__(self,other):        return self.data&other
+    def __xor__(self,other):        return self.data^other
+    def __or__(self,other):         return self.data|other
