@@ -1543,9 +1543,15 @@ class bvar(bcontainer):
         if isinstance(other,bvar):  return self.mean>=other.mean
         else:                       return self.mean>=other
     
-    def __and__(self,other):        return self.mean&other
-    def __xor__(self,other):        return self.mean^other
-    def __or__(self,other):         return self.mean|other
+    def __and__(self,other):
+        if isinstance(other,bvar):  return self&other
+        else:                       return self.mean&other
+    def __xor__(self,other):
+        if isinstance(other,bvar):  return self^other
+        else:                       return self.mean^other
+    def __or__(self,other):
+        if isinstance(other,bvar):  return self|other
+        else:                       return self.mean|other
     
 # =========================================================================== #
 class bscaler(bcontainer):
@@ -1558,6 +1564,56 @@ class bscaler(bcontainer):
             counts
     """
     
+    # arithmatic operators
+    def __add__(self,other):            return self.counts+other
+    def __sub__(self,other):            return self.counts-other
+    def __mul__(self,other):            return self.counts*other
+    def __truediv__(self,other):        return self.counts/other
+    def __floordiv__(self,other):       return self.counts//other
+    def __mod__(self,other):            return self.counts%other
+    def __divmod__(self,other):         return divmod(self.counts,other)
+    def __pow__(self,other):            return pow(self.counts,other)
+    def __lshift__(self,other):         return self.counts<<other
+    def __rshift__(self,other):         return self.counts>>other
+    def __neg__(self):                  return -self.counts
+    def __pos__(self):                  return +self.counts
+    def __abs__(self):                  return abs(self.counts)
+    def __invert__(self):               return ~self.counts
+    def __round__(self):                return round(self.counts)
+        
+    # casting operators 
+    def __complex__(self):              return complex(self.counts)
+    def __int__(self):                  return int(self.counts)
+    def __float__(self):                return float(self.counts)
+    def __str__(self):                  return str(self.counts)
+    
+    # logic operators
+    def __eq__(self,other):     
+        if isinstance(other,bscaler):   return self==other
+        else:                           return self.counts==other
+    def __lt__(self,other):     
+        if isinstance(other,bscaler):   return self.counts<other.counts
+        else:                           return self.counts<other
+    def __le__(self,other):
+        if isinstance(other,bscaler):   return self.counts<=other.counts
+        else:                           return self.counts<=other
+    def __gt__(self,other):
+        if isinstance(other,bscaler):   return self.counts>other.counts
+        else:                           return self.counts>other
+    def __ge__(self,other):
+        if isinstance(other,bscaler):   return self.counts>=other.counts
+        else:                           return self.counts>=other
+    
+    def __and__(self,other):
+        if isinstance(other,bscaler):   return self&other
+        else:                           return self.counts&other
+    def __xor__(self,other):
+        if isinstance(other,bscaler):   return self^other
+        else:                           return self.counts^other
+    def __or__(self,other):
+        if isinstance(other,bscaler):   return self|other
+        else:                           return self.counts|other
+        
 # =========================================================================== #
 class bhist(bcontainer):
     """
@@ -1582,16 +1638,30 @@ class bhist(bcontainer):
     """
     
     # arithmatic operators
-    def __add__(self,other):        return self.data+other
-    def __sub__(self,other):        return self.data-other
-    def __mul__(self,other):        return self.data*other
-    def __truediv__(self,other):    return self.data/other
-    def __floordiv__(self,other):   return self.data//other
-    def __mod__(self,other):        return self.data%other
-    def __divmod__(self,other):     return np.divmod(self.data,other)
-    def __pow__(self,other):        return np.pow(self.data,other)
-    def __lshift__(self,other):     return self.data<<other
-    def __rshift__(self,other):     return self.data>>other
+    def __add__(self,other):        
+        if isinstance(other,bhist): return self.data+other.data
+        else:                       return self.data+other
+    def __sub__(self,other):
+        if isinstance(other,bhist): return self.data-other.data
+        else:                       return self.data-other
+    def __mul__(self,other):
+        if isinstance(other,bhist): return self.data*other.data
+        else:                       return self.data*other
+    def __truediv__(self,other):
+        if isinstance(other,bhist): return self.data/other.data
+        else:                       return self.data/other
+    def __floordiv__(self,other):
+        if isinstance(other,bhist): return self.data//other.data
+        else:                       return self.data//other
+    def __mod__(self,other):
+        if isinstance(other,bhist): return self.data%other.data
+        else:                       return self.data%other
+    def __divmod__(self,other):     
+        if isinstance(other,bhist): return np.divmod(self.data,other.data)
+        else:                       return np.divmod(self.data,other)
+    def __pow__(self,other):        
+        if isinstance(other,bhist): return np.pow(self.data,other.data)
+        else:                       return np.pow(self.data,other)
     def __neg__(self):              return -self.data
     def __abs__(self):              return np.abs(self.data)
     def __invert__(self):           return ~self.data
@@ -1602,21 +1672,27 @@ class bhist(bcontainer):
     
     # logic operators
     def __eq__(self,other):     
-        if isinstance(other,bvar):  return self==other
+        if isinstance(other,bhist): return self==other
         else:                       return self.data==other
     def __lt__(self,other):     
-        if isinstance(other,bvar):  return self.data<other.data
+        if isinstance(other,bhist): return self.data<other.data
         else:                       return self.data<other
     def __le__(self,other):
-        if isinstance(other,bvar):  return self.data<=other.data
+        if isinstance(other,bhist): return self.data<=other.data
         else:                       return self.data<=other
     def __gt__(self,other):
-        if isinstance(other,bvar):  return self.data>other.data
+        if isinstance(other,bhist): return self.data>other.data
         else:                       return self.data>other
     def __ge__(self,other):
-        if isinstance(other,bvar):  return self.data>=other.data
+        if isinstance(other,bhist): return self.data>=other.data
         else:                       return self.data>=other
     
-    def __and__(self,other):        return self.data&other
-    def __xor__(self,other):        return self.data^other
-    def __or__(self,other):         return self.data|other
+    def __and__(self,other):
+        if isinstance(other,bhist): return self.data&other.data
+        else:                       return self.data&other
+    def __xor__(self,other):       
+        if isinstance(other,bhist): return self.data^other.data
+        else:                       return self.data^other
+    def __or__(self,other):         
+        if isinstance(other,bhist): return self.data|other.data
+        else:                       return self.data|other
