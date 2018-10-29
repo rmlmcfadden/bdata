@@ -124,10 +124,10 @@ class bdata(object):
             __init__
             __get_1f_asym_comb_hel__
             __get_1f_asym_comb_scans__
-            __get_area_data__
-            __get_asym_hel__
-            __get_asym_comb__
-            __rebin__
+            _get_area_data
+            _get_asym_hel
+            _get_asym_comb
+            _rebin
             __repr__
     """
     
@@ -534,7 +534,7 @@ class bdata(object):
         self.year = time.gmtime(self.start_time).tm_year
 
 # =========================================================================== #
-    def __get_area_data__(self):
+    def _get_area_data(self):
         """Get histogram list based on area type. 
         List pattern: [type1_hel+,type2_hel+,type1_hel-,type2_hel-]
         where type1/2 = F/B or R/L in that order.
@@ -570,7 +570,7 @@ class bdata(object):
         return [np.copy(d) for d in data]
 
 # =========================================================================== #
-    def __get_asym_hel__(self,d):
+    def _get_asym_hel(self,d):
         """
             Find the asymmetry of each helicity. 
         """
@@ -604,7 +604,7 @@ class bdata(object):
                 [asym_hel[0],asym_hel_err[0]]]  # written file, I shouldn't have 
                                                 # to switch these
 # =========================================================================== #
-    def __get_asym_comb__(self,d):
+    def _get_asym_comb(self,d):
         """
         Find the combined asymmetry for slr runs. Elegant 4-counter method.
         """
@@ -637,7 +637,7 @@ class bdata(object):
         return [asym_comb,asym_comb_err]
 
 # =========================================================================== #
-    def __get_asym_alpha__(self,a,b):
+    def _get_asym_alpha(self,a,b):
         """
             Find alpha diffusion ratios from cryo oven with alpha detectors. 
             a: list of alpha detector histograms (each helicity)
@@ -669,7 +669,7 @@ class bdata(object):
         return [asym,dasym]
 
 # =========================================================================== #
-    def __get_asym_alpha_tag__(self,a,b):
+    def _get_asym_alpha_tag(self,a,b):
         """
             Find asymmetry from cryo oven with alpha detectors. 
             a: list of alpha detector histograms (each helicity)  
@@ -683,20 +683,20 @@ class bdata(object):
         no_coin = a[4:8]
 
         # get split helicity asym from 
-        hel_coin =      self.__get_asym_hel__(coin)
-        hel_no_coin =   self.__get_asym_hel__(no_coin)
-        hel_reg =       self.__get_asym_hel__(b)
+        hel_coin =      self._get_asym_hel(coin)
+        hel_no_coin =   self._get_asym_hel(no_coin)
+        hel_reg =       self._get_asym_hel(b)
         
         # get combined helicities
-        com_coin =      self.__get_asym_comb__(coin)
-        com_no_coin =   self.__get_asym_comb__(no_coin)
-        com_reg =       self.__get_asym_comb__(b)
+        com_coin =      self._get_asym_comb(coin)
+        com_no_coin =   self._get_asym_comb(no_coin)
+        com_reg =       self._get_asym_comb(b)
 
         # make output
         return (hel_coin,hel_no_coin,hel_reg,com_coin,com_no_coin,com_reg)
 
 # =========================================================================== #
-    def __get_1f_sum_scans__(self,d,freq):
+    def _get_1f_sum_scans(self,d,freq):
         """
             Sum counts in each frequency bin over 1f scans. 
         """
@@ -714,7 +714,7 @@ class bdata(object):
         return (np.array(unique_freq),np.array(sum_scans))
 
 # =========================================================================== #
-    def __get_2e_asym__(self):
+    def _get_2e_asym(self):
         """
             Get asymmetries for 2e random-frequency scan. 
             Based on bnmr_2e.cpp by rmlm (Oct 4, 2017).
@@ -754,7 +754,7 @@ class bdata(object):
         out['time'] = time
             
         # get data
-        data = np.array(self.__get_area_data__()) # [[fp], [bfm], [bp], [bm]]
+        data = np.array(self._get_area_data()) # [[fp], [bfm], [bp], [bm]]
         
         # discared initial bad bins, and beam-off trailing bins
         data = data[:,start_bin:len(freq)*ndwell+start_bin]
@@ -854,7 +854,7 @@ class bdata(object):
         return out
 
 # =========================================================================== #
-    def __rebin__(self,xdx,rebin):
+    def _rebin(self,xdx,rebin):
         """
             Rebin array x with weights 1/dx**2 by factor rebin.
             
@@ -1121,7 +1121,7 @@ class bdata(object):
             
         # get default data
         else:
-            d = self.__get_area_data__() # 1+ 2+ 1- 2-
+            d = self._get_area_data() # 1+ 2+ 1- 2-
             d_all = d
             
         # get alpha diffusion data
@@ -1154,7 +1154,7 @@ class bdata(object):
                 
             # get helicity data
             if option != 'combined':
-                h = np.array(self.__get_asym_hel__(d))
+                h = np.array(self._get_asym_hel(d))
                 
             # rebin time
             time = (np.arange(len(d[0]))+0.5)*self.ppg['dwelltime'].mean/1000
@@ -1167,33 +1167,33 @@ class bdata(object):
 
             # mode switching
             if option == 'positive': # ---------------------------------------
-                return np.vstack([time,self.__rebin__(h[0],rebin)])
+                return np.vstack([time,self._rebin(h[0],rebin)])
                 
             elif option == 'negative': # -------------------------------------
-                return np.vstack([time,self.__rebin__(h[1],rebin)])
+                return np.vstack([time,self._rebin(h[1],rebin)])
 
             elif option == 'helicity': # -------------------------------------
                 out = bdict()
-                out['p'] = self.__rebin__(h[0],rebin)
-                out['n'] = self.__rebin__(h[1],rebin)
+                out['p'] = self._rebin(h[0],rebin)
+                out['n'] = self._rebin(h[1],rebin)
                 out['time_s'] = time
                 return out
 
             elif option == 'combined': # -------------------------------------
-                c = np.array(self.__get_asym_comb__(d))
-                return np.vstack([time,self.__rebin__(c,rebin)])
+                c = np.array(self._get_asym_comb(d))
+                return np.vstack([time,self._rebin(c,rebin)])
                 
             elif option == 'alpha_diffusion': # ------------------------------
                 try:
-                    asym = self.__get_asym_alpha__(d_alpha,d)
+                    asym = self._get_asym_alpha(d_alpha,d)
                 except UnboundLocalError as err:
                     if self.mode != '2h':
                         raise RuntimeError('Run is not in 2h mode.')
-                return np.vstack([time,self.__rebin__(asym,rebin)])
+                return np.vstack([time,self._rebin(asym,rebin)])
             
             elif option == 'alpha_tagged': # ---------------------------------
                 try:
-                    asym = self.__get_asym_alpha_tag__(d_alpha,d)  
+                    asym = self._get_asym_alpha_tag(d_alpha,d)  
                 except UnboundLocalError as err:
                     if self.mode != '2h':
                         raise RuntimeError('Run is not in 2h mode.')
@@ -1201,26 +1201,26 @@ class bdata(object):
                         raise err
                 
                 out = bdict()
-                out['p_wiA'] = self.__rebin__(asym[0][0],rebin)
-                out['n_wiA'] = self.__rebin__(asym[0][1],rebin)
-                out['p_noA'] = self.__rebin__(asym[1][0],rebin)
-                out['n_noA'] = self.__rebin__(asym[1][1],rebin)
-                out['p_noT'] = self.__rebin__(asym[2][0],rebin)
-                out['n_noT'] = self.__rebin__(asym[2][1],rebin)
-                out['c_wiA'] = self.__rebin__(asym[3],rebin)
-                out['c_noA'] = self.__rebin__(asym[4],rebin)
-                out['c_noT'] = self.__rebin__(asym[5],rebin)
+                out['p_wiA'] = self._rebin(asym[0][0],rebin)
+                out['n_wiA'] = self._rebin(asym[0][1],rebin)
+                out['p_noA'] = self._rebin(asym[1][0],rebin)
+                out['n_noA'] = self._rebin(asym[1][1],rebin)
+                out['p_noT'] = self._rebin(asym[2][0],rebin)
+                out['n_noT'] = self._rebin(asym[2][1],rebin)
+                out['c_wiA'] = self._rebin(asym[3],rebin)
+                out['c_noA'] = self._rebin(asym[4],rebin)
+                out['c_noT'] = self._rebin(asym[5],rebin)
                 out['time_s'] = time
                 
                 return out
             
             else:
-                c = np.array(self.__get_asym_comb__(d))
+                c = np.array(self._get_asym_comb(d))
                 
                 out = bdict()
-                out['p'] = self.__rebin__(h[0],rebin)
-                out['n'] = self.__rebin__(h[1],rebin)
-                out['c'] = self.__rebin__(c,rebin)  
+                out['p'] = self._rebin(h[0],rebin)
+                out['n'] = self._rebin(h[1],rebin)
+                out['c'] = self._rebin(c,rebin)  
                 out['time_s'] = time
                 return out
         
@@ -1263,17 +1263,17 @@ class bdata(object):
             
             # mode switching
             if option =='raw':
-                a = self.__get_asym_hel__(d)
+                a = self._get_asym_hel(d)
                 out = bdict()
                 out['p'] = np.array(a[0])
                 out['n'] = np.array(a[1])
                 out[xlab] = np.array(freq)
                 return out 
             else:
-                freq,d = self.__get_1f_sum_scans__(d,freq)
+                freq,d = self._get_1f_sum_scans(d,freq)
                                        
             if option == 'helicity':
-                a = self.__get_asym_hel__(d)
+                a = self._get_asym_hel(d)
                 out = bdict()
                 out['p'] = np.array([a[0][0],a[0][1]])
                 out['n'] = np.array([a[1][0],a[1][1]])
@@ -1281,19 +1281,19 @@ class bdata(object):
                 return out
             
             elif option == 'positive':
-                a = self.__get_asym_hel__(d)
+                a = self._get_asym_hel(d)
                 return (np.array(freq),np.array(a[0][0]),np.array(a[0][1]))
             
             elif option == 'negative':
-                a = self.__get_asym_hel__(d)
+                a = self._get_asym_hel(d)
                 return (np.array(freq),np.array(a[1][0]),np.array(a[1][1]))
             
             elif option in ['combined']:
-                a = self.__get_asym_comb__(d)
+                a = self._get_asym_comb(d)
                 return (np.array(freq),np.array(a[0]),np.array(a[1]))
             else:
-                ah = self.__get_asym_hel__(d)
-                ac = self.__get_asym_comb__(d)
+                ah = self._get_asym_hel(d)
+                ac = self._get_asym_comb(d)
                 
                 out = bdict()
                 out['p'] = np.array([ah[0][0],ah[0][1]])
@@ -1304,7 +1304,7 @@ class bdata(object):
             
         # 2E ------------------------------------------------------------------
         elif self.mode in ['2e']:
-            return self.__get_2e_asym__()
+            return self._get_2e_asym()
         
         # unknown entry -------------------------------------------------------
         else:
