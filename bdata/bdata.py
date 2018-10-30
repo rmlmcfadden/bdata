@@ -122,8 +122,6 @@ class bdata(object):
             
         Private worker functions
             __init__
-            __get_1f_asym_comb_hel__
-            __get_1f_asym_comb_scans__
             _get_area_data
             _get_asym_hel
             _get_asym_comb
