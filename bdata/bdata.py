@@ -214,6 +214,7 @@ class bdata(object):
             "/Cryo_oven/read_A"                         :"oven_readA",
             "/Cryo_oven/read_B"                         :"oven_readB",
             "/Cryo_oven/read_C"                         :"oven_readC",
+            "/Cryo_oven/read_D"                         :"oven_readD",
             "/Cryo_oven/setpoint_1"                     :"oven_set1",
                         
             "/Dac0/dac_set"                             :"daq_set",
