@@ -372,22 +372,7 @@ class bdata(object):
                 
             elif spect_dir == "bnqr/" and self.evar_bnqr in list(os.environ.keys()):
                 filename = os.environ[self.evar_bnqr]
-                
-            # some common defaults if no environment variable
-            else:                   
-                hostname = socket.gethostname()
-                
-                # musr data archive folder structure
-                if hostname in ["lincmms","lincmms.triumf.ca","muesli",\
-                                  "muesli.triumf.ca"]:
-                    parent_dir = "/data/"
-                    filename = parent_dir + spect_dir
-
-                # isdaq data folder structure
-                if hostname in ["linbnmr2","linbnmr2.triumf.ca"]:
-                    parent_directory = "/data1/"
-                    filename = parent_dir + spect_dir + "dlog/"
-                
+                    
             # finalize file name
             if filename[-1] != '/':
                 filename += '/'
@@ -395,7 +380,7 @@ class bdata(object):
         
         # check file existence
         if not os.path.isfile(filename):
-            raise RuntimeError("File does not exist")
+            raise RuntimeError("File %s does not exist" % filename)
         
         # Open file ----------------------------------------------------------
         fh = mp.open_read(filename)
