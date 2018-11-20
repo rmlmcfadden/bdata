@@ -23,46 +23,30 @@ If `year=0` then default is the current year. For scripts analysing a specific d
     * `export BNMR_ARCHIVE=/path/bnmr/`
     * `export BNQR_ARCHIVE=/path/bnqr/`
 
-## Example Usage
+## Object Map
 
-1 Asymmetry: 
+**Constructor**: 
 
-```python
-bd.asym() # for details and options see bdata.asym docstring. 
-```        
+`bdata(run_number,year=0,filename='')`
 
-2 Beam energy: 
+**Functions**: 
 
-```python
-bd.beam_kev()   # returns beam energy in keV
-```
-
-3 Pulse-off time for SLR measurements: 
-
-```python
-pulse_off_s()
-```                             
-
-4 For a nicely-formatted list of all data fields call the fields method: 
-
-```python
-bd.fields()
-```
-        
-Note that the object representation has been nicely formatted as well, so that typing
-   
-```python
-bd
-```
-        
-into the interpreter produces nice output. 
+| Signature | Description |
+| -------- | -------- |
+| `asym(option="",omit="",rebin=1,hist_select='')`     | Calculate asymmetry. See below for docstring.     |
+| `beam_kev()`     | Get beam implantation energy in keV     |
+| `get_pulse_s()`     | Get beam pulse duration in s     |
 
 
-## Notes
+## Misc Notes
 
 The bdict objects allow for the calling of dictionary keys like an object attribute. For example, bd.ppg.beam_on or bd.ppg['beam_on'] have the exact same output. Note that reserved characters such as '+' cannot be used in this manner. 
             
 Set the location of the data archive via environment variables "BNMR_ARCHIVE" and "BNQR_ARCHIVE". This would be something like "/data1/bnmr/dlog/" on linbnmr2 or "~/triumf/data/bnmr/" on muesli or lincmms.
+
+The various object containers returned have customized defined "magic" functions for common comparison and mathematical operators. So one can do `bd.ppg.beam_on*5` and get 5 times the beam on time, stored in the mean property of that object. 
+
+Note that the object representation has been nicely formatted as well.
 
 ## bdata.asym() docstring
 
