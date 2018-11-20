@@ -348,7 +348,7 @@ class bdata(object):
     evar_bnmr = "BNMR_ARCHIVE"
     evar_bnqr = "BNQR_ARCHIVE"
 
-# =========================================================================== #
+    # ======================================================================= #
     def __init__(self,run_number,year=0,filename=""):
         """Constructor. Reads file, stores and sorts data."""
         
@@ -517,7 +517,7 @@ class bdata(object):
         self.end_date = time.ctime(self.end_time)
         self.year = time.gmtime(self.start_time).tm_year
 
-# =========================================================================== #
+    # ======================================================================= #
     def _get_area_data(self):
         """Get histogram list based on area type. 
         List pattern: [type1_hel+,type2_hel+,type1_hel-,type2_hel-]
@@ -553,7 +553,7 @@ class bdata(object):
         # copy
         return [np.copy(d) for d in data]
 
-# =========================================================================== #
+    # ======================================================================= #
     def _get_asym_hel(self,d):
         """
             Find the asymmetry of each helicity. 
@@ -584,10 +584,10 @@ class bdata(object):
             asym_hel_err[i][np.isnan(asym_hel_err[i])] = 0.
         
         # exit
-        return [[asym_hel[1],asym_hel_err[1]],  # something may be wrong with 
-                [asym_hel[0],asym_hel_err[0]]]  # written file, I shouldn't have 
-                                                # to switch these
-# =========================================================================== #
+        return [[asym_hel[1],asym_hel_err[1]],  # something wrong with file?
+                [asym_hel[0],asym_hel_err[0]]]  # I shouldn't have to switch
+                
+    # ======================================================================= #
     def _get_asym_comb(self,d):
         """
         Find the combined asymmetry for slr runs. Elegant 4-counter method.
@@ -620,7 +620,7 @@ class bdata(object):
         
         return [asym_comb,asym_comb_err]
 
-# =========================================================================== #
+    # ======================================================================= #
     def _get_asym_alpha(self,a,b):
         """
             Find alpha diffusion ratios from cryo oven with alpha detectors. 
@@ -652,7 +652,7 @@ class bdata(object):
         
         return [asym,dasym]
 
-# =========================================================================== #
+    # ======================================================================= #
     def _get_asym_alpha_tag(self,a,b):
         """
             Find asymmetry from cryo oven with alpha detectors. 
@@ -679,7 +679,7 @@ class bdata(object):
         # make output
         return (hel_coin,hel_no_coin,hel_reg,com_coin,com_no_coin,com_reg)
 
-# =========================================================================== #
+    # ======================================================================= #
     def _get_1f_sum_scans(self,d,freq):
         """
             Sum counts in each frequency bin over 1f scans. 
@@ -697,7 +697,7 @@ class bdata(object):
             
         return (np.array(unique_freq),np.array(sum_scans))
 
-# =========================================================================== #
+    # ======================================================================= #
     def _get_2e_asym(self):
         """
             Get asymmetries for 2e random-frequency scan. 
@@ -837,7 +837,7 @@ class bdata(object):
             
         return out
 
-# =========================================================================== #
+    # ======================================================================= #
     def _rebin(self,xdx,rebin):
         """
             Rebin array x with weights 1/dx**2 by factor rebin.
@@ -877,7 +877,7 @@ class bdata(object):
                 dx_rebin.append(1./wsum**0.5)
         return np.array([x_rebin,dx_rebin])
             
-# =========================================================================== #
+    # ======================================================================= #
     def __repr__(self):
         """
             Nice printing of parameters.
@@ -903,7 +903,7 @@ class bdata(object):
         else:
             return self.__class__.__name__ + "()"
 
-# =========================================================================== #
+    # ======================================================================= #
     def asym(self,option="",omit="",rebin=1,hist_select=''):
         """Calculate and return the asymmetry for various run types. 
            
@@ -1295,7 +1295,7 @@ class bdata(object):
             print("Unknown run type.")
             return
 
-# =========================================================================== #
+    # ======================================================================= #
     def beam_kev(self):
         """
             Get the beam energy in kev, based on typical biases: 
@@ -1321,97 +1321,9 @@ class bdata(object):
         
         return beam-bias15-platform # keV
 
-# =========================================================================== #
-    def fields(self):
-        """Print user-friendly options."""
-        
-        print("""
-        List of useful data fields. Not comprehensive. See docstrings for full
-        object descriptions. 
-        
-        bdata fields: 
-            area            (BNMR/BNQR)
-            duration        (in seconds)
-            end_date        (human-readable)
-            end_time        (epoch time)
-            exp             (int)
-            experimenter    (signatures)
-            method          (data type)
-            mode            (run mode)
-            orientation     (sample orientation)
-            run             (run number)
-            sample          (sample name)
-            start_date      (human-readable)
-            start_time      (epoch time)
-            title           (run title)
-            year            (run year)
-            
-            camp            (bdict of bvar objects)
-            epics           (..       bvar ..     )
-            ppg             (..       bvar ..     )
-            hist            (..       bhist ..    )
-            sclr            (..       bscaler ..  )
-            
-        bvar fields (ppg,epics,camp container)
-            low             (extrema)
-            high            (extrema)
-            mean            (average)
-            std             (standard deviation)
-            skew            (skewness)
-            title           (name)    
-            description     (string)
-            units           (string)
-            
-        bscaler fields (sclr container)
-            title           (label)
-            counts          (value - int)
-        
-        bhist fields (hist container)
-            title           (F-, B+, ...)
-            data            (numpy array of doubles: bin contents)
-            n_bins          (number of x axis bins)
-            n_events        (total number of events in histogram)
-            fs_per_bin      (bin size - int)
-            s_per_bin       (bin size - double)
-            t0_ps           (int)
-            t0_bin          (int)
-            good_bin1       (int)
-            good_bin2       (int)
-            background1     (int)
-            background2     (int)
-        """)
-        
-        return
-        
-# =========================================================================== #
-    def help(self):
-        """Print usage and help methods."""
-        
-        print(\
-        """
-        The bdata object is largely a data container, designed to read out the
-        MUD data files and to provide user-friendly access to reliable and 
-        corrected BNMR/BNQR data. 
-        
-        Example usage: 
-            bd = bdata(40001) # read run 40001 from the default year. 
-            bd = bdata(40001,year=2009) # read run 40001 from 2009. 
-        
-        For a nicely-formatted list of all data fields call the fields method: 
-            bd.fields()
-            
-        Full usage information for the various functions and helper containers
-        can be viewed in their respective docstrings. 
-            print bd.__doc__            # docstring for bdata
-            print bd.asym.__doc__       # docstring for the bdata asym function
-            
-        Further questions can be directed to fujimoto@phas.ubc.ca
-        """)
-        return
-                
-# =========================================================================== #
-    def pulse_off_s(self):
-        """Get pulse off time, for pulsed measurements."""
+    # ======================================================================= #
+    def get_pulse_s(self):
+        """Get pulse duration in seconds, for pulsed measurements."""
         
         try:
             dwelltime = self.ppg.dwelltime.mean
@@ -1420,6 +1332,14 @@ class bdata(object):
             raise AttributeError("Missing logged ppg parameter: dwelltime "+\
                     "or beam_on")
         return dwelltime*beam_on/1000.
+    
+    # DEPRECIATED =========================================================== #
+    def pulse_off_s(self):  
+        """Depreciated in favor of get_pulse_s"""
+        warnings.warn("pulse_off_s depreciated in favor of get_pulse_s",
+                      DeprecationWarning,
+                      stacklevel=2)
+        return self.get_pulse_s()
                 
 # =========================================================================== #
 # DATA CONTAINERS
