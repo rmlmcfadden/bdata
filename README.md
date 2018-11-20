@@ -1,20 +1,5 @@
 # bdata
-Contains both bdata and mudpy python modules.
-
-
-Beta-data package. The bdata object is largely a data container, designed to read out [MUD](http://musr.ca/mud/mud_fmt.html) data files and to provide user-friendly access [BNMR/BNQR data](http://musr.ca/mud/runSel.html). Data files are read either from a directory specified by environment variable (see installation notes), or from a passed filename for easy external user access. The [MUD](http://musr.ca/mud/mud_fmt.html) data file is read and closed on object construction. 
-
-This package also provides direct python access to the [MUD](http://musr.ca/mud/mud_fmt.html) file format in the `bdata.mudpy` module. 
-
-Constructor: `bdata(run_number,year=0,filename='')`
-    
-```python
-bd = bdata(40001)                     # read run 40001 from the default year. 
-bd = bdata(40001,year=2009)           # read run 40001 from year 2009.
-bd = bdata(0,filename='filename.msr') # read file from local memory, run number unused 
-```        
-
-If `year=0` then default is the current year. For scripts analysing a specific data set, it is advised that this be set so that the script does not break as time passes. 
+Beta-data package. The bdata object is largely a data container, designed to read out [MUD](http://musr.ca/mud/mud_fmt.html) data files and to provide user-friendly access [BNMR/BNQR data](http://musr.ca/mud/runSel.html). 
 
 ## Installation 
 
@@ -28,6 +13,14 @@ If `year=0` then default is the current year. For scripts analysing a specific d
 **Constructor**: 
 
 `bdata(run_number,year=0,filename='')`
+
+Examples:
+    
+```python
+bd = bdata(40001)                     # read run 40001 from the current year. 
+bd = bdata(40001,year=2017)           # read run 40001 from year 2017.
+bd = bdata(0,filename='filename.msr') # read file from local memory, run number unused 
+```        
 
 **Functions**: 
 
