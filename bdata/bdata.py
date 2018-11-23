@@ -857,7 +857,7 @@ class bdata(object):
             return (x,dx)
         
         # Rebin Discard unused bins
-        new_len = len(x/rebin)
+        lenx = len(x)
         x_rebin = []
         dx_rebin = []
         
@@ -865,7 +865,7 @@ class bdata(object):
         dx[dx==0] = np.inf
         
         # weighted mean
-        for i in np.arange(0,new_len,rebin):
+        for i in np.arange(0,lenx,rebin):
             w = 1./dx[i:i+rebin-1]**2
             wsum = np.sum(w)
             
@@ -1143,11 +1143,9 @@ class bdata(object):
             # rebin time
             time = (np.arange(len(d[0]))+0.5)*self.ppg['dwelltime'].mean/1000
             if rebin > 1:
-                new_len = len(d[0]/rebin)
-                new_time = []
-                for i in np.arange(0,new_len,rebin):
-                    new_time.append(np.average(time[i:i+rebin-1]))
-                time = np.array(new_time)
+                len_t = len(time)
+                new_time = (np.average(time[i:i+rebin-1]) for i in np.arange(0,len_t,rebin))
+                time = np.fromiter(new_time,dtype=float,count=int(len_t/rebin))
 
             # mode switching
             if option == 'positive': # ---------------------------------------
@@ -1256,33 +1254,40 @@ class bdata(object):
             else:
                 freq,d = self._get_1f_sum_scans(d,freq)
                                        
+            # rebin frequency
+            if rebin>1:
+                len_f = len(freq)
+                newf = (np.average(freq[i:i+rebin-1]) for i in np.arange(0,len_f,rebin))
+                freq = np.fromiter(newf,dtype=float,count=int(np.ceil(len_f/rebin)))
+                                       
+            # swtich between remaining modes
             if option == 'helicity':
                 a = self._get_asym_hel(d)
                 out = bdict()
-                out['p'] = np.array([a[0][0],a[0][1]])
-                out['n'] = np.array([a[1][0],a[1][1]])
+                out['p'] = self._rebin(a[0],rebin)
+                out['n'] = self._rebin(a[1],rebin)
                 out[xlab] = np.array(freq)
                 return out
             
             elif option == 'positive':
                 a = self._get_asym_hel(d)
-                return (np.array(freq),np.array(a[0][0]),np.array(a[0][1]))
+                return np.vstack([freq,self._rebin(a[0],rebin)])
             
             elif option == 'negative':
                 a = self._get_asym_hel(d)
-                return (np.array(freq),np.array(a[1][0]),np.array(a[1][1]))
+                return np.vstack([freq,self._rebin(a[1],rebin)])
             
             elif option in ['combined']:
                 a = self._get_asym_comb(d)
-                return (np.array(freq),np.array(a[0]),np.array(a[1]))
+                return np.vstack([freq,self._rebin(a,rebin)])
             else:
                 ah = self._get_asym_hel(d)
                 ac = self._get_asym_comb(d)
                 
                 out = bdict()
-                out['p'] = np.array([ah[0][0],ah[0][1]])
-                out['n'] = np.array([ah[1][0],ah[1][1]])
-                out['c'] = np.array([ac[0],ac[1]])
+                out['p'] = self._rebin(ah[0],rebin)
+                out['n'] = self._rebin(ah[1],rebin)
+                out['c'] = self._rebin(ac,rebin)  
                 out[xlab] = np.array(freq)
                 return out
             
