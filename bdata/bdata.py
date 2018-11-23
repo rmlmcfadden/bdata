@@ -612,7 +612,7 @@ class bdata(object):
         d3[d3==0] = np.nan
         
         # error in combined asymmetry
-        asym_comb_err = 2*r*np.sqrt(1/d1 + 1/d0 + 1/d3 + 1/d2)/np.square(r+1)
+        asym_comb_err = 0.5*np.sqrt(1/d1 + 1/d0 + 1/d3 + 1/d2)*np.square(r/(r+1))
         
         # replace nan with zero 
         asym_comb[np.isnan(asym_comb)] = 0.
