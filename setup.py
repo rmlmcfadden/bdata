@@ -24,7 +24,7 @@ setuptools.setup(
     description="BNMR/BNQR MUD file reader and asymmetry calculator",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://ms-code.phas.ubc.ca:2633/dfujim_public/bdata",
+    url="https://github.com/dfujim/bdata",
     packages=setuptools.find_packages(),
     classifiers=(
         "Programming Language :: Python :: 3",
