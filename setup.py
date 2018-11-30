@@ -8,13 +8,7 @@ with open("README.md", "r") as fh:
 
 # module extension
 ext = Extension("bdata.mudpy",
-                sources=["./bdata/mudpy.pyx",
-                        "./mud_src/mud.c",
-                        "./mud_src/mud_gen.c",
-                        "./mud_src/mud_encode.c",
-                        "./mud_src/mud_new.c",
-                        "./mud_src/mud_tri_ti.c",
-                        "./mud_src/mud_all.c"])
+                sources=["./bdata/mudpy.pyx"])
 
 setuptools.setup(
     name="bdata",
@@ -31,7 +25,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
-    install_requires=['markdown>=2.6','cython>=0.28','numpy>=1.14'],
+    install_requires=['cython>=0.28','numpy>=1.14'],
     ext_modules = cythonize([ext],include_path = [numpy.get_include()]),
 )
 
