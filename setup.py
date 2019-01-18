@@ -9,7 +9,16 @@ with open("README.md", "r") as fh:
 # module extension
 ext = Extension("bdata.mudpy",
                 sources=["./bdata/mudpy.pyx",
-                         "./mud_src/mud.c"],
+                         "./mud_src/mud.c",
+                         "./mud_src/mud_gen.c",
+                         "./mud_src/mud_friendly.c",
+                         "./mud_src/mud_fort.c",
+                         "./mud_src/mud_encode.c",
+                         "./mud_src/mud_all.c",
+                         "./mud_src/mud_tri_ti.c",
+                         "./mud_src/mud_misc.c",
+                         "./mud_src/mud_new.c",
+                         "./mud_src/mud.h"],
                 include_dirs=['./mud_src/'])
 
 setuptools.setup(
