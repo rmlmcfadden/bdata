@@ -78,7 +78,6 @@ Derek Fujimoto
 July 2017
 """
 
-cimport cmud
 import numpy as np
 from cpython cimport array
 import array
