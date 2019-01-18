@@ -6,26 +6,6 @@ Cython wrapper functions for friendly MUD file reading.
 MUD source description can be found on the musr webpage: 
     http://musr.ca/mud/mud_friendly.html
 
-Installation instructions for MUD files: 
-    wget http://cmms.triumf.ca/mud/mud.zip
-    unzip mud.zip
-    cd mud/
-    make all
-    sudo make install
-    sudo cp src/mud.h /usr/local/include
-    
-Installation instructions for cython:
-    pip install Cython
-
-Installation instructions for mudpy:
-    wget https://raw.githubusercontent.com/dfujim/Tools/master/mudpy/mudpy.pyx
-    wget https://raw.githubusercontent.com/dfujim/Tools/master/mudpy/setup.py
-    python setup.py build_ext --inplace
-    export PYTHONPATH=$PYTHONPATH:/path_to_build_directory
-
-One can then access this module in python using 'import mudpy'. It is a good 
-idea to add the above environment variable to your .bash_profile file. 
-
 Function list: 
 
     FILE IO
@@ -98,9 +78,11 @@ Derek Fujimoto
 July 2017
 """
 
+cimport cmud
 import numpy as np
 from cpython cimport array
 import array
+
 
 ### ======================================================================= ###
 # FILE IO

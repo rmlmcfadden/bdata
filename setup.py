@@ -8,7 +8,9 @@ with open("README.md", "r") as fh:
 
 # module extension
 ext = Extension("bdata.mudpy",
-                sources=["./bdata/mudpy.pyx"])
+                sources=["./bdata/mudpy.pyx",
+                         "./mud_src/mud.c"],
+                include_dirs=['./mud_src/'])
 
 setuptools.setup(
     name="bdata",
