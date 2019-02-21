@@ -574,9 +574,10 @@ class bdata(object):
         asym_hel = [(d0-d1)/denom1,
                     (d2-d3)/denom2]
                     
-        # errors
-        asym_hel_err = [2*np.sqrt((d0*d1)/denom1**3),
-                        2*np.sqrt((d2*d3)/denom2**3)]
+        # errors 
+        # https://www.wolframalpha.com/input/?i=%E2%88%9A(F*(derivative+of+((F-B)%2F(F%2BB))+with+respect+to+F)%5E2+%2B+B*(derivative+of+((F-B)%2F(F%2BB))+with+respect+to+B)%5E2)
+        asym_hel_err = [2*np.sqrt(d0*d1/np.power(denom1,3)),
+                        2*np.sqrt(d2*d3/np.power(denom2,3))]
         
         # remove nan            
         for i in range(2):
