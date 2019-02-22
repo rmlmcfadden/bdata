@@ -1302,30 +1302,41 @@ class bdata(object):
             return
 
     # ======================================================================= #
-    def beam_kev(self):
+    def beam_kev(self,get_error=False):
         """
             Get the beam energy in kev, based on typical biases: 
                 itw (or ite bias) - bias15 - platform bias
+                
+            if get_error: fetch error in value, rather than value
         """
         
         # get epics pointer
         epics = self.epics
         
+        # fetch stds
+        if get_error:
+            attr = 'std'
+        else:
+            attr = 'mean'
+        
         # get inital beam energy in keV
-        beam = epics.target_bias.mean/1000.
+        beam = getattr(epics.target_bias,attr)/1000.
             
         # get RB cell voltage
-        bias15 = epics.bias15.mean/1000.
+        bias15 = getattr(epics.bias15,attr)/1000.
         
         # get platform bias 
         if self.area == 'BNMR':
-            platform = epics.nmr_bias.mean
+            platform = getattr(epics.nmr_bias,attr)
         elif self.area == 'BNQR':
-            platform = epics.nqr_bias.mean/1000.
+            platform = getattr(epics.nqr_bias,attr)/1000.
         else:
             raise RuntimeError('Area not recognized')
         
-        return beam-bias15-platform # keV
+        if get_error:
+            return np.sqrt(np.sum(np.square((beam,bias15,platform)))) # keV
+        else:
+            return beam-bias15-platform # keV
 
     # ======================================================================= #
     def get_pulse_s(self):
