@@ -70,12 +70,10 @@ __doc__="""
     Last updated: December 2017
 """
 
-
 # =========================================================================== #
 class bdata(object):
     """
         Class fields 
-            life
             dkeys
             evar_bnmr
             evar_bnqr
@@ -331,16 +329,6 @@ class bdata(object):
             "":""
             }
     
-    # set lifetimes for various particles in seconds, with errors (ref: rmlm slr_v2.cpp)
-    life = {"8Li":[1.2096,0.0005],  #	http://journals.aps.org/prc/abstract/10.1103/PhysRevC.82.027309
-            "9Li":[0.2572,0.0006],  #	http://journals.aps.org/prc/abstract/10.1103/PhysRevC.13.835
-            "11Li":[0.0126,0.0020], #   http://www.sciencedirect.com/science/article/pii/S0375947412000413
-            "11Be":[19.85,0.10],    #   http://www.sciencedirect.com/science/article/pii/S0375947412000413
-            "20F":[16.105,0.012],   #   http://www.sciencedirect.com/science/article/pii/037594749290251E
-            "29Mg":[1.88,0.17],     #   http://www.sciencedirect.com/science/article/pii/S0375947403018074
-            "31Mg":[0.332,0.029]    #   http://www.sciencedirect.com/science/article/pii/S0375947403018074
-            }
-
     # set environment variable same to get data archive location
     # should point to something like
     # "/data1/bnmr/dlog/" on linbnmr2
@@ -1357,7 +1345,7 @@ class bdata(object):
                       DeprecationWarning,
                       stacklevel=2)
         return self.get_pulse_s()
-                
+            
 # =========================================================================== #
 # DATA CONTAINERS
 # =========================================================================== #
@@ -1617,3 +1605,21 @@ class bhist(bcontainer):
     def __or__(self,other):         
         if isinstance(other,bhist): return self.data|other.data
         else:                       return self.data|other
+
+# set lifetimes for various particles in seconds, with errors (ref: rmlm slr_v2.cpp)
+life = bdict({
+            "Li8"       :1.2096, # http://journals.aps.org/prc/abstract/10.1103/PhysRevC.82.027309
+            "Li8_err"   :0.0005, 
+            "Li9"       :0.2572, # http://journals.aps.org/prc/abstract/10.1103/PhysRevC.13.835
+            "Li9_err"   :0.0006, 
+            "Li11"      :0.0126, # http://www.sciencedirect.com/science/article/pii/S0375947412000413
+            "Li11_err"  :0.0020, 
+            "Be11"      :19.85,  # http://www.sciencedirect.com/science/article/pii/S0375947412000413
+            "Be11_err"  :0.10,   
+            "F20"       :16.105, # http://www.sciencedirect.com/science/article/pii/037594749290251E
+            "F20_err"   :0.012,  
+            "Mg29"      :1.88,   # http://www.sciencedirect.com/science/article/pii/S0375947403018074
+            "Mg29_err"  :0.17,   
+            "Mg31"      :0.332,  # http://www.sciencedirect.com/science/article/pii/S0375947403018074
+            "Mg31_err"  :0.029,   
+        })

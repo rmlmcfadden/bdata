@@ -1,4 +1,5 @@
 from bdata.bdata import bdata
+from bdata.bdata import life
 from bdata.bdata import bdict
 from bdata.bdata import bvar
 from bdata.bdata import bhist
