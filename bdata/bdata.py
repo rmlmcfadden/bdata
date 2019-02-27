@@ -1338,14 +1338,6 @@ class bdata(object):
                     "or beam_on")
         return dwelltime*beam_on/1000.
     
-    # DEPRECIATED =========================================================== #
-    def pulse_off_s(self):  
-        """Depreciated in favor of get_pulse_s"""
-        warnings.warn("pulse_off_s depreciated in favor of get_pulse_s",
-                      DeprecationWarning,
-                      stacklevel=2)
-        return self.get_pulse_s()
-            
 # =========================================================================== #
 # DATA CONTAINERS
 # =========================================================================== #
