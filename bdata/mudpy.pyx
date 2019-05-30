@@ -29,6 +29,8 @@ Function list:
         get_orientation
         get_das
         get_experimenter
+        get_temperature
+        get_field
     
     COMMENTS
         get_comments
@@ -119,6 +121,8 @@ cdef extern from "../mud_src/mud_friendly.c":
     int MUD_getOrient(int fh, char* string, int strdim)
     int MUD_getDas(int fh, char* string, int strdim)
     int MUD_getExperimenter(int fh, char* string, int strdim)
+    int MUD_getTemperature(int fh, char* string, int strdim )
+    int MUD_getField(int fh, char* string, int strdim )
 
 def get_description(file_handle):
     """Returns int, related to file description."""
@@ -214,6 +218,18 @@ def get_experimenter(file_handle):
     """Returns python string. Max number of characters: 256. """
     cdef char title[256]
     MUD_getExperimenter(file_handle,title,256)
+    return <object>(title.decode('cp1252'))
+
+def get_temperature(file_handle):
+    """Returns python string. Max number of characters: 256. """
+    cdef char title[256]
+    MUD_getTemperature(file_handle,title,256)
+    return <object>(title.decode('cp1252'))
+
+def get_field(file_handle):
+    """Returns python string. Max number of characters: 256. """
+    cdef char title[256]
+    MUD_getField(file_handle,title,256)
     return <object>(title.decode('cp1252'))
        
 ### ======================================================================= ###
