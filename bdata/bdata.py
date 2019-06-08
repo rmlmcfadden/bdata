@@ -1603,19 +1603,22 @@ class bhist(bcontainer):
         else:                       return self.data|other
 
 # set lifetimes for various particles in seconds, with errors (ref: rmlm slr_v2.cpp)
+# commented out isotopes with multiple decay products not taken into account by bfit
 life = bdict({
-            "Li8"       :1.2096, # http://journals.aps.org/prc/abstract/10.1103/PhysRevC.82.027309
+            "Li8"       :1.2096,    # http://journals.aps.org/prc/abstract/10.1103/PhysRevC.82.027309
             "Li8_err"   :0.0005, 
-            "Li9"       :0.2572, # http://journals.aps.org/prc/abstract/10.1103/PhysRevC.13.835
+            "Li9"       :0.2572,    # http://journals.aps.org/prc/abstract/10.1103/PhysRevC.13.835
             "Li9_err"   :0.0006, 
-            "Li11"      :0.0126, # http://www.sciencedirect.com/science/article/pii/S0375947412000413
-            "Li11_err"  :0.0020, 
-            "Be11"      :19.85,  # http://www.sciencedirect.com/science/article/pii/S0375947412000413
+#            "Li11"      :0.0126,   # http://www.sciencedirect.com/science/article/pii/S0375947412000413
+#            "Li11_err"  :0.0020, 
+            "Be11"      :19.85,     # http://www.sciencedirect.com/science/article/pii/S0375947412000413
             "Be11_err"  :0.10,   
-            "F20"       :16.105, # http://www.sciencedirect.com/science/article/pii/037594749290251E
+            "F20"       :16.105,    # http://www.sciencedirect.com/science/article/pii/037594749290251E
             "F20_err"   :0.012,  
-            "Mg29"      :1.88,   # http://www.sciencedirect.com/science/article/pii/S0375947403018074
-            "Mg29_err"  :0.17,   
-            "Mg31"      :0.332,  # http://www.sciencedirect.com/science/article/pii/S0375947403018074
+#            "Mg29"      :1.88,     # http://www.sciencedirect.com/science/article/pii/S0375947403018074
+#            "Mg29_err"  :0.17,   
+            "Mg31"      :0.332,     # http://www.sciencedirect.com/science/article/pii/S0375947403018074
             "Mg31_err"  :0.029,   
+            "Ac230"     :121.8,     # N. E. Table of the isotopes, Brookhaven National Laboratory, Upton, New York, 2002.
+            "Ac234"     :40,        # N. E. Table of the isotopes, Brookhaven National Laboratory, Upton, New York, 2002.
         })
