@@ -951,10 +951,7 @@ class bdata(object):
         Status of Data Corrections --------------------------------------------
             SLR/2H: 
                 Removes prebeam bins. 
-                Subtract mean of prebeam bins from raw counts 
-                    (does not treat error propagation from this. Errors are 
-                    still treated as Poisson, despite not being integers) 
-                    
+                
                 Rebinning: 
                     returned time is average time over rebin range
                     returned asym is weighted mean
@@ -1111,21 +1108,16 @@ class bdata(object):
             
             # calculate background
             n_prebeam = int(self.ppg['prebeam'].mean)
-            bkgd = np.sum(np.asarray(d_all)[:,:n_prebeam],axis=1)
-            bkgd_err = np.sqrt(bkgd)/n_prebeam
-            bkgd /= n_prebeam
             
-            # subtract background from counts, remove negative count values,
+            # remove negative count values,
             # delete prebeam entries
             for i in range(len(d)):
-                d[i] = d[i]-bkgd[i]
                 d[i][d[i]<0] = 0.
                 d[i] = np.delete(d[i],np.arange(n_prebeam))
 
             # do alpha background subtractions
             if self.mode == '2h':    
                 for i in range(len(d_alpha)):
-                    d_alpha[i] = d_alpha[i]-bkgd[i+len(d)]
                     d_alpha[i][d_alpha[i]<0] = 0.
                     d_alpha[i] = np.delete(d_alpha[i],np.arange(n_prebeam))
                 
