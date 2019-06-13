@@ -1,18 +1,22 @@
 # bdata
 Beta-data package. The bdata object is largely a data container, designed to read out [MUD](http://musr.ca/mud/mud_fmt.html) data files and to provide user-friendly access [BNMR/BNQR data](http://musr.ca/mud/runSel.html). 
 
-## Installation 
+## Setup 
 
 * Install using pip: `pip install bdata`
 * Export environment variables for finding data files (add to `.bashrc` or similar)
-    * `export BNMR_ARCHIVE=/path/bnmr/`
-    * `export BNQR_ARCHIVE=/path/bnqr/`
+   Set environment variables BNMR_ARCHIVE and BNQR_ARCHIVE such that one 
+   can access the msr files according to the following scheme:
+   ```bash
+      ${BNMR_ARCHIVE}/year/filename
+      ${BNQR_ARCHIVE}/year/filename
+   ```
 
 ## Object Map
 
-**Constructor**: 
+**Signature**: 
 
-`bdata(run_number,year=0,filename='')`
+`bdata(run_number,year=None,filename='')`
 
 Examples:
     
@@ -31,15 +35,37 @@ bd = bdata(0,filename='filename.msr') # read file from local memory, run number 
 | `get_pulse_s()`     | Get beam pulse duration in s     |
 
 
-## Misc Notes
+## Misc Features
 
-The bdict objects allow for the calling of dictionary keys like an object attribute. For example, bd.ppg.beam_on or bd.ppg['beam_on'] have the exact same output. Note that reserved characters such as '+' cannot be used in this manner. 
-            
-Set the location of the data archive via environment variables "BNMR_ARCHIVE" and "BNQR_ARCHIVE". This would be something like "/data1/bnmr/dlog/" on linbnmr2 or "~/triumf/data/bnmr/" on muesli or lincmms.
+### Representation
 
-The various object containers returned have customized defined "magic" functions for common comparison and mathematical operators. So one can do `bd.ppg.beam_on*5` and get 5 times the beam on time, stored in the mean property of that object. 
+   Representation has been nicely formatted so that typing the object 
+   name into the interpreter produces nice output. 
 
-Note that the object representation has been nicely formatted as well.
+### Operators
+
+   bvar, bscaler, and bhist objects allow for arithmatic or logic 
+   operators to be used, where the value used in the operation is the 
+   mean, count, or data array respectively. 
+
+   Example:    `bd.ppg.bias15 + 1`
+   is equivalent to 
+               `bd.ppg.bias15.mean + 1`
+
+### Special Rules For Attributes
+
+   If an attribute is not found in bdata, it will look for the 
+   attribute in the bdict objects in the order: camp, epics, ppg, hist.
+   This second-level attribute search is much slower than regular 
+   access.
+
+   bdict objects all allow assignment and fetching of dictionary keys 
+   as if they were attributes. Note that one can replace `+` with `p`,
+   and `-` with `m` to allow fetching of histograms. 
+
+   Example: `bd.ppg.beam_on`, `bd.ppg['beam_on']`, `bd.beam_on` all have the 
+            exact same output, with the last being much slower than 
+            the others.
 
 ## bdata.asym() docstring
 
@@ -99,9 +125,6 @@ Histogram Selection ---------------------------------------------------
 Status of Data Corrections --------------------------------------------
     SLR/2H: 
         Removes prebeam bins. 
-        Subtract mean of prebeam bins from raw counts 
-            (does not treat error propagation from this. Errors are 
-            still treated as Poisson, despite not being integers) 
 
         Rebinning: 
             returned time is average time over rebin range
