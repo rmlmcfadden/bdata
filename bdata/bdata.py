@@ -20,54 +20,62 @@ __doc__="""
     for easy external user access. In this case, data files can be downloaded 
     from musr.ca. The MUD data file is read and closed on object construction. 
     
-    Requires the installation of mudpy. See mudpy docstring for installation
-    instructions. 
+    Signature: bdata(run_number,year=None,filename='')
     
-    Constructor: bdata(run_number,year=0,filename='')
+    Example usage ------------------------------------------------------------
     
-    Example usage: 
-        bd = bdata(40001)           # read run 40001 from the default year. 
-        bd = bdata(40001,year=2009) # read run 40001 from 2009.
+        bd = bdata(40001)               # read run 40001 from the current year. 
+        bd = bdata(40001,year=2009)     # read run 40001 from year 2009.
         bd = bdata(0,filename='file.msr') # read file from local memory, run 
                                             number unused 
-        
-    if year==0 then default is the current year. For scripts analysing a 
-    specific data set, it is advised that this be set so that the script does 
-    not break as time passes. 
-        
-    Asymmetry: 
-        bd.asym() # for details and options see bdata.asym docstring. 
-        
-    Beam energy: 
-        bd.beam_kev()   # returns beam energy in keV
-               
-    Pulse-off time for SLR measurements: 
-        pulse_off_s()
-                                      
-    For a nicely-formatted list of all data fields call the fields method: 
-        bd.fields()
-        
-        Note that the object representation has been nicely formatted as well, 
-        so that typing
-        
-        bd
-        
-        into the interpreter produces nice output. 
-        
-    Note that bdict objects allow for the calling of dictionary keys like an 
-    object attribute. For example, bd.ppg.beam_on or bd.ppg['beam_on'] have the 
-    exact same output. Note that reserved characters such as '+' cannot be used 
-    in this manner. 
-            
-    One can also set the location of the data archive via environment 
-    variables "BNMR_ARCHIVE" and "BNQR_ARCHIVE". This would be something 
-    like "/data1/bnmr/dlog/" on linbnmr2 or "/data/bnmr/" on muesli or 
-    lincmms
-        
-    Derek Fujimoto
-    August 2017
+    Methods ------------------------------------------------------------------
     
-    Last updated: December 2017
+        bd.asym()       # calculate asymmetry. See bdata.asym docstring.     
+        bd.beam_kev()   # returns beam energy in keV
+        pulse_off_s()   # pulse-off time for SLR measurements: 
+
+    Setup --------------------------------------------------------------------
+    
+        Set environment variables BNMR_ARCHIVE and BNQR_ARCHIVE such that one 
+        can access the msr files according to the following scheme:
+        
+        ${BNMR_ARCHIVE}/year/filename
+        ${BNQR_ARCHIVE}/year/filename
+
+    Features -----------------------------------------------------------------
+    
+        Representation 
+    
+            Representation has been nicely formatted so that typing the object 
+            name into the interpreter produces nice output. 
+        
+        Operators
+            
+            bvar, bscaler, and bhist objects allow for arithmatic or logic 
+            operators to be used, where the value used in the operation is the 
+            mean, count, or data array respectively. 
+            
+            Example:    bd.ppg.bias15 + 1       
+            is equivalent to 
+                        bd.ppg.bias15.mean + 1
+        
+        Special Rules For Attributes
+        
+            If an attribute is not found in bdata, it will look for the 
+            attribute in the bdict objects in the order: camp, epics, ppg, hist.
+            This second-level attribute search is much slower than regular 
+            access.
+            
+            bdict objects all allow assignment and fetching of dictionary keys 
+            as if they were attributes. Note that one can replace "+" with "p",
+            and "-" with "m" to allow fetching of histograms. 
+        
+            Example: bd.ppg.beam_on, bd.ppg['beam_on'], bd.beam_on all have the 
+                     exact same output, with the last being much slower than 
+                     the others.
+    
+    Derek Fujimoto
+    June 2019
 """
 
 # =========================================================================== #
@@ -120,11 +128,13 @@ class bdata(object):
             
         Private worker functions
             __init__
+            __getattr__
+            __repr__
             _get_area_data
             _get_asym_hel
             _get_asym_comb
             _rebin
-            __repr__
+            
     """
     
     # set nice dictionary keys based on 2017 titles and names, for independent
@@ -215,7 +225,8 @@ class bdata(object):
             "/Cryo_oven/read_D"                         :"oven_readD",
             "/Cryo_oven/setpoint_1"                     :"oven_set1",
                         
-            "/Dac0/dac_set"                             :"daq_set",
+            "/Dac0/dac_set"                             :"dac_set",
+            "/dac/dac_set"                              :"dac_set",
             "/Dewar/He_level"                           :"he_level",
              
             "/flow_set/output"                          :"flow_set_out",
@@ -254,6 +265,7 @@ class bdata(object):
             "/Sample1/read_A"                           :"smpl_read_A",
             "/Sample/read_B"                            :"smpl_read_B",
             "/Sample1/read_B"                           :"smpl_read_B",
+            "/adc0/adc_read"                            :"smpl_read_B",
             "/Sample/read_C"                            :"smpl_read_C",
             "/Sample/read_D"                            :"smpl_read_D",
             "/Sample/set_current"                       :"smpl_set_current",
@@ -337,11 +349,11 @@ class bdata(object):
     evar_bnqr = "BNQR_ARCHIVE"
 
     # ======================================================================= #
-    def __init__(self,run_number,year=0,filename=""):
+    def __init__(self,run_number,year=None,filename=""):
         """Constructor. Reads file, stores and sorts data."""
         
         # Get the current year
-        if year == 0:   year = datetime.datetime.now().year
+        if year is None:   year = datetime.datetime.now().year
         
         # read file if not provided
         if filename == "":
@@ -478,11 +490,11 @@ class bdata(object):
         for v in self.var_list: 
             try:
                 if 'PPG' in v.title:
-                    self.ppg[self.dkeys[v.title.split("/")[-1]]] = v
+                    self.ppg[bdata.dkeys[v.title.split("/")[-1]]] = v
                 elif v.title[0] == "/":
-                    self.camp[self.dkeys[v.title]] = v
+                    self.camp[bdata.dkeys[v.title]] = v
                 else:
-                    self.epics[self.dkeys[v.title]] = v
+                    self.epics[bdata.dkeys[v.title]] = v
             except (KeyError,IndexError):
                     message = '"' + v.title + '" not found in dkeys. '+\
                                 "Data in list, but not sorted to dict."
@@ -505,6 +517,23 @@ class bdata(object):
         self.end_date = time.ctime(self.end_time)
         self.year = time.gmtime(self.start_time).tm_year
 
+    # ======================================================================= #
+    def __getattr__(self,name):
+        
+        try:
+            # fetch from top level
+            return getattr(object,name)
+        except AttributeError as err:
+            
+            # fetching of second level
+            if hasattr(self.camp,name): return getattr(self.camp,name)
+            if hasattr(self.epics,name):return getattr(self.epics,name)
+            if hasattr(self.ppg,name):  return getattr(self.ppg,name)
+            if hasattr(self.hist,name): return getattr(self.hist,name)
+                    
+            # nothing worked - raise error
+            raise AttributeError(err) from None
+                        
     # ======================================================================= #
     def _get_area_data(self):
         """Get histogram list based on area type. 
@@ -1199,7 +1228,9 @@ class bdata(object):
                 xlabel = 'Frequency'
                 xlab = 'freq'
             elif self.mode == '1n':
-                xlabel = 'Rb Cell mV set'
+                for xlabel in self.hist.keys():
+                    if 'cell' in xlabel.lower():    
+                        break
                 xlab = 'mV'
             
             # get bins to kill
@@ -1340,17 +1371,86 @@ class bdata(object):
 class bcontainer(object):
     """
         Provides common functions for data containers
+        
+        _get_val(): return the value needed to do the various operators. 
+                    Define in child classes
     """
 
     def __repr__(self):
-        if list(self.__dict__.keys()):
-            m = max(map(len,self.__dict__.keys())) + 1
+        if list(self.__slots__):
+            m = max(map(len,self.__slots__)) + 1
             s = ''
-            s += '\n'.join([k.rjust(m) + ': ' + repr(v)
-                              for k, v in sorted(self.__dict__.items())])
+            s += '\n'.join([k.rjust(m) + ': ' + repr(getattr(self,k))
+                              for k in sorted(self.__slots__)])
             return s
         else:
             return self.__class__.__name__ + "()"
+
+    # arithmatic operators
+    def __add__(self,other):        return self._get_val()+other
+    def __sub__(self,other):        return self._get_val()-other
+    def __mul__(self,other):        return self._get_val()*other
+    def __div__(self,other):        return self._get_val()/other
+    def __floordiv__(self,other):   return self._get_val()//other
+    def __mod__(self,other):        return self._get_val()%other
+    def __divmod__(self,other):     return divmod(self._get_val(),other)
+    def __pow__(self,other):        return pow(self._get_val(),other)
+    def __lshift__(self,other):     return self._get_val()<<other
+    def __rshift__(self,other):     return self._get_val()>>other
+    def __neg__(self):              return -self._get_val()
+    def __pos__(self):              return +self._get_val()
+    def __abs__(self):              return abs(self._get_val())
+    def __invert__(self):           return ~self._get_val()
+    def __round__(self):            return round(self._get_val())
+    
+    # casting operators
+    def __complex__(self):          return complex(self._get_val())
+    def __int__(self):              return int(self._get_val())
+    def __float__(self):            return float(self._get_val())
+    def __str__(self):              return str(self._get_val())
+    
+    # logic operators
+    def __eq__(self,other):     
+        if isinstance(other,bvar):  return self==other
+        else:                       return self._get_val()==other
+    def __lt__(self,other):     
+        if isinstance(other,bvar):  return self._get_val()<other._get_val()
+        else:                       return self._get_val()<other
+    def __le__(self,other):
+        if isinstance(other,bvar):  return self._get_val()<=other._get_val()
+        else:                       return self._get_val()<=other
+    def __gt__(self,other):
+        if isinstance(other,bvar):  return self._get_val()>other._get_val()
+        else:                       return self._get_val()>other
+    def __ge__(self,other):
+        if isinstance(other,bvar):  return self._get_val()>=other._get_val()
+        else:                       return self._get_val()>=other
+    
+    def __and__(self,other):
+        if isinstance(other,bvar):  return self&other
+        else:                       return self._get_val()&other
+    def __xor__(self,other):
+        if isinstance(other,bvar):  return self^other
+        else:                       return self._get_val()^other
+    def __or__(self,other):
+        if isinstance(other,bvar):  return self|other
+        else:                       return self._get_val()|other
+    
+    # reflected operators
+    def __radd__(self,other):       return self.__add__(other)        
+    def __rsub__(self,other):       return self.__sub__(other)        
+    def __rmul__(self,other):       return self.__mul__(other)     
+    def __rdiv__(self,other):       return self.__div__(other)    
+    def __rfloordiv__(self,other):  return self.__floordiv__(other)
+    def __rmod__(self,other):       return self.__mod__(other)      
+    def __rdivmod__(self,other):    return self.__divmod__(other)
+    def __rpow__(self,other):       return self.__pow__(other)      
+    def __rlshift__(self,other):    return self.__lshift__(other)
+    def __rrshift__(self,other):    return self.__rshift__(other)                          
+    def __rand__(self,other):       return self.__and__(other)
+    def __rxor__(self,other):       return self.__xor__(other)
+    def __ror__(self,other):        return self.__or__(other)
+    
 
 # =========================================================================== #
 class bdict(dict):
@@ -1361,8 +1461,12 @@ class bdict(dict):
     def __getattr__(self, name):
         try:
             return self[name]
-        except KeyError:
-            raise AttributeError(name)
+        except KeyError as err:
+            name = name.replace('m','-').replace('p','+')
+            try:
+                return self[name]
+            except KeyError:
+                raise AttributeError(err) from None
 
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
@@ -1400,56 +1504,11 @@ class bvar(bcontainer):
             units
     """
         
-    # arithmatic operators
-    def __add__(self,other):        return self.mean+other
-    def __sub__(self,other):        return self.mean-other
-    def __mul__(self,other):        return self.mean*other
-    def __truediv__(self,other):    return self.mean/other
-    def __floordiv__(self,other):   return self.mean//other
-    def __mod__(self,other):        return self.mean%other
-    def __divmod__(self,other):     return divmod(self.mean,other)
-    def __pow__(self,other):        return pow(self.mean,other)
-    def __lshift__(self,other):     return self.mean<<other
-    def __rshift__(self,other):     return self.mean>>other
-    def __neg__(self):              return -self.mean
-    def __pos__(self):              return +self.mean
-    def __abs__(self):              return abs(self.mean)
-    def __invert__(self):           return ~self.mean
-    def __round__(self):            return round(self.mean)
-    
-    # casting operators
-    def __complex__(self):          return complex(self.mean)
-    def __int__(self):              return int(self.mean)
-    def __float__(self):            return float(self.mean)
-    def __str__(self):              return str(self.mean)
-    
-    # logic operators
-    def __eq__(self,other):     
-        if isinstance(other,bvar):  return self==other
-        else:                       return self.mean==other
-    def __lt__(self,other):     
-        if isinstance(other,bvar):  return self.mean<other.mean
-        else:                       return self.mean<other
-    def __le__(self,other):
-        if isinstance(other,bvar):  return self.mean<=other.mean
-        else:                       return self.mean<=other
-    def __gt__(self,other):
-        if isinstance(other,bvar):  return self.mean>other.mean
-        else:                       return self.mean>other
-    def __ge__(self,other):
-        if isinstance(other,bvar):  return self.mean>=other.mean
-        else:                       return self.mean>=other
-    
-    def __and__(self,other):
-        if isinstance(other,bvar):  return self&other
-        else:                       return self.mean&other
-    def __xor__(self,other):
-        if isinstance(other,bvar):  return self^other
-        else:                       return self.mean^other
-    def __or__(self,other):
-        if isinstance(other,bvar):  return self|other
-        else:                       return self.mean|other
-    
+    __slots__ = ('id_number', 'low', 'high', 'mean', 'std', 'skew', 'title', 
+                 'description', 'units')
+
+    def _get_val(self): return self.mean
+            
 # =========================================================================== #
 class bscaler(bcontainer):
     """
@@ -1460,56 +1519,9 @@ class bscaler(bcontainer):
             title
             counts
     """
+    __slots__ = ('id_number','title','counts')
     
-    # arithmatic operators
-    def __add__(self,other):            return self.counts+other
-    def __sub__(self,other):            return self.counts-other
-    def __mul__(self,other):            return self.counts*other
-    def __truediv__(self,other):        return self.counts/other
-    def __floordiv__(self,other):       return self.counts//other
-    def __mod__(self,other):            return self.counts%other
-    def __divmod__(self,other):         return divmod(self.counts,other)
-    def __pow__(self,other):            return pow(self.counts,other)
-    def __lshift__(self,other):         return self.counts<<other
-    def __rshift__(self,other):         return self.counts>>other
-    def __neg__(self):                  return -self.counts
-    def __pos__(self):                  return +self.counts
-    def __abs__(self):                  return abs(self.counts)
-    def __invert__(self):               return ~self.counts
-    def __round__(self):                return round(self.counts)
-        
-    # casting operators 
-    def __complex__(self):              return complex(self.counts)
-    def __int__(self):                  return int(self.counts)
-    def __float__(self):                return float(self.counts)
-    def __str__(self):                  return str(self.counts)
-    
-    # logic operators
-    def __eq__(self,other):     
-        if isinstance(other,bscaler):   return self==other
-        else:                           return self.counts==other
-    def __lt__(self,other):     
-        if isinstance(other,bscaler):   return self.counts<other.counts
-        else:                           return self.counts<other
-    def __le__(self,other):
-        if isinstance(other,bscaler):   return self.counts<=other.counts
-        else:                           return self.counts<=other
-    def __gt__(self,other):
-        if isinstance(other,bscaler):   return self.counts>other.counts
-        else:                           return self.counts>other
-    def __ge__(self,other):
-        if isinstance(other,bscaler):   return self.counts>=other.counts
-        else:                           return self.counts>=other
-    
-    def __and__(self,other):
-        if isinstance(other,bscaler):   return self&other
-        else:                           return self.counts&other
-    def __xor__(self,other):
-        if isinstance(other,bscaler):   return self^other
-        else:                           return self.counts^other
-    def __or__(self,other):
-        if isinstance(other,bscaler):   return self|other
-        else:                           return self.counts|other
+    def _get_val(self): return self.counts
         
 # =========================================================================== #
 class bhist(bcontainer):
@@ -1534,66 +1546,13 @@ class bhist(bcontainer):
             background2
     """
     
-    # arithmatic operators
-    def __add__(self,other):        
-        if isinstance(other,bhist): return self.data+other.data
-        else:                       return self.data+other
-    def __sub__(self,other):
-        if isinstance(other,bhist): return self.data-other.data
-        else:                       return self.data-other
-    def __mul__(self,other):
-        if isinstance(other,bhist): return self.data*other.data
-        else:                       return self.data*other
-    def __truediv__(self,other):
-        if isinstance(other,bhist): return self.data/other.data
-        else:                       return self.data/other
-    def __floordiv__(self,other):
-        if isinstance(other,bhist): return self.data//other.data
-        else:                       return self.data//other
-    def __mod__(self,other):
-        if isinstance(other,bhist): return self.data%other.data
-        else:                       return self.data%other
-    def __divmod__(self,other):     
-        if isinstance(other,bhist): return np.divmod(self.data,other.data)
-        else:                       return np.divmod(self.data,other)
-    def __pow__(self,other):        
-        if isinstance(other,bhist): return np.pow(self.data,other.data)
-        else:                       return np.pow(self.data,other)
-    def __neg__(self):              return -self.data
-    def __abs__(self):              return np.abs(self.data)
-    def __invert__(self):           return ~self.data
-    def __round__(self):            return np.round(self.data)
+    __slots__ = ('id_number', 'htype', 'title', 'data', 'n_bytes', 'n_bins', 
+                 'n_events', 'fs_per_bin', 's_per_bin', 't0_ps', 't0_bin', 
+                 'good_bin1', 'good_bin2', 'background1', 'background2')
     
-    # casting operators
-    def astype(self,type):          return self.data.astype(type)
+    def _get_val(self):     return self.data
+    def astype(self,type):  return self.data.astype(type)
     
-    # logic operators
-    def __eq__(self,other):     
-        if isinstance(other,bhist): return self==other
-        else:                       return self.data==other
-    def __lt__(self,other):     
-        if isinstance(other,bhist): return self.data<other.data
-        else:                       return self.data<other
-    def __le__(self,other):
-        if isinstance(other,bhist): return self.data<=other.data
-        else:                       return self.data<=other
-    def __gt__(self,other):
-        if isinstance(other,bhist): return self.data>other.data
-        else:                       return self.data>other
-    def __ge__(self,other):
-        if isinstance(other,bhist): return self.data>=other.data
-        else:                       return self.data>=other
-    
-    def __and__(self,other):
-        if isinstance(other,bhist): return self.data&other.data
-        else:                       return self.data&other
-    def __xor__(self,other):       
-        if isinstance(other,bhist): return self.data^other.data
-        else:                       return self.data^other
-    def __or__(self,other):         
-        if isinstance(other,bhist): return self.data|other.data
-        else:                       return self.data|other
-
 # set lifetimes for various particles in seconds, with errors (ref: rmlm slr_v2.cpp)
 # commented out isotopes with multiple decay products not taken into account by bfit
 life = bdict({
