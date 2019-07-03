@@ -179,6 +179,15 @@ class bdata(object):
             "Number dwelltimes per freq"        :"ndwell_per_f",
             "number of midbnmr regions"         :"nregion",
             "num post RF beamOn dwelltimes"     :"ndwell_post_on",
+                                   
+            "Param X Start"                     :'xstart',
+            "Param X Stop"                      :'xstop',
+            "Param X Incr"                      :'xincr',
+            
+            "f1 frequency function"             :"freqfn_f1",
+            "f2 frequency function"             :"freqfn_f2",
+            "f3 frequency function"             :"freqfn_f3",
+            "f4 frequency function"             :"freqfn_f4",
                                                         
             "PPG mode"                          :"mode",     
             "e20 prebeam dwelltimes"            :"prebeam", 
@@ -985,7 +994,7 @@ class bdata(object):
                     returned time is average time over rebin range
                     returned asym is weighted mean
                 
-            1F: 
+            1F/1W: 
                 Allows manual removal of unwanted bins. 
                 
                 Scan Combination:
@@ -1224,9 +1233,12 @@ class bdata(object):
         elif self.mode in ('1f','1n','1w'):
             
             # get xaxis label and data key
-            if self.mode in ('1f','1w'):
+            if self.mode in ('1f',):
                 xlabel = 'Frequency'
                 xlab = 'freq'
+            elif self.mode == '1w':
+                xlabel = 'x parameter'
+                xlab = 'xpar'
             elif self.mode == '1n':
                 for xlabel in self.hist.keys():
                     if 'cell' in xlabel.lower():    
