@@ -1133,7 +1133,7 @@ class bdata(object):
             d = d[:4]
         
         # SLR -----------------------------------------------------------------
-        if self.mode in ["20",'2h']:
+        if self.mode in ("20",'2h'):
             
             # calculate background
             n_prebeam = int(self.ppg['prebeam'].mean)
@@ -1221,10 +1221,10 @@ class bdata(object):
                 return out
         
         # 1F ------------------------------------------------------------------
-        elif self.mode in ['1f','1n']:
+        elif self.mode in ('1f','1n','1w'):
             
             # get xaxis label and data key
-            if self.mode == '1f':
+            if self.mode in ('1f','1w'):
                 xlabel = 'Frequency'
                 xlab = 'freq'
             elif self.mode == '1n':
@@ -1308,7 +1308,7 @@ class bdata(object):
                 return out
             
         # 2E ------------------------------------------------------------------
-        elif self.mode in ['2e']:
+        elif self.mode in ('2e',):
             return self._get_2e_asym()
         
         # unknown entry -------------------------------------------------------
