@@ -1069,7 +1069,11 @@ class bdata(object):
                         
             2E DESCRIPTIONS ---------------------------------------------------
             
-                Takes no options. Returns a dictionary with the keys: 
+            "sc":   get slope combined helicity states as tuple (freq,val,err)
+            "dc":   get difference combined helicity states as tuple (freq,val,err)
+            "rc":   get raw combined helicity states as tuple (freq,time,val,err)
+            
+                If no options, returns a dictionary with the keys: 
              
             'dif_p':    [val,err][frequency] of pos. helicity asymmetry 
             'dif_n':    [ve][f] of negative helicity asymmetry
@@ -1110,6 +1114,12 @@ class bdata(object):
         elif option in ["r","raw"]                          : option = 'raw'
         elif option in ['adif','ad','adiff']                : option = 'alpha_diffusion'
         elif option in ['atag','at']                        : option = 'alpha_tagged'
+        elif option in ['sl_c','slope_combined','slc','sc'] : option = 'slope_combined'
+        elif option in ['dif_c','difference_combined','dc'] : option = 'difference_combined'
+        elif option in ['raw_c','raw_combined','rc']        : option = 'raw_combined'
+        elif option in ['sl_h','slope_helicity','slh','sh'] : option = 'slope_helicity'
+        elif option in ['dif_h','difference_helicity','dh'] : option = 'difference_helicity'
+        elif option in ['raw_h','raw_helicity','rh']        : option = 'raw_helicity'
         else:
             raise RuntimeError("Option not recognized.")
         
@@ -1321,7 +1331,16 @@ class bdata(object):
             
         # 2E ------------------------------------------------------------------
         elif self.mode in ('2e',):
-            return self._get_2e_asym()
+            adict = self._get_2e_asym()
+            
+            if option == 'slope_combined':  
+                return (adict['freq'],*adict['sl_c'])
+            elif option == 'difference_combined':  
+                return (adict['freq'],*adict['dif_c'])
+            elif option == 'raw_combined':  
+                return (adict['freq'],adict['time'],*adict['raw_c'])
+            else:
+                return adict
         
         # unknown entry -------------------------------------------------------
         else:
