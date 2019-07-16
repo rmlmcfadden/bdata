@@ -347,6 +347,7 @@ class bdata(object):
             "ILE2A1:HH:CUR"                             :"hh_current",
             "ILE2A1:HH:RDCU"                            :"hh_current",
             "ILE2A1:HH:RDCUR"                           :"hh_current",
+            "ILE2A1:HH3:RDCUR"                          :"hh_current",
             "":""
             }
     
