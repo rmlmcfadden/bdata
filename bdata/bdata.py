@@ -1481,8 +1481,7 @@ class bcontainer(object):
     def __rrshift__(self,other):    return self.__rshift__(other)                          
     def __rand__(self,other):       return self.__and__(other)
     def __rxor__(self,other):       return self.__xor__(other)
-    def __ror__(self,other):        return self.__or__(other)
-    
+    def __ror__(self,other):        return self.__or__(other)    
 
 # =========================================================================== #
 class bdict(dict):
@@ -1494,7 +1493,7 @@ class bdict(dict):
         try:
             return self[name]
         except KeyError as err:
-            name = name.replace('m','-').replace('p','+')
+            name = name.replace('n','-').replace('p','+')
             try:
                 return self[name]
             except KeyError:
