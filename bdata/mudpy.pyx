@@ -164,73 +164,73 @@ def get_title(file_handle):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getTitle(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
     
 def get_lab(file_handle):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getLab(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
  
 def get_area(file_handle):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getArea(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
     
 def get_method(file_handle):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getMethod(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
     
 def get_apparatus(file_handle):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getApparatus(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
     
 def get_insert(file_handle):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getInsert(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
 
 def get_sample(file_handle):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getSample(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
     
 def get_orientation(file_handle):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getOrient(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
 
 def get_das(file_handle):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getDas(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
 
 def get_experimenter(file_handle):
     """Returns python string. Max number of characters: 256. """
     cdef char title[256]
     MUD_getExperimenter(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
 
 def get_temperature(file_handle):
     """Returns python string. Max number of characters: 256. """
     cdef char title[256]
     MUD_getTemperature(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
 
 def get_field(file_handle):
     """Returns python string. Max number of characters: 256. """
     cdef char title[256]
     MUD_getField(file_handle,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
        
 ### ======================================================================= ###
 # COMMENTS
@@ -274,19 +274,19 @@ def get_comment_author(file_handle,comment_id_number):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getCommentAuthor(file_handle,comment_id_number,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
 
 def get_comment_title(file_handle,comment_id_number):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getCommentTitle(file_handle,comment_id_number,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
     
 def get_comment_body(file_handle,comment_id_number):
     """Returns python string. Max number of characters: 8192."""
     cdef char title[8192]
     MUD_getCommentAuthor(file_handle,comment_id_number,title,8192)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
         
 ### ======================================================================= ###
 # HISTOGRAMS
@@ -395,7 +395,7 @@ def get_hist_title(file_handle,hist_id_number):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getHistTitle(file_handle,hist_id_number,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
     
 def get_hist_sec_per_bin(file_handle,hist_id_number):
     """Returns float."""
@@ -498,16 +498,16 @@ def get_ivar_name(file_handle,variable_id_number):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getIndVarName(file_handle,variable_id_number,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
 
 def get_ivar_description(file_handle,variable_id_number):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getIndVarDescription(file_handle,variable_id_number,title,256)
-    return <object>(title.decode('cp1252')) 
+    return <object>(title.decode('latin1')) 
     
 def get_ivar_units(file_handle,variable_id_number):
     """Returns python string. Max number of characters: 256."""
     cdef char title[256]
     MUD_getIndVarUnits(file_handle,variable_id_number,title,256)
-    return <object>(title.decode('cp1252'))
+    return <object>(title.decode('latin1'))
