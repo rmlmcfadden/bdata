@@ -545,13 +545,13 @@ class bdata(object):
             raise AttributeError(err) from None
                         
     # ======================================================================= #
-    def _get_area_data(self):
+    def _get_area_data(self,nbm=False):
         """Get histogram list based on area type. 
         List pattern: [type1_hel+,type2_hel+,type1_hel-,type2_hel-]
         where type1/2 = F/B or R/L in that order.
         """
         
-        if self.mode == '1n':
+        if self.mode == '1n' or nbm:
             data = [self.hist['NBMF+'].data,\
                     self.hist['NBMF-'].data,\
                     self.hist['NBMB+'].data,\
@@ -932,7 +932,7 @@ class bdata(object):
             return self.__class__.__name__ + "()"
 
     # ======================================================================= #
-    def asym(self,option="",omit="",rebin=1,hist_select=''):
+    def asym(self,option="",omit="",rebin=1,hist_select='',nbm=False):
         """Calculate and return the asymmetry for various run types. 
            
         usage: asym(option="",omit="",rebin=1,hist_select='')
@@ -947,6 +947,7 @@ class bdata(object):
                                 making the asymmetry calculation. Deliminate 
                                 with [,] or [;]. Histogram names cannot 
                                 therefore contain either of these characters.
+            nbm:            use neutral beams in calculations
             
         Asymmetry calculation outline (with default detectors) ---------------
         
@@ -1144,7 +1145,7 @@ class bdata(object):
             
         # get default data
         else:
-            d = self._get_area_data() # 1+ 2+ 1- 2-
+            d = self._get_area_data(nbm=nbm) # 1+ 2+ 1- 2-
             d_all = d
             
         # get alpha diffusion data
