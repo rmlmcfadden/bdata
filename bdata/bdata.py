@@ -183,6 +183,7 @@ class bdata(object):
             "Param X Start"                     :'xstart',
             "Param X Stop"                      :'xstop',
             "Param X Incr"                      :'xincr',
+            "Constant param Y"                  :'yconst',
             
             "f1 frequency function"             :"freqfn_f1",
             "f2 frequency function"             :"freqfn_f2",
@@ -386,17 +387,13 @@ class bdata(object):
             # finalize file name
             if filename[-1] != '/':
                 filename += '/'
-            filename += repr(year) + "/0" + repr(run_number) + ".msr"
-        
-        # check file existence
-        if not os.path.isfile(filename):
-            raise RuntimeError("File %s does not exist" % filename)
+            filename += str(year) + "/0" + str(run_number) + ".msr"
         
         # Open file ----------------------------------------------------------
         fh = mp.open_read(filename)
         
         if fh < 0: 
-            raise RuntimeError("__init__: open file failed. ")
+            raise RuntimeError("Open file %s failed. " % filename)
         try:
             # Read run description
             self.exp = mp.get_exp_number(fh)
