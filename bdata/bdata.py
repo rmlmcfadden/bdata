@@ -358,11 +358,11 @@ class bdata(object):
     # "/data/bnmr/" on muesli or lincmms
     evar_bnmr = "BNMR_ARCHIVE"
     evar_bnqr = "BNQR_ARCHIVE"
-
+    
     # ======================================================================= #
     def __init__(self,run_number,year=None,filename=""):
         """Constructor. Reads file, stores and sorts data."""
-        
+            
         # Get the current year
         if year is None:   year = datetime.datetime.now().year
         
@@ -523,6 +523,9 @@ class bdata(object):
         self.start_date = time.ctime(self.start_time)
         self.end_date = time.ctime(self.end_time)
         self.year = time.gmtime(self.start_time).tm_year
+    
+        # prevent overwriting of attributes
+        self.__initialised = True
 
     # ======================================================================= #
     def __getattr__(self,name):
@@ -914,6 +917,8 @@ class bdata(object):
             items = []
             dkeys.sort()
             for key in dkeys:
+                if key[0] == '_': continue
+                
                 if not hasattr(d[key],'__iter__') or d[key].__class__ == bdict:
                     items.append([key,d[key]])                
                 elif d[key].__class__ == str:
@@ -927,7 +932,21 @@ class bdata(object):
             return s
         else:
             return self.__class__.__name__ + "()"
-
+    
+    # ======================================================================= #
+    def __setattr__(self,name,value):
+        """Allow setting attributes only when initializing"""
+        
+        # this test allows attributes to be set in the __init__ method
+        if '_bdata__initialised' not in self.__dict__.keys(): 
+            return dict.__setattr__(self, name, value)
+            
+        # any normal attributes are handled normally
+        elif name in self.__dict__.keys():       
+            raise AttributeError('Object is readonly')
+        else:
+            dict.__setattr__(self, name, value)
+        
     # ======================================================================= #
     def asym(self,option="",omit="",rebin=1,hist_select='',nbm=False):
         """Calculate and return the asymmetry for various run types. 
