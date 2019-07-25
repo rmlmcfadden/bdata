@@ -371,23 +371,21 @@ class bdata(object):
             
             # Get spectrometer directory. Based on rmlm's bnmr_20a.cpp.
             if run_number >= 40000 and run_number <= 44999:
-                spect_dir = "bnmr/"
+                spect_dir = "bnmr"
             elif run_number >= 45000 and run_number <= 49999:
-                spect_dir = "bnqr/"
+                spect_dir = "bnqr"
             else:
                 raise ValueError("Run number out of range") 
                 
             # look for environment variable
-            if spect_dir == "bnmr/" and self.evar_bnmr in list(os.environ.keys()):
+            if spect_dir == "bnmr" and self.evar_bnmr in list(os.environ.keys()):
                 filename = os.environ[self.evar_bnmr]
                 
-            elif spect_dir == "bnqr/" and self.evar_bnqr in list(os.environ.keys()):
+            elif spect_dir == "bnqr" and self.evar_bnqr in list(os.environ.keys()):
                 filename = os.environ[self.evar_bnqr]
                     
             # finalize file name
-            if filename[-1] != '/':
-                filename += '/'
-            filename += str(year) + "/0" + str(run_number) + ".msr"
+            filename = os.path.join(filename,str(year),'%06d.msr' % run_number)
         
         # Open file ----------------------------------------------------------
         fh = mp.open_read(filename)
