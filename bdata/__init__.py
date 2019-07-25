@@ -7,5 +7,5 @@ from bdata.bdata import bscaler
 from bdata import mudpy
 
 __all__ = ['bdata','mudpy']
-__version__ = '4.0.0'
+__version__ = '4.0.1'
 __author__ = 'Derek Fujimoto'
