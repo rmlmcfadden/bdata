@@ -5,6 +5,7 @@
 
 import bdata.mudpy as mp
 import numpy as np
+import pandas as pd
 import socket, os, time, sys
 import datetime
 import warnings
@@ -545,35 +546,37 @@ class bdata(object):
     # ======================================================================= #
     def _get_area_data(self,nbm=False):
         """Get histogram list based on area type. 
-        List pattern: [type1_hel+,type2_hel+,type1_hel-,type2_hel-]
+        List pattern: [type1_hel+,type1_hel-,type2_hel+,type2_hel-]
         where type1/2 = F/B or R/L in that order.
         """
         
+        hist = self.hist
+        
         if self.mode == '1n' or nbm:
-            data = [self.hist['NBMF+'].data,\
-                    self.hist['NBMF-'].data,\
-                    self.hist['NBMB+'].data,\
-                    self.hist['NBMB-'].data]
+            data = [hist['NBMF+'].data,\
+                    hist['NBMF-'].data,\
+                    hist['NBMB+'].data,\
+                    hist['NBMB-'].data]
             
         elif self.area == 'BNMR':
-            data = [self.hist['F+'].data,\
-                    self.hist['F-'].data,\
-                    self.hist['B+'].data,\
-                    self.hist['B-'].data]
+            data = [hist['F+'].data,\
+                    hist['F-'].data,\
+                    hist['B+'].data,\
+                    hist['B-'].data]
         
         elif self.area == 'BNQR':
-            data = [self.hist['R+'].data,\
-                    self.hist['R-'].data,\
-                    self.hist['L+'].data,\
-                    self.hist['L-'].data]
+            data = [hist['R+'].data,\
+                    hist['R-'].data,\
+                    hist['L+'].data,\
+                    hist['L-'].data]
         else:
             data = []
         
         if self.mode == '2h':
-            data.extend([self.hist['AL1+'].data,self.hist['AL1-'].data,
-                        self.hist['AL0+'].data,self.hist['AL0-'].data,
-                        self.hist['AL3+'].data,self.hist['AL3-'].data,
-                        self.hist['AL2+'].data,self.hist['AL2-'].data])
+            data.extend([hist['AL1+'].data,hist['AL1-'].data,
+                         hist['AL0+'].data,hist['AL0-'].data,
+                         hist['AL3+'].data,hist['AL3-'].data,
+                         hist['AL2+'].data,hist['AL2-'].data])
         
         # copy
         return [np.copy(d) for d in data]
@@ -584,7 +587,7 @@ class bdata(object):
             Find the asymmetry of each helicity. 
         """
         
-        # get data 1+ 2+ 1- 2-
+        # get data [1+ 1- 2+ 2-] ---> [1+ 2+ 1- 2-]
         d0 = d[0]; d1 = d[2]; d2 = d[1]; d3 = d[3]
 
         # pre-calcs
@@ -610,8 +613,8 @@ class bdata(object):
             asym_hel_err[i][np.isnan(asym_hel_err[i])] = 0.
         
         # exit
-        return [[asym_hel[1],asym_hel_err[1]],  # something wrong with file?
-                [asym_hel[0],asym_hel_err[0]]]  # I shouldn't have to switch
+        return [[asym_hel[0],asym_hel_err[0]],  
+                [asym_hel[1],asym_hel_err[1]]]  
                 
     # ======================================================================= #
     def _get_asym_comb(self,d):
@@ -619,7 +622,7 @@ class bdata(object):
         Find the combined asymmetry for slr runs. Elegant 4-counter method.
         """
         
-        # get data
+        # get data [1+ 1- 2+ 2-] ---> [1+ 2+ 1- 2-]
         d0 = d[0]; d1 = d[2]; d2 = d[1]; d3 = d[3]
         
         # pre-calcs
@@ -711,18 +714,17 @@ class bdata(object):
             Sum counts in each frequency bin over 1f scans. 
         """
         
+        # make data frame
+        df = pd.DataFrame({i:d[i] for i in range(len(d))})
+        df['x'] = freq
+        
         # combine scans: values with same frequency 
-        unique_freq = np.unique(freq)
+        df = df.groupby('x').sum()
+        x = df.index.values
+        d = df.values.T
         
-        sum_scans = [[] for i in range(len(d))]
+        return (x,d)
         
-        for f in unique_freq: 
-            tag = freq==f
-            for i in range(len(d)):
-                sum_scans[i].append(np.sum(d[i][tag]))
-            
-        return (np.array(unique_freq),np.array(sum_scans))
-
     # ======================================================================= #
     def _get_2e_asym(self):
         """
@@ -733,26 +735,25 @@ class bdata(object):
         # get needed PPG parameters for splitting 1D histos into 2D histos
         try:        
             # get frequency vector
-            freq = np.arange(self.ppg['freq_start'].mean,\
-                             self.ppg['freq_stop'].mean+\
-                                    self.ppg['freq_incr'].mean,\
-                             self.ppg['freq_incr'].mean)
+            freq = np.arange(self.get_ppg('freq_start'),\
+                        self.get_ppg('freq_stop')+self.get_ppg('freq_incr'),\
+                        self.get_ppg('freq_incr'))
                              
             # number of dwelltimes per frequency bin 
-            ndwell = 2*int(self.ppg['ndwell_per_f'].mean)-1
+            ndwell = 2*int(self.get_ppg('ndwell_per_f'))-1
             
             # number of RF on delays for the start bin. 
-            start_bin = int(self.ppg['rf_on_delay'].mean)
+            start_bin = int(self.get_ppg('rf_on_delay'))
             
             # get bin centers in ms
-            time = self.ppg['rf_on_ms'].mean*(np.arange(ndwell)+0.5-ndwell/2.)
+            time = self.get_ppg('rf_on_ms')*(np.arange(ndwell)+0.5-ndwell/2.)
             
             # get the time and index of the middle time 
             mid_time_i = int(np.floor(ndwell/2.))
             mid_time = time[mid_time_i]
         
             # beam off time after pulse in ms
-            beam_off = int(self.ppg['beam_off_ms'].mean)
+            beam_off = int(self.get_ppg('beam_off_ms'))
         
         except KeyError:
             raise RuntimeError("Not all dictionary variables read out to "+\
@@ -764,7 +765,7 @@ class bdata(object):
         out['time'] = time
             
         # get data
-        data = np.array(self._get_area_data()) # [[fp], [bfm], [bp], [bm]]
+        data = np.array(self._get_area_data()) # [[fp], [fm], [bp], [bm]]
         
         # discared initial bad bins, and beam-off trailing bins
         data = data[:,start_bin:len(freq)*ndwell+start_bin]
@@ -1123,19 +1124,19 @@ class bdata(object):
         # Option reduction
         option = option.lower()
         if option == ""                                     : pass
-        elif option in ['+','up','u','p','pos','positive']  : option = 'positive'
-        elif option in ['-','down','d','n','neg','negative']: option = 'negative'
-        elif option in ["c","com","combined"]               : option = "combined"
-        elif option in ["h","hel","helicity"]               : option = 'helicity'
-        elif option in ["r","raw"]                          : option = 'raw'
-        elif option in ['adif','ad','adiff']                : option = 'alpha_diffusion'
-        elif option in ['atag','at']                        : option = 'alpha_tagged'
-        elif option in ['sl_c','slope_combined','slc','sc'] : option = 'slope_combined'
-        elif option in ['dif_c','difference_combined','dc'] : option = 'difference_combined'
-        elif option in ['raw_c','raw_combined','rc']        : option = 'raw_combined'
-        elif option in ['sl_h','slope_helicity','slh','sh'] : option = 'slope_helicity'
-        elif option in ['dif_h','difference_helicity','dh'] : option = 'difference_helicity'
-        elif option in ['raw_h','raw_helicity','rh']        : option = 'raw_helicity'
+        elif option in ('+','up','u','p','pos','positive')  : option = 'positive'
+        elif option in ('-','down','d','n','neg','negative'): option = 'negative'
+        elif option in ("c","com","combined")               : option = "combined"
+        elif option in ("h","hel","helicity")               : option = 'helicity'
+        elif option in ("r","raw")                          : option = 'raw'
+        elif option in ('adif','ad','adiff')                : option = 'alpha_diffusion'
+        elif option in ('atag','at')                        : option = 'alpha_tagged'
+        elif option in ('sl_c','slope_combined','slc','sc') : option = 'slope_combined'
+        elif option in ('dif_c','difference_combined','dc') : option = 'difference_combined'
+        elif option in ('raw_c','raw_combined','rc')        : option = 'raw_combined'
+        elif option in ('sl_h','slope_helicity','slh','sh') : option = 'slope_helicity'
+        elif option in ('dif_h','difference_helicity','dh') : option = 'difference_helicity'
+        elif option in ('raw_h','raw_helicity','rh')        : option = 'raw_helicity'
         else:
             raise RuntimeError("Option not recognized.")
         
@@ -1170,11 +1171,8 @@ class bdata(object):
         # SLR -----------------------------------------------------------------
         if self.mode in ("20",'2h'):
             
-            # calculate background
-            n_prebeam = int(self.ppg['prebeam'].mean)
-            
-            # remove negative count values,
-            # delete prebeam entries
+            # remove negative count values, delete prebeam entries
+            n_prebeam = int(self.get_ppg('prebeam'))
             for i in range(len(d)):
                 d[i][d[i]<0] = 0.
                 d[i] = np.delete(d[i],np.arange(n_prebeam))
@@ -1190,7 +1188,8 @@ class bdata(object):
                 h = np.array(self._get_asym_hel(d))
                 
             # rebin time
-            time = (np.arange(len(d[0]))+0.5)*self.ppg['dwelltime'].mean/1000
+            time = (np.arange(len(d[0]))+0.5)*self.get_ppg('dwelltime')/1000
+            
             if rebin > 1:
                 len_t = len(time)
                 new_time = (np.average(time[i:i+rebin-1]) for i in np.arange(0,len_t,rebin))
@@ -1401,15 +1400,20 @@ class bdata(object):
             return beam-bias15-platform # keV
 
     # ======================================================================= #
+    def get_ppg(self,name):
+        """Get ppg parameter mean value"""
+        return self.ppg[name].mean
+        
+    # ======================================================================= #
     def get_pulse_s(self):
         """Get pulse duration in seconds, for pulsed measurements."""
         
         try:
-            dwelltime = self.ppg.dwelltime.mean
-            beam_on = self.ppg.beam_on.mean
+            dwelltime = self.get_ppg('dwelltime')
+            beam_on = self.get_ppg('beam_on')
         except AttributeError:
             raise AttributeError("Missing logged ppg parameter: dwelltime "+\
-                    "or beam_on")
+                    "or beam_on") from None
         return dwelltime*beam_on/1000.
     
 # =========================================================================== #
