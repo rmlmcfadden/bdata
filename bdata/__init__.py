@@ -9,5 +9,5 @@ from bdata.bjoined import bjoined
 from bdata import mudpy
 
 __all__ = ['bdata','mudpy','bjoined']
-__version__ = '4.0.1'
+__version__ = '4.1.0'
 __author__ = 'Derek Fujimoto'
