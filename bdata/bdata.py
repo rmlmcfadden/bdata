@@ -1258,16 +1258,11 @@ class bdata(object):
         elif self.mode in ('1f','1n','1w'):
             
             # get xaxis label and data key
-            if self.mode in ('1f',):
-                xlabel = 'Frequency'
+            if self.mode == '1f':
                 xlab = 'freq'
             elif self.mode == '1w':
-                xlabel = 'x parameter'
                 xlab = 'xpar'
             elif self.mode == '1n':
-                for xlabel in self.hist.keys():
-                    if 'cell' in xlabel.lower():    
-                        break
                 xlab = 'mV'
             
             # get bins to kill
@@ -1294,7 +1289,7 @@ class bdata(object):
                 d[i][bin_ranges] = 0.
             
             # get frequency
-            freq = self.hist[xlabel].data
+            freq = self.get_xhist()
             
             # mode switching
             if option =='raw':
@@ -1415,6 +1410,21 @@ class bdata(object):
             raise AttributeError("Missing logged ppg parameter: dwelltime "+\
                     "or beam_on") from None
         return dwelltime*beam_on/1000.
+    
+    # ======================================================================= #
+    def get_xhist(self):
+        """Get histogram data for x axis."""
+        if self.mode == '1f':
+            xlabel = 'Frequency'
+        elif self.mode == '1w':
+            xlabel = 'x parameter'
+        elif self.mode == '1n':
+            for xlabel in self.hist.keys():
+                if 'cell' in xlabel.lower():    
+                    break
+        
+        return self.hist[xlabel].data
+        
     
 # =========================================================================== #
 # DATA CONTAINERS
