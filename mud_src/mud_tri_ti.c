@@ -112,8 +112,8 @@ MUD_SEC_TRI_TI_RUN_DESC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_TRI_TI_RUN_DESC* pM
 	    size += sizeof( MUD_STR_LEN_TYPE ) + _strlen( pMUD->comment3 );
 	    return( size );
 	case MUD_SHOW:
-	    printf( "  MUD_SEC_TRI_TI_RUN_DESC: expt:[%ld], run:[%ld]\n",
-			pMUD->exptNumber, pMUD->runNumber );
+	    printf( "  MUD_SEC_TRI_TI_RUN_DESC: expt:[%lu], run:[%lu]\n",
+                    (unsigned long)(pMUD->exptNumber), (unsigned long)(pMUD->runNumber) );
 	    bintime = pMUD->timeBegin;
 	    strncpy( tempStr1, ctime( &bintime ), sizeof(tempStr1) );
 	    tempStr1[strlen(tempStr1)-1] = '\0';
@@ -122,7 +122,7 @@ MUD_SEC_TRI_TI_RUN_DESC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_TRI_TI_RUN_DESC* pM
 	    tempStr2[strlen(tempStr2)-1] = '\0';
 	    printf( "    timeBegin:[%s]\n", tempStr1 );
 	    printf( "    timeEnd:[%s]\n", tempStr2 );
-	    printf( "    elapsedSec:[%ld]\n", pMUD->elapsedSec );
+	    printf( "    elapsedSec:[%lu]\n", (unsigned long)(pMUD->elapsedSec) );
 	    if( pMUD->title ) printf( "    title:\"%s\"\n", pMUD->title );
 	    if( pMUD->lab ) printf( "    lab:\"%s\"\n", pMUD->lab );
 	    if( pMUD->area ) printf( "    area:\"%s\"\n", pMUD->area );
@@ -145,8 +145,8 @@ MUD_SEC_TRI_TI_RUN_DESC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_TRI_TI_RUN_DESC* pM
 		printf( "    comment3:\"%s\"\n", pMUD->comment3 );
 	    break;
 	case MUD_HEADS:
-	    printf( "Run number:     %ld\n", pMUD->runNumber );
-	    printf( "  exper num:    %ld\n", pMUD->exptNumber );
+            printf( "Run number:     %lu\n", (unsigned long)(pMUD->runNumber) );
+            printf( "  exper num:    %lu\n", (unsigned long)(pMUD->exptNumber) );
 	    if( pMUD->experimenter ) 
 	        printf( "  operator:     %s\n", pMUD->experimenter );
             if( pMUD->method ) 
@@ -159,9 +159,9 @@ MUD_SEC_TRI_TI_RUN_DESC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_TRI_TI_RUN_DESC* pM
 	    tempStr2[strlen(tempStr2)-1] = '\0';
 	    printf( "  began:        %s\n  ended:        %s\n",
                      tempStr1, tempStr2 );
-            printf( "  elapsed:      %ld:%.2d:%.2d   (%ld seconds)\n",
-                     (pMUD->elapsedSec/3600), ((pMUD->elapsedSec%3600)/60), (pMUD->elapsedSec%60), 
-                      pMUD->elapsedSec );
+            printf( "  elapsed:      %ld:%.2d:%.2d   (%lu seconds)\n",
+                    (long)(pMUD->elapsedSec/3600), ((pMUD->elapsedSec%3600)/60), (pMUD->elapsedSec%60), 
+                    (unsigned long)(pMUD->elapsedSec) );
 	    if( pMUD->title )  printf( "  title:        %s\n", pMUD->title );
 	    if( pMUD->sample ) printf( "  sample:       %s\n", pMUD->sample );
 	    if( pMUD->orient ) printf( "  orient:       %s\n", pMUD->orient );

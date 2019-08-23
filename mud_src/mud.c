@@ -27,7 +27,6 @@
  */
 
 
-#include <stdio.h>
 #include "mud.h"
 
 #ifdef NO_STDARG
@@ -427,7 +426,7 @@ MUD_read( FILE* fin, MUD_IO_OPT io_opt )
     if( fseek( fin, pos, 0 ) == EOF ) return( NULL );
 
 #ifdef DEBUG
-    printf( "MUD_read: got %d\n", size );
+    printf( "MUD_read: got %lu\n", (unsigned long)(size) );
     printf( "          pos = %d\n", pos );
     printf( "          reading the section ...\n" );
 #endif /* DEBUG */
@@ -975,8 +974,9 @@ MUD_CORE_proc( MUD_OPT op, BUF* pBuf, MUD_SEC* pMUD )
 #endif /* DEBUG */            
 	    return( size );
 	case MUD_SHOW:
-	    printf( "  CORE: size=[%ld], secID=[0x%08lX], instanceID=[0x%08lX]\n",
-		    pMUD->core.size, pMUD->core.secID, pMUD->core.instanceID );
+	    printf( "  CORE: size=[%lu], secID=[0x%08lX], instanceID=[0x%08lX]\n",
+		    (unsigned long)(pMUD->core.size), (unsigned long)(pMUD->core.secID), 
+                    (unsigned long)(pMUD->core.instanceID) );
 	    break;
 	case MUD_HEADS:
 	    break;
@@ -1014,8 +1014,9 @@ MUD_INDEX_proc( MUD_OPT op, BUF* pBuf, MUD_INDEX* pMUD )
 	    size = 3*sizeof(UINT32);
 	    return( size );
 	case MUD_SHOW:
-	    printf( "  INDEX: offset=[%ld], secID=[0x%08lX], instanceID=[0x%08lX]\n",
-		    pMUD->offset, pMUD->secID, pMUD->instanceID );
+	    printf( "  INDEX: offset=[%lu], secID=[0x%08lX], instanceID=[0x%08lX]\n",
+		    (unsigned long)(pMUD->offset), (unsigned long)(pMUD->secID), 
+                    (unsigned long)(pMUD->instanceID) );
 	    break;
 	case MUD_HEADS:
 	    break;

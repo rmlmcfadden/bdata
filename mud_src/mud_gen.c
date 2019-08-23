@@ -47,7 +47,6 @@ MUD_SEC_GEN_RUN_DESC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GEN_RUN_DESC* pMUD )
     int size;
     char tempStr1[32];
     char tempStr2[32];
-    int  imin,isec;
     time_t bintime;
 
     switch( op )
@@ -121,16 +120,16 @@ MUD_SEC_GEN_RUN_DESC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GEN_RUN_DESC* pMUD )
 	    return( size );
 	case MUD_SHOW:
 	    printf( "  MUD_SEC_GEN_RUN_DESC: expt:[%ld], run:[%ld]\n",
-			pMUD->exptNumber, pMUD->runNumber );
+                    (long)(pMUD->exptNumber), (long)(pMUD->runNumber) );
 	    bintime = pMUD->timeBegin;
 	    strncpy( tempStr1, ctime( &bintime ), sizeof(tempStr1) );
 	    tempStr1[strlen(tempStr1)-1] = '\0';
 	    bintime = pMUD->timeEnd;
 	    strncpy( tempStr2, ctime( &bintime ), sizeof(tempStr2) );
 	    tempStr2[strlen(tempStr2)-1] = '\0';
-	    printf( "    timeBegin:[%s] [%ld]\n", tempStr1, pMUD->timeBegin );
-	    printf( "    timeEnd:[%s] [%ld]\n", tempStr2, pMUD->timeEnd );
-	    printf( "    elapsedSec:[%ld]\n", pMUD->elapsedSec );
+	    printf( "    timeBegin:[%s] [%lu]\n", tempStr1, (unsigned long)(pMUD->timeBegin) );
+	    printf( "    timeEnd:[%s] [%lu]\n", tempStr2, (unsigned long)(pMUD->timeEnd) );
+	    printf( "    elapsedSec:[%ld]\n", (long)(pMUD->elapsedSec) );
 	    if( pMUD->title ) printf( "    title:\"%s\"\n", pMUD->title );
 	    if( pMUD->lab ) printf( "    lab:\"%s\"\n", pMUD->lab );
 	    if( pMUD->area ) printf( "    area:\"%s\"\n", pMUD->area );
@@ -149,8 +148,8 @@ MUD_SEC_GEN_RUN_DESC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GEN_RUN_DESC* pMUD )
 		printf( "    field:\"%s\"\n", pMUD->field );
 	    break;
 	case MUD_HEADS:
-	    printf( "Run number:    %ld\n", pMUD->runNumber );
-	    printf( "  exper num:   %ld\n", pMUD->exptNumber );
+            printf( "Run number:    %ld\n", (long)(pMUD->runNumber) );
+            printf( "  exper num:   %ld\n", (long)(pMUD->exptNumber) );
 	    if( pMUD->experimenter ) 
 	        printf( "  operator:    %s\n", pMUD->experimenter );
 	    if( pMUD->method ) printf( "  method:      %s\n", pMUD->method );
@@ -162,9 +161,9 @@ MUD_SEC_GEN_RUN_DESC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GEN_RUN_DESC* pMUD )
 	    tempStr2[strlen(tempStr2)-1] = '\0';
 	    printf( "  began:       %s\n  ended:       %s\n",
                     tempStr1, tempStr2 );
-            printf( "  elapsed:     %ld:%.2d:%.2d   (%ld seconds)\n",
-                     (pMUD->elapsedSec/3600), ((pMUD->elapsedSec%3600)/60), (pMUD->elapsedSec%60),
-                     pMUD->elapsedSec );
+            printf( "  elapsed:     %ld:%.2d:%.2d   (%lu seconds)\n",
+                    (long)(pMUD->elapsedSec/3600), ((pMUD->elapsedSec%3600)/60), (pMUD->elapsedSec%60),
+                    (unsigned long)(pMUD->elapsedSec) );
             if( pMUD->title )  
             {
                 if( strlen( pMUD->title ) > 63 && strlen( pMUD->title ) < 80 )
@@ -240,28 +239,28 @@ MUD_SEC_GEN_HIST_HDR_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GEN_HIST_HDR* pMUD )
 	    size += sizeof( MUD_STR_LEN_TYPE ) + _strlen( pMUD->title );
 	    return( size );
 	case MUD_SHOW:
-	    printf( "  MUD_SEC_GEN_HIST_HDR: histType:[0x%08lX]\n", pMUD->histType );
-	    printf( "    nBytes:[%ld], nBins:[%ld], nEvents:[%ld]\n", 
-			pMUD->nBytes, pMUD->nBins, pMUD->nEvents );
+            printf( "  MUD_SEC_GEN_HIST_HDR: histType:[0x%08lX]\n", (unsigned long)(pMUD->histType) );
+	    printf( "    nBytes:[%ld], nBins:[%ld], nEvents:[%lu]\n", 
+                    (long)(pMUD->nBytes), (long)(pMUD->nBins), (unsigned long)(pMUD->nEvents) );
 	    printf( "    bytesPerBin:[%ld], fsPerBin:[%ld], t0_ps:[%ld], t0_bin:[%ld]\n", 
-			pMUD->bytesPerBin, pMUD->fsPerBin, pMUD->t0_ps, pMUD->t0_bin );
+                    (long)(pMUD->bytesPerBin), (long)(pMUD->fsPerBin), (long)(pMUD->t0_ps), (long)(pMUD->t0_bin) );
 	    printf( "    goodBin1:[%ld], goodBin2:[%ld], bkgd1:[%ld], bkgd2:[%ld]\n", 
-			pMUD->goodBin1, pMUD->goodBin2, pMUD->bkgd1, pMUD->bkgd2 );
+                    (long)(pMUD->goodBin1), (long)(pMUD->goodBin2), (long)(pMUD->bkgd1), (long)(pMUD->bkgd2) );
 	    if( pMUD->title ) printf( "    title:\"%s\"\n", pMUD->title );
 	    break;
 	case MUD_HEADS:
 	    if( pMUD->title ) printf( "Hist title: %s\n", pMUD->title );
-	    printf( "  nBins: %ld,  nEvents: %ld,  ",
-			pMUD->nBins, pMUD->nEvents );
+	    printf( "  nBins: %ld,  nEvents: %lu,  ",
+                    (long)(pMUD->nBins), (unsigned long)(pMUD->nEvents) );
 	    fsBin = pMUD->fsPerBin;
 	    if( fsBin < 16 )
 	    {
 		nsBin = 0.078125 * pow( (double)2.0, (double)fsBin );
-		printf( "ns_per_Bin: %.lf\n", nsBin );
+		printf( "ns_per_Bin: %.6lf\n", nsBin );
 	    }
 	    else if( fsBin < 29 )
 	    {
-		nsBin = 0.048828125 * pow( (double)2.0, (double)fsBin - 16 );
+                nsBin = 0.048828125 * pow( (double)2.0, (double)(fsBin - 16) );
 		printf( "ns_per_Bin: %.9lf\n", nsBin );
 	    }
 	    else
@@ -271,9 +270,9 @@ MUD_SEC_GEN_HIST_HDR_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GEN_HIST_HDR* pMUD )
 	    }
 
 	    printf( "  t0_ps: %ld,  t0_bin: %ld\n", 
-			pMUD->t0_ps, pMUD->t0_bin );
+                    (long)(pMUD->t0_ps), (long)(pMUD->t0_bin) );
 	    printf( "  goodBin1: %ld,  goodBin2: %ld,  bkgd1: %ld,  bkgd2: %ld\n", 
-			pMUD->goodBin1, pMUD->goodBin2, pMUD->bkgd1, pMUD->bkgd2 );
+                    (long)(pMUD->goodBin1), (long)(pMUD->goodBin2), (long)(pMUD->bkgd1), (long)(pMUD->bkgd2) );
 	    break;
     }
     return( 1 );
@@ -304,7 +303,7 @@ MUD_SEC_GEN_HIST_DAT_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GEN_HIST_DAT* pMUD )
 	    size += pMUD->nBytes;
 	    return( size );
 	case MUD_SHOW:
-	    printf( "  MUD_SEC_GEN_HIST_DAT: nBytes:[%ld]\n", pMUD->nBytes );
+          printf( "  MUD_SEC_GEN_HIST_DAT: nBytes:[%ld]\n", (long)(pMUD->nBytes) );
 	    break;
 	case MUD_HEADS:
 	    break;
@@ -338,15 +337,16 @@ MUD_SEC_GEN_SCALER_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GEN_SCALER* pMUD )
 	    size += sizeof( MUD_STR_LEN_TYPE ) + _strlen( pMUD->label );
 	    return( size );
 	case MUD_SHOW:
-	    printf( "  MUD_SEC_GEN_SCALER: counts[1]:[%ld], counts[0]:[%ld]\n",
-			pMUD->counts[1], pMUD->counts[0] );
+	    printf( "  MUD_SEC_GEN_SCALER: counts[1]:[%lu], counts[0]:[%lu]\n",
+                    (unsigned long)(pMUD->counts[1]), (unsigned long)(pMUD->counts[0]) );
 	    if( pMUD->label ) printf( "    label:\"%s\"\n", pMUD->label );
 	    break;
 	case MUD_HEADS:
 	    printf( "  Scaler " );
 	    if( pMUD->label ) printf( "%8s", pMUD->label );
 	    else  printf( "???     " );
-	    printf( "  total: %11ld,  recent: %ld\n", pMUD->counts[0], pMUD->counts[1] );
+	    printf( "  total: %11lu,  recent: %lu\n", 
+                    (unsigned long)(pMUD->counts[0]), (unsigned long)(pMUD->counts[1]) );
 	    break;
     }
     return( 1 );
@@ -520,8 +520,8 @@ MUD_SEC_GEN_ARRAY_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GEN_ARRAY* pMUD )
 	case MUD_SHOW:
 	    printf( "  MUD_SEC_GEN_ARRAY: \n" );
 	    printf( "    num:[%ld], elemSize:[%ld], type:[%ld], hasTime:[%ld], nBytes:[%ld]\n", 
-                    pMUD->num, pMUD->elemSize, pMUD->type, pMUD->hasTime,
-                    pMUD->nBytes );
+                    (long)(pMUD->num), (long)(pMUD->elemSize), (long)(pMUD->type), (long)(pMUD->hasTime),
+                    (long)(pMUD->nBytes) );
 	    break;
 	case MUD_HEADS:
 	    break;
@@ -551,7 +551,7 @@ MUD_SEC_GEN_HIST_dopack( int num, int inBinSize, void* inHist, int outBinSize, v
     int outLen = 0;
     MUD_VAR_BIN_LEN_TYPE num_temp;
     int bin, inLoc, outLoc;
-    int inLen_temp, outLen_temp;
+    int outLen_temp;
     MUD_VAR_BIN_SIZ_TYPE outBinSize_now, outBinSize_next;
     MUD_VAR_BIN_SIZ_TYPE inBinSize_temp;
     UINT8  c, *pc;

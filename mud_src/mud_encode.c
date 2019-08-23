@@ -21,8 +21,6 @@
  *  license (unrestricted use).
  */
 
-#include <stdio.h>
-
 #include "mud.h"
 
 
@@ -214,7 +212,6 @@ bencode_float( char* buf, float* fp )
   struct vax_single vs;
   struct sgl_limits *lim;
   int i;
-  UINT16 sa[2], sb[2];
 #endif /* !VMS */
 
 #ifdef VMS
@@ -375,7 +372,6 @@ bencode_double( char* buf, double* dp )
   struct vax_double vd;
   register struct dbl_limits *lim;
   int i;
-  UINT16 sa[4], sb[4];
 #endif /* !VMS */
 
 #ifdef VMS
@@ -419,11 +415,10 @@ void
 bdecode_double( char* buf, double* dp )
 {
 #ifndef VMS
-  struct ieee_double id, *idp;
+  struct ieee_double *idp;
   struct vax_double vd;
   register struct dbl_limits *lim;
   int i;
-  UINT16 sa[4], sb[4];
 #endif /* !VMS */
 
 #ifdef VMS

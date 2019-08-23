@@ -29,8 +29,6 @@
 int
 MUD_SEC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC* pMUD )
 {
-    int size;
-
     switch( op )
     {
 	case MUD_FREE:
@@ -54,8 +52,6 @@ MUD_SEC_proc( MUD_OPT op, BUF* pBuf, MUD_SEC* pMUD )
 int
 MUD_SEC_EOF_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_EOF* pMUD )
 {
-    int size;
-
     switch( op )
     {
 	case MUD_FREE:
@@ -97,8 +93,8 @@ MUD_SEC_FIXED_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_FIXED* pMUD )
 	    size = 2*sizeof( UINT32 );
 	    return( size );
 	case MUD_SHOW:
-	    printf( "  MUD_SEC_FIXED: fileSize=[%ld], formatID=[0x%08lX]\n",
-		    pMUD->fileSize, pMUD->formatID );
+	    printf( "  MUD_SEC_FIXED: fileSize=[%lu], formatID=[0x%08lX]\n",
+		    (unsigned long)(pMUD->fileSize), (unsigned long)(pMUD->formatID) );
 	    break;
 	case MUD_HEADS:
 	    break;
@@ -148,7 +144,7 @@ MUD_SEC_GRP_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_GRP* pMUD )
 	    return( size );
 	case MUD_SHOW:
 	    printf( "  MUD_SEC_GRP: num=[%ld], memSize=%ld\n", 
-		    pMUD->num, pMUD->memSize );
+		    (long int)(pMUD->num), (long int)(pMUD->memSize) );
 	    for( pMUD_index = pMUD->pMemIndex;
 		 pMUD_index != NULL;
 		 pMUD_index = pMUD_index->pNext )
@@ -206,8 +202,9 @@ MUD_SEC_CMT_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_CMT* pMUD )
 	    return( size );
 	case MUD_SHOW:
 	    printf( "  MUD_SEC_CMT: \n" );
-	    printf( "    number:[%ld],  prevReply:[%ld],  nextReply:[%ld]\n", 
-			pMUD->ID, pMUD->prevReplyID, pMUD->nextReplyID );
+	    printf( "    number:[%lu],  prevReply:[%lu],  nextReply:[%lu]\n", 
+                    (unsigned long)(pMUD->ID), (unsigned long)(pMUD->prevReplyID),
+                    (unsigned long)(pMUD->nextReplyID) );
 	    bintime = pMUD->time;
 	    strncpy( tempStr1, ctime( &bintime ), sizeof(tempStr1) );
 	    tempStr1[strlen(tempStr1)-1] = '\0';
@@ -217,11 +214,11 @@ MUD_SEC_CMT_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_CMT* pMUD )
 	    if( pMUD->comment ) printf( "    comment:\"%s\"\n", pMUD->comment );
 	    break;
 	case MUD_HEADS:
-            printf( "Comment number %ld.     ", pMUD->ID );
+            printf( "Comment number %lu.     ", (unsigned long)(pMUD->ID) );
             if( pMUD->prevReplyID > 0 )
-              printf("  Re: #%ld.    ", pMUD->prevReplyID );
+              printf("  Re: #%lu.    ", (unsigned long)(pMUD->prevReplyID) );
             if( pMUD->nextReplyID > 0 )
-              printf("  Next: #%ld.", pMUD->nextReplyID );
+              printf("  Next: #%lu.", (unsigned long)(pMUD->nextReplyID) );
             printf( "\n" );
 	    bintime = pMUD->time;
 	    strncpy( tempStr1, ctime( &bintime ), sizeof(tempStr1) );
@@ -238,8 +235,6 @@ MUD_SEC_CMT_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_CMT* pMUD )
 int
 MUD_SEC_UNKNOWN_proc( MUD_OPT op, BUF* pBuf, MUD_SEC_UNKNOWN* pMUD )
 {
-    int size;
-
     switch( op )
     {
 	case MUD_FREE:

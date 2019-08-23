@@ -24,6 +24,7 @@
  * 22-Apr-2003   DJA  add MUD_openReadWrite, MUD_openInOut
  * 25-Nov-2009   DJA  64-bit linux
  * 25-Jun-2017   DJA  Allow use in C++ (ROOT); shared lib.
+ * 14-Aug-2019   DJA  Use stdint.h, casts in printf
  */
 
 #ifdef __cplusplus
@@ -113,30 +114,48 @@ typedef char* caddr_t;
 #include <stddef.h>
 #include <sys/types.h>
 
+#ifndef NOSTDINT
+/* If there is no stdint.h, define NOSTDINT, as with "make NOSTDINT=1" */
+#include <stdint.h>
+#endif
+
 /*
  *  MUD types
  */
+
+#ifdef _STDINT_H
+typedef int			STATUS;
+typedef int8_t			INT8;
+typedef uint8_t			UINT8;
+typedef int16_t			INT16;
+typedef uint16_t 		UINT16;
+typedef int32_t			INT32;
+typedef uint32_t		UINT32;
+typedef float			REAL32;
+typedef double			REAL64;
+#else /*no stding.h */
 typedef int			STATUS;
 typedef char			INT8;
 typedef unsigned char		UINT8;
 typedef short			INT16;
 typedef unsigned short		UINT16;
-#if defined(__alpha)||defined(__linux)
+#if defined(__alpha)||defined(__linux)||defined(__MACH__)
 typedef int			INT32;
 typedef unsigned int		UINT32;
 #else
 typedef long			INT32;
 typedef unsigned long		UINT32;
-#endif /* __alpha || __linux */
+#endif /* __alpha || __linux || __MACH__*/
 typedef float			REAL32;
 typedef double			REAL64;
+#if (defined(__alpha)&&defined(vms)) || defined(__BORLANDC__) || defined(__TURBOC__)
+typedef char* 			caddr_t;
+#endif
+#endif /* _STDINT_HNOSTDINT */
 typedef UINT32                  TIME;
 #ifndef BOOL_DEFINED
 #define BOOL_DEFINED
 typedef UINT32                  BOOL;
-#endif
-#if (defined(__alpha)&&defined(vms)) || defined(__BORLANDC__) || defined(__TURBOC__)
-typedef char* 			caddr_t;
 #endif
 
 #ifndef FALSE
@@ -176,8 +195,9 @@ typedef char* 			caddr_t;
 #define _swap32( l )                    (((UINT32)l>>16)+((UINT32)l<<16))
 #define _swap16( s )                    (((UINT16)s>>8)+((UINT16)s<<8))
 #endif
+
 #define _free(objp)			if((void*)(objp)!=(void*)NULL){free((void*)(objp));objp=NULL;}
-#define  _roundUp( n, r )		( (r) * (int)( ((n)+(r)-1) / (r) ) )
+#define _roundUp( n, r )		( (r) * (int)( ((n)+(r)-1) / (r) ) )
 
 #define zalloc( n )			memset((void*)malloc(n),0,n)
 #if defined(vms) || (defined(mips)&&!defined(__sgi)) || (defined(__MSDOS__)&&defined(__STDC__))

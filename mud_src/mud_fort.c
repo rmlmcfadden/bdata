@@ -526,7 +526,7 @@ MANGLE(int,fMUD_fseek,FMUD_FSEEK,fmud_fseek)
     va_end( args );
 
 #ifdef DEBUG
-	printf( "fio = %X\n", *pFio );
+	printf( "fio = %p\n", *pFio );
 
 	for( i = 0; i < 9; i++ )
 	    printf( "arg[%d] = %X\n", i, argsArray[i] );
