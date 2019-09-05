@@ -16,24 +16,20 @@ class bjoined(bdata):
     """
     
     # ======================================================================= #
-    def __init__(self,data,combine_operation=np.sum):
+    def __init__(self,bdata_list):
         """
-            data:               list of bdata objects
-            combine_operation:  apply this function to raw histograms to combine 
-                                the data. 1f data (and similar) are first 
-                                combined by scan using np.sum, then by data set
-                                with the defined operation.
+            bdata_list:               list of bdata objects
         """
         
         # set data
-        self.data = data
+        self.data = bdata_list
         
         # set some calculation-required parameters
         self.set_common('mode')
         self.set_common('area')
         
         # combine the histograms
-        self.combine_hist(operation=combine_operation)
+        self.combine_hist()
     
     # ======================================================================= #
     def __getattr__(self,name):
@@ -119,7 +115,6 @@ class bjoined(bdata):
         """
             Get individual asymmetries first, then combine with weighted mean
             
-            operation: function applied to list of asymmetries
             asym_args: dict, passed to bdata.asym. 
         """
     
@@ -191,9 +186,12 @@ class bjoined(bdata):
             return out
         
     # ======================================================================= #
-    def combine_hist(self,operation):
+    def combine_hist(self):
         """
-            Apply numpy operation to base histograms and set result to top level
+            Apply np.sum to base histograms and set result to top level
+            
+            Scans are concatenated. 
+            SLR histograms are summed.
         """
         
         # these will get combined
@@ -226,31 +224,14 @@ class bjoined(bdata):
             # name doesn't exist
             if name not in self.hist[0].keys(): continue
             
-            # combine without scan combine
+            # combine scan-less runs (just add the histogrms)
             if not do_append:
-                hist_data = operation(list(self.hist[name].data),axis=0)
+                hist_data = np.sum(list(self.hist[name].data),axis=0)
             
-            # combine scans, then do operation
+            # combine runs with scans (append the data)
             else:                
-                
-                # combine scans
-                data = list(self.hist[name].data)
-                x = list(self.hist[xname].data)
-                for i in range(len(data)):
-                    df = pd.DataFrame({'data':data[i],'x':x[i]})
-                    df = df.groupby('x').sum()
-                    data[i] = df.values.T[0]
-                    x[i] = df.index.values
-                    
-                # apply operation by x index
-                data = np.concatenate(data)
-                x = np.concatenate(x)
-                
-                df = pd.DataFrame({'data':data,'x':x})
-                df = df.groupby('x').apply(operation)
-                hist_data = df['data'].values
-                x = df.index.values
-                
+                hist_data = np.concatenate(self.hist[name].data)
+                x = np.concatenate(self.hist[xname].data)                
                 
             # make the object
             hist_obj = bhist()
