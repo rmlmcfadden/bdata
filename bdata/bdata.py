@@ -997,7 +997,7 @@ class bdata(object):
     def asym(self,option="",omit="",rebin=1,hist_select='',nbm=False):
         """Calculate and return the asymmetry for various run types. 
            
-        usage: asym(option="",omit="",rebin=1,hist_select='')
+        usage: asym(option="",omit="",rebin=1,hist_select='',nbm=False)
             
         Inputs:
             option:         see below for details
@@ -1009,7 +1009,7 @@ class bdata(object):
                                 making the asymmetry calculation. Deliminate 
                                 with [,] or [;]. Histogram names cannot 
                                 therefore contain either of these characters.
-            nbm:            use neutral beams in calculations
+            nbm:            if True, use neutral beams in calculations
             
         Asymmetry calculation outline (with default detectors) ---------------
         
