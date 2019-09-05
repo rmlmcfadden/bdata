@@ -25,11 +25,11 @@ class bjoined(bdata):
         self.data = bdata_list
         
         # set some calculation-required parameters
-        self.set_common('mode')
-        self.set_common('area')
+        self._set_common('mode')
+        self._set_common('area')
         
         # combine the histograms
-        self.combine_hist()
+        self._combine_hist()
     
     # ======================================================================= #
     def __getattr__(self,name):
@@ -71,122 +71,7 @@ class bjoined(bdata):
             return self.__class__.__name__ + "()"
 
     # ======================================================================= #
-    def _get_area_data(self,nbm=False):
-        """Get histogram list based on area type. 
-        List pattern: [type1_hel+,type1_hel-,type2_hel+,type2_hel-]
-        where type1/2 = F/B or R/L in that order.
-        """
-        
-        # get histogram
-        hist = self.hist_joined
-        
-        # return data set
-        if self.mode == '1n' or nbm:
-            data = [hist['NBMF+'].data,\
-                    hist['NBMF-'].data,\
-                    hist['NBMB+'].data,\
-                    hist['NBMB-'].data]
-            
-        elif self.area == 'BNMR':
-            data = [hist['F+'].data,\
-                    hist['F-'].data,\
-                    hist['B+'].data,\
-                    hist['B-'].data]
-        
-        elif self.area == 'BNQR':
-            data = [hist['R+'].data,\
-                    hist['R-'].data,\
-                    hist['L+'].data,\
-                    hist['L-'].data]
-        else:
-            data = []
-        
-        if self.mode == '2h':
-            data.extend([hist['AL1+'].data,hist['AL1-'].data,
-                         hist['AL0+'].data,hist['AL0-'].data,
-                         hist['AL3+'].data,hist['AL3-'].data,
-                         hist['AL2+'].data,hist['AL2-'].data])
-        
-        # copy
-        return [np.copy(d) for d in data]
-    
-    # ======================================================================= #
-    def asym_mean(self,*asym_args,**asym_kwargs):
-        """
-            Get individual asymmetries first, then combine with weighted mean
-            
-            asym_args: dict, passed to bdata.asym. 
-        """
-    
-        # calcuate asymmetries
-        asym_list = [b.asym(*asym_args,**asym_kwargs) for b in self.data]
-        
-        # make into dataframes, get errors as weights
-        for i in range(len(asym_list)):
-            asym = asym_list[i]
-            
-            # tuple return: (x,a,da)
-            if type(asym) is np.ndarray:
-                asym_list[i] = pd.DataFrame({'x':asym[0],'a':asym[1],'da':asym[2]})
-            
-            # dict return: (x,p:(a,da),...)
-            elif type(asym) is bdict:
-                
-                # if entry is tuple, split into error and value
-                klist = list(asym.keys())
-                for k in klist:
-                    if type(asym[k]) is tuple:
-                        asym['d'+k] = asym[k][1]
-                        asym[k] = asym[k][0]
-                    else:
-                        asym['x'] = asym[k]
-                        del asym[k]
-                        xk = k
-                
-                # make into data frame
-                asym_list[i] = pd.DataFrame(asym)
-        
-        # combine the data frames and set index
-        df = pd.concat(asym_list).set_index('x')
-        
-        # slice into errors and values
-        values = pd.DataFrame(df[[c for c in df.columns if 'd' not in c]])
-        errors = pd.DataFrame(df[[c for c in df.columns if 'd' in c]])
-        
-        # rename error columns
-        errors.rename(columns={c:c.replace('d','') for c in errors.columns},
-                      inplace=True)
-        
-        # make errors weights
-        errors = 1/errors.apply(np.square)
-        
-        # weight the values
-        values = values * errors
-        
-        # group and sum 
-        values = values.groupby(level=0).sum()
-        errors = errors.groupby(level=0).sum()
-
-        # weighted mean
-        values = values / errors
-        errors = 1/errors.apply(np.sqrt)
-        
-        # make output type the same as the original 
-        if type(asym) is np.ndarray:
-            return np.array([values.index.values,
-                             values.values.T[0],
-                             errors.values.T[0]])
-        
-        elif type(asym) is bdict:
-            out = bdict()
-            out[xk] = values.index
-            for c in values.columns:
-                out[c] = (values[c].values,errors[c].values)
-        
-            return out
-        
-    # ======================================================================= #
-    def combine_hist(self):
+    def _combine_hist(self):
         """
             Apply np.sum to base histograms and set result to top level
             
@@ -265,7 +150,47 @@ class bjoined(bdata):
         self.hist_joined = hist_joined
     
     # ======================================================================= #
-    def get_ppg(self,name):
+    def _get_area_data(self,nbm=False):
+        """Get histogram list based on area type. 
+        List pattern: [type1_hel+,type1_hel-,type2_hel+,type2_hel-]
+        where type1/2 = F/B or R/L in that order.
+        """
+        
+        # get histogram
+        hist = self.hist_joined
+        
+        # return data set
+        if self.mode == '1n' or nbm:
+            data = [hist['NBMF+'].data,\
+                    hist['NBMF-'].data,\
+                    hist['NBMB+'].data,\
+                    hist['NBMB-'].data]
+            
+        elif self.area == 'BNMR':
+            data = [hist['F+'].data,\
+                    hist['F-'].data,\
+                    hist['B+'].data,\
+                    hist['B-'].data]
+        
+        elif self.area == 'BNQR':
+            data = [hist['R+'].data,\
+                    hist['R-'].data,\
+                    hist['L+'].data,\
+                    hist['L-'].data]
+        else:
+            data = []
+        
+        if self.mode == '2h':
+            data.extend([hist['AL1+'].data,hist['AL1-'].data,
+                         hist['AL0+'].data,hist['AL0-'].data,
+                         hist['AL3+'].data,hist['AL3-'].data,
+                         hist['AL2+'].data,hist['AL2-'].data])
+        
+        # copy
+        return [np.copy(d) for d in data]
+    
+    # ======================================================================= #
+    def _get_ppg(self,name):
         """Get ppg parameter mean value"""
         
         values = self.ppg[name].mean
@@ -275,7 +200,7 @@ class bjoined(bdata):
         return values[0]
     
     # ======================================================================= #
-    def get_xhist(self):
+    def _get_xhist(self):
         """Get histogram data for x axis."""
         if self.mode == '1f':
             xlabel = 'Frequency'
@@ -289,7 +214,7 @@ class bjoined(bdata):
         return self.hist_joined[xlabel].data
     
     # ======================================================================= #
-    def set_common(self,name):
+    def _set_common(self,name):
         """
             Set attribute which is shared among all joine data sets.
         """
@@ -301,6 +226,81 @@ class bjoined(bdata):
             raise RuntimeError('Expected attribute %s to be ' % name+\
                                 'common among data sets')
     
+    # ======================================================================= #
+    def asym_mean(self,*asym_args,**asym_kwargs):
+        """
+            Get individual asymmetries first, then combine with weighted mean
+            
+            asym_args: dict, passed to bdata.asym. 
+        """
+    
+        # calcuate asymmetries
+        asym_list = [b.asym(*asym_args,**asym_kwargs) for b in self.data]
+        
+        # make into dataframes, get errors as weights
+        for i in range(len(asym_list)):
+            asym = asym_list[i]
+            
+            # tuple return: (x,a,da)
+            if type(asym) is np.ndarray:
+                asym_list[i] = pd.DataFrame({'x':asym[0],'a':asym[1],'da':asym[2]})
+            
+            # dict return: (x,p:(a,da),...)
+            elif type(asym) is bdict:
+                
+                # if entry is tuple, split into error and value
+                klist = list(asym.keys())
+                for k in klist:
+                    if type(asym[k]) is tuple:
+                        asym['d'+k] = asym[k][1]
+                        asym[k] = asym[k][0]
+                    else:
+                        asym['x'] = asym[k]
+                        del asym[k]
+                        xk = k
+                
+                # make into data frame
+                asym_list[i] = pd.DataFrame(asym)
+        
+        # combine the data frames and set index
+        df = pd.concat(asym_list).set_index('x')
+        
+        # slice into errors and values
+        values = pd.DataFrame(df[[c for c in df.columns if 'd' not in c]])
+        errors = pd.DataFrame(df[[c for c in df.columns if 'd' in c]])
+        
+        # rename error columns
+        errors.rename(columns={c:c.replace('d','') for c in errors.columns},
+                      inplace=True)
+        
+        # make errors weights
+        errors = 1/errors.apply(np.square)
+        
+        # weight the values
+        values = values * errors
+        
+        # group and sum 
+        values = values.groupby(level=0).sum()
+        errors = errors.groupby(level=0).sum()
+
+        # weighted mean
+        values = values / errors
+        errors = 1/errors.apply(np.sqrt)
+        
+        # make output type the same as the original 
+        if type(asym) is np.ndarray:
+            return np.array([values.index.values,
+                             values.values.T[0],
+                             errors.values.T[0]])
+        
+        elif type(asym) is bdict:
+            out = bdict()
+            out[xk] = values.index
+            for c in values.columns:
+                out[c] = (values[c].values,errors[c].values)
+        
+            return out
+        
 # ========================================================================== #
 class blist(list):
     """

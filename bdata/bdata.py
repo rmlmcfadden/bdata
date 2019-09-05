@@ -591,6 +591,48 @@ class bdata(object):
             raise AttributeError(err) from None
                         
     # ======================================================================= #
+    def __repr__(self):
+        """
+            Nice printing of parameters.
+        """
+        
+        d = self.__dict__
+        dkeys = list(d.keys())
+        if dkeys:
+            items = []
+            dkeys.sort()
+            for key in dkeys:
+                if key[0] == '_': continue
+                
+                if not hasattr(d[key],'__iter__') or d[key].__class__ == bdict:
+                    items.append([key,d[key]])                
+                elif d[key].__class__ == str:
+                    items.append([key,d[key]])                
+                else:
+                    items.append([key,d[key].__class__])
+                
+                            
+            m = max(map(len,dkeys)) + 1
+            s = '\n'.join([k.rjust(m)+': '+repr(v) for k, v in sorted(items)])
+            return s
+        else:
+            return self.__class__.__name__ + "()"
+    
+    # ======================================================================= #
+    def __setattr__(self,name,value):
+        """Allow setting attributes only when initializing"""
+        
+        # this test allows attributes to be set in the __init__ method
+        if '_bdata__initialised' not in self.__dict__.keys(): 
+            return dict.__setattr__(self, name, value)
+            
+        # any normal attributes are handled normally
+        elif name in self.__dict__.keys():       
+            raise AttributeError('Object is readonly')
+        else:
+            dict.__setattr__(self, name, value)
+        
+    # ======================================================================= #
     def _get_area_data(self,nbm=False):
         """Get histogram list based on area type. 
         List pattern: [type1_hel+,type1_hel-,type2_hel+,type2_hel-]
@@ -782,25 +824,25 @@ class bdata(object):
         # get needed PPG parameters for splitting 1D histos into 2D histos
         try:        
             # get frequency vector
-            freq = np.arange(self.get_ppg('freq_start'),\
-                        self.get_ppg('freq_stop')+self.get_ppg('freq_incr'),\
-                        self.get_ppg('freq_incr'))
+            freq = np.arange(self._get_ppg('freq_start'),\
+                        self._get_ppg('freq_stop')+self._get_ppg('freq_incr'),\
+                        self._get_ppg('freq_incr'))
                              
             # number of dwelltimes per frequency bin 
-            ndwell = 2*int(self.get_ppg('ndwell_per_f'))-1
+            ndwell = 2*int(self._get_ppg('ndwell_per_f'))-1
             
             # number of RF on delays for the start bin. 
-            start_bin = int(self.get_ppg('rf_on_delay'))
+            start_bin = int(self._get_ppg('rf_on_delay'))
             
             # get bin centers in ms
-            time = self.get_ppg('rf_on_ms')*(np.arange(ndwell)+0.5-ndwell/2.)
+            time = self._get_ppg('rf_on_ms')*(np.arange(ndwell)+0.5-ndwell/2.)
             
             # get the time and index of the middle time 
             mid_time_i = int(np.floor(ndwell/2.))
             mid_time = time[mid_time_i]
         
             # beam off time after pulse in ms
-            beam_off = int(self.get_ppg('beam_off_ms'))
+            beam_off = int(self._get_ppg('beam_off_ms'))
         
         except KeyError:
             raise RuntimeError("Not all dictionary variables read out to "+\
@@ -912,6 +954,25 @@ class bdata(object):
         return out
 
     # ======================================================================= #
+    def _get_ppg(self,name):
+        """Get ppg parameter mean value"""
+        return self.ppg[name].mean
+    
+    # ======================================================================= #
+    def _get_xhist(self):
+        """Get histogram data for x axis."""
+        if self.mode == '1f':
+            xlabel = 'Frequency'
+        elif self.mode == '1w':
+            xlabel = 'x parameter'
+        elif self.mode == '1n':
+            for xlabel in self.hist.keys():
+                if 'cell' in xlabel.lower():    
+                    break
+        
+        return self.hist[xlabel].data
+    
+    # ======================================================================= #
     def _rebin(self,xdx,rebin):
         """
             Rebin array x with weights 1/dx**2 by factor rebin.
@@ -951,48 +1012,6 @@ class bdata(object):
                 dx_rebin.append(1./wsum**0.5)
         return np.array([x_rebin,dx_rebin])
             
-    # ======================================================================= #
-    def __repr__(self):
-        """
-            Nice printing of parameters.
-        """
-        
-        d = self.__dict__
-        dkeys = list(d.keys())
-        if dkeys:
-            items = []
-            dkeys.sort()
-            for key in dkeys:
-                if key[0] == '_': continue
-                
-                if not hasattr(d[key],'__iter__') or d[key].__class__ == bdict:
-                    items.append([key,d[key]])                
-                elif d[key].__class__ == str:
-                    items.append([key,d[key]])                
-                else:
-                    items.append([key,d[key].__class__])
-                
-                            
-            m = max(map(len,dkeys)) + 1
-            s = '\n'.join([k.rjust(m)+': '+repr(v) for k, v in sorted(items)])
-            return s
-        else:
-            return self.__class__.__name__ + "()"
-    
-    # ======================================================================= #
-    def __setattr__(self,name,value):
-        """Allow setting attributes only when initializing"""
-        
-        # this test allows attributes to be set in the __init__ method
-        if '_bdata__initialised' not in self.__dict__.keys(): 
-            return dict.__setattr__(self, name, value)
-            
-        # any normal attributes are handled normally
-        elif name in self.__dict__.keys():       
-            raise AttributeError('Object is readonly')
-        else:
-            dict.__setattr__(self, name, value)
-        
     # ======================================================================= #
     def asym(self,option="",omit="",rebin=1,hist_select='',nbm=False):
         """Calculate and return the asymmetry for various run types. 
@@ -1219,7 +1238,7 @@ class bdata(object):
         if self.mode in ("20",'2h'):
             
             # remove negative count values, delete prebeam entries
-            n_prebeam = int(self.get_ppg('prebeam'))
+            n_prebeam = int(self._get_ppg('prebeam'))
             for i in range(len(d)):
                 d[i][d[i]<0] = 0.
                 d[i] = np.delete(d[i],np.arange(n_prebeam))
@@ -1235,7 +1254,7 @@ class bdata(object):
                 h = np.array(self._get_asym_hel(d))
                 
             # rebin time
-            time = (np.arange(len(d[0]))+0.5)*self.get_ppg('dwelltime')/1000
+            time = (np.arange(len(d[0]))+0.5)*self._get_ppg('dwelltime')/1000
             
             if rebin > 1:
                 len_t = len(time)
@@ -1336,7 +1355,7 @@ class bdata(object):
                 d[i][bin_ranges] = 0.
             
             # get frequency
-            freq = self.get_xhist()
+            freq = self._get_xhist()
             
             # mode switching
             if option =='raw':
@@ -1440,38 +1459,18 @@ class bdata(object):
             return np.sqrt(np.sum(np.square((beam,bias15,platform)))) # keV
         else:
             return beam-bias15-platform # keV
-
-    # ======================================================================= #
-    def get_ppg(self,name):
-        """Get ppg parameter mean value"""
-        return self.ppg[name].mean
-        
+    
     # ======================================================================= #
     def get_pulse_s(self):
         """Get pulse duration in seconds, for pulsed measurements."""
         
         try:
-            dwelltime = self.get_ppg('dwelltime')
-            beam_on = self.get_ppg('beam_on')
+            dwelltime = self._get_ppg('dwelltime')
+            beam_on = self._get_ppg('beam_on')
         except AttributeError:
             raise AttributeError("Missing logged ppg parameter: dwelltime "+\
                     "or beam_on") from None
         return dwelltime*beam_on/1000.
-    
-    # ======================================================================= #
-    def get_xhist(self):
-        """Get histogram data for x axis."""
-        if self.mode == '1f':
-            xlabel = 'Frequency'
-        elif self.mode == '1w':
-            xlabel = 'x parameter'
-        elif self.mode == '1n':
-            for xlabel in self.hist.keys():
-                if 'cell' in xlabel.lower():    
-                    break
-        
-        return self.hist[xlabel].data
-        
     
 # =========================================================================== #
 # DATA CONTAINERS
