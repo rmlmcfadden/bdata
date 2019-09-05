@@ -21,7 +21,7 @@ ext = Extension("bdata.mudpy",
 
 setuptools.setup(
     name="bdata",
-    version="4.2.1",
+    version="4.2.2",
     author="Derek Fujimoto",
     author_email="fujimoto@phas.ubc.ca",
     description="BNMR/BNQR MUD file reader and asymmetry calculator",
@@ -34,7 +34,8 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['cython>=0.28','numpy>=1.14','requests>=2.22.0'],
+    install_requires=['cython>=0.28','numpy>=1.14','requests>=2.22.0',
+                      'pandas>=0.25'],
     ext_modules = cythonize([ext],include_path =[numpy.get_include()]),
 )
 

@@ -11,6 +11,6 @@ from bdata import mudpy
 import os
 
 __all__ = ['bdata','mudpy','bjoined']
-__version__ = '4.2.0'
+__version__ = '4.2.2'
 __author__ = 'Derek Fujimoto'
 _mud_data = os.path.join(os.environ['HOME'],'.bdata')
