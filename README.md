@@ -19,7 +19,7 @@ Beta-data package.
 * [`bjoined`](#bjoined) [object]: combine `bdata` objects
 * [`life`](#life) [`bdict` object]: dictionary of probe lifetimes. 
 
-# bdata
+# [bdata](https://github.com/dfujim/bdata/blob/master/bdata/bdata.py)
 Beta-data object. The bdata object is a data container with some basic analysis capabilities, designed to read out [MUD](http://musr.ca/mud/mud_fmt.html) data files and to provide user-friendly access to the file headers and provide asymmetry calculations. 
 
 ## Object Map
@@ -77,7 +77,7 @@ b = bdata(0,filename='filename.msr') # read file from local memory, run number u
             exact same output, with the last being much slower than 
             the others.
 
-# bjoined
+# [bjoined](https://github.com/dfujim/bdata/blob/master/bdata/bjoined.py)
 
 Object for combining bdata objects. Attribute access works through lists (see examples below). Histogram counts are summed over to emulate data taken within a single run. bdata asymmetry calculations operate on these summed histograms. Additional functionality for proper weighted  means of asymmetries of the invididual runs is also given.
 
