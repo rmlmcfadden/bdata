@@ -18,7 +18,7 @@ Beta-data package.
 * [`bdata`](#bdata) [object]: access BNMR MUD files
 * [`bjoined`](#bjoined) [object]: combine `bdata` objects
 * [`life`](#life) [`bdict` object]: dictionary of probe lifetimes. 
-* ['mudpy'](#mudpy) [C wrapper]: python access to MUD C functions
+* [`mudpy`](#mudpy) [C wrapper]: python access to MUD C functions
 
 # [bdata](https://github.com/dfujim/bdata/blob/master/bdata/bdata.py)
 Beta-data object. The bdata object is a data container with some basic analysis capabilities, designed to read out [MUD](http://musr.ca/mud/mud_fmt.html) data files and to provide user-friendly access to the file headers and provide asymmetry calculations. 
