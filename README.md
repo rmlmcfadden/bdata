@@ -152,8 +152,6 @@ Wrap the [mud_friendly.c](http://musr.ca/mud/mud_friendly.html) functions using 
 
 **Functions**: 
 
-In addtion to the [`bdata`](#bdata) functions, `bjoined` also provides:
-
 File IO
 
 |Cython Function (python-accessible) |C Function (wrapped) |
