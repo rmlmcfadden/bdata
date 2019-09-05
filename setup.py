@@ -21,7 +21,7 @@ ext = Extension("bdata.mudpy",
 
 setuptools.setup(
     name="bdata",
-    version="4.1.1",
+    version="4.2.0",
     author="Derek Fujimoto",
     author_email="fujimoto@phas.ubc.ca",
     package_data={'': ['mud_data/bnmr/','mud_data/bnqr/']},
