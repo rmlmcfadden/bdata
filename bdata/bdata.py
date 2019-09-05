@@ -6,12 +6,8 @@
 import bdata as bd
 import bdata.mudpy as mp
 import numpy as np
-import pandas as pd
-import socket, os, time, sys
+import os, time, glob
 import datetime, warnings, requests
-
-if sys.version_info[0] >= 3:
-    xrange = range
 
 __doc__="""
     Beta-data module. The bdata object is largely a data container, designed to 
@@ -392,16 +388,19 @@ class bdata(object):
             # look for data location
             if spect_dir == "bnmr":
                 
-                if self.evar_bnmr in os.environ:
-                    directory = os.environ[self.evar_bnmr]
-                else:
+                use_default_dir = not self.evar_bnmr in os.environ
+                if use_default_dir:
                     directory = os.path.join(bd._mud_data,spect_dir)
+                else:
+                    directory = os.environ[self.evar_bnmr]
                     
             elif spect_dir == "bnqr":
-                if self.evar_bnmr in os.environ:
-                    directory = os.environ[self.evar_bnqr]
-                else:
+                
+                use_default_dir = not self.evar_bnqr in os.environ
+                if use_default_dir:
                     directory = os.path.join(bd._mud_data,spect_dir)
+                else:
+                    directory = os.environ[self.evar_bnqr]
                     
             # finalize file name
             run = '%06d.msr' % run_number
@@ -431,7 +430,8 @@ class bdata(object):
                 
                 # let users know what happened
                 warnings.warn('Run %d (%d) not found '% (run_number,year)+\
-                              'locally. Fetched and saved from musr.ca.',
+                              'locally. Fetched and saved to %s '%bd._mud_data+\
+                              'from musr.ca.',
                               category=Warning)
                         
         # Open file ----------------------------------------------------------
