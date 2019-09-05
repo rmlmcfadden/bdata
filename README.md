@@ -100,7 +100,7 @@ In addtion to the [`bdata`](#bdata) functions, `bjoined` also provides:
 
 | Signature | Description |
 | -------- | -------- |
-| `asym_mean(self,*asym_args,**asym_kwargs)`     | Take weighted mean of individual asymmetries. Arguments are passed to `bdata.asym()`   |
+| `asym_mean(*asym_args,**asym_kwargs)`     | Take weighted mean of individual asymmetries. Arguments are passed to `bdata.asym()`   |
 
 
 ## Misc Features
@@ -135,9 +135,12 @@ In addtion to the [`bdata`](#bdata) functions, `bjoined` also provides:
    
 # [life](https://github.com/dfujim/bdata/blob/481ab42cdd39a86266431176a3853e354ea385aa/bdata/bdata.py#L1663-L1682)
 
-Access is given through the following example:
+Probe lifetimes. Example:
 
 ```python
 import bdata as bd
-bd.life.Li8
+lifeitme = bd.life.Li8
+error = bd.life.Li8_err
 ```
+
+Probes implemented are keyed by `Li8`, `Li9`, `Be11`, `F20`, `Mg31`, `Ac230`, `Ac234`.
