@@ -1,16 +1,16 @@
 # bdata
-Beta-data package. The bdata object is largely a data container, designed to read out [MUD](http://musr.ca/mud/mud_fmt.html) data files and to provide user-friendly access [BNMR/BNQR data](http://musr.ca/mud/runSel.html). 
+Beta-data package. The bdata object is a data container with some basic analysis capabilities, designed to read out [MUD](http://musr.ca/mud/mud_fmt.html) data files and to provide user-friendly access to the file headers and provide asymmetry calculations. 
 
 ## Setup 
 
 * Install using pip: `pip install bdata`
-* Export environment variables for finding data files (add to `.bashrc` or similar)
-   Set environment variables BNMR_ARCHIVE and BNQR_ARCHIVE such that one 
-   can access the msr files according to the following scheme:
+* OPTIONAL: Export the following environment variables to set the local data storage location (add to `.bashrc`):
+   Set `BNMR_ARCHIVE` and `BNQR_ARCHIVE` the following scheme points to the msr files:
    ```bash
-      ${BNMR_ARCHIVE}/year/filename
-      ${BNQR_ARCHIVE}/year/filename
+      ${BNMR_ARCHIVE}/year/filename.msr
+      ${BNQR_ARCHIVE}/year/filename.msr
    ```
+   By default `bdata` will look for data in `$HOME/.bdata/`. If the requested run is not found locally, an attempt to downlaod the file from [musr.ca](http://musr.ca/mud/runSel.html) will ensue. The file will be written to disk at the appropriate location. 
 
 ## Object Map
 
@@ -30,7 +30,7 @@ bd = bdata(0,filename='filename.msr') # read file from local memory, run number 
 
 | Signature | Description |
 | -------- | -------- |
-| `asym(option="",omit="",rebin=1,hist_select='')`     | Calculate asymmetry. See below for docstring.     |
+| `asym(option="",omit="",rebin=1,hist_select='',nbm=False)`     | Calculate asymmetry. See below for docstring.     |
 | `beam_kev()`     | Get beam implantation energy in keV     |
 | `get_pulse_s()`     | Get beam pulse duration in s     |
 
@@ -82,6 +82,7 @@ Inputs:
                         making the asymmetry calculation. Deliminate 
                         with [,] or [;]. Histogram names cannot 
                         therefore contain either of these characters.
+    nbm:            if True, use neutral beams in calculations
 
 Asymmetry calculation outline (with default detectors) ---------------
 
