@@ -3,12 +3,12 @@
 # Derek Fujimoto
 # July 2017
 
+import bdata as bd
 import bdata.mudpy as mp
 import numpy as np
 import pandas as pd
 import socket, os, time, sys
-import datetime
-import warnings
+import datetime, warnings, requests
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -37,11 +37,17 @@ __doc__="""
 
     Setup --------------------------------------------------------------------
     
-        Set environment variables BNMR_ARCHIVE and BNQR_ARCHIVE such that one 
-        can access the msr files according to the following scheme:
+        bdata will download the mssr data files from musr.ca automatically and 
+        save them under the install location by default. 
+        
+        To specify the data directory, set environment variables BNMR_ARCHIVE 
+        and BNQR_ARCHIVE such that one can access the msr files according to 
+        the following scheme:
         
         ${BNMR_ARCHIVE}/year/filename
         ${BNQR_ARCHIVE}/year/filename
+
+        This may be preferred if access to data prior to archival is desired. 
 
     Features -----------------------------------------------------------------
     
@@ -76,8 +82,13 @@ __doc__="""
                      the others.
     
     Derek Fujimoto
-    June 2019
+    September 2019
 """
+
+# new warning
+def warn(message, category, filename, lineno, file=None, line=None):
+    return ': '.join(('bdata.py',category.__name__,str(message)))+'\n'
+warnings.formatwarning = warn
 
 # =========================================================================== #
 class bdata(object):
@@ -378,16 +389,51 @@ class bdata(object):
             else:
                 raise ValueError("Run number out of range") 
                 
-            # look for environment variable
-            if spect_dir == "bnmr" and self.evar_bnmr in list(os.environ.keys()):
-                filename = os.environ[self.evar_bnmr]
+            # look for data location
+            if spect_dir == "bnmr":
                 
-            elif spect_dir == "bnqr" and self.evar_bnqr in list(os.environ.keys()):
-                filename = os.environ[self.evar_bnqr]
+                if self.evar_bnmr in os.environ:
+                    directory = os.environ[self.evar_bnmr]
+                else:
+                    directory = os.path.join(bd._mud_data,spect_dir)
+                    
+            elif spect_dir == "bnqr":
+                if self.evar_bnmr in os.environ:
+                    directory = os.environ[self.evar_bnqr]
+                else:
+                    directory = os.path.join(bd._mud_data,spect_dir)
                     
             # finalize file name
-            filename = os.path.join(filename,str(year),'%06d.msr' % run_number)
-        
+            run = '%06d.msr' % run_number
+            filename = os.path.join(directory,str(year),run)
+            
+            # if file does not exist, try to fetch from web
+            if not os.path.isfile(filename):
+                
+                # make directory 
+                os.makedirs(os.path.join(directory,str(year)),exist_ok=True)
+                
+                # make url
+                url = '/'.join(('http://musr.ca/mud/data',
+                                spect_dir.upper(),
+                                str(year),
+                                run))
+            
+                # get data
+                webfile = requests.get(url)
+                if not webfile.ok:
+                    raise RuntimeError('File %s not found. '%filename+\
+                                'Attempted download from musr.ca failed.')
+                
+                # write to file
+                with open(filename,'wb') as fid:
+                    fid.write(webfile.content)
+                
+                # let users know what happened
+                warnings.warn('Run %d (%d) not found '% (run_number,year)+\
+                              'locally. Fetched and saved from musr.ca.',
+                              category=Warning)
+                        
         # Open file ----------------------------------------------------------
         fh = mp.open_read(filename)
         
