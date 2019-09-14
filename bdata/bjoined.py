@@ -11,8 +11,6 @@ class bjoined(bdata):
         Object to store lists or the combination of bdata objects. 
         
         data:                   list of bdata objects    
-        
-        Math operates only on histograms. 
     """
     
     # ======================================================================= #
@@ -300,6 +298,14 @@ class bjoined(bdata):
                 out[c] = (values[c].values,errors[c].values)
         
             return out
+        
+    # ======================================================================= #
+    def beam_kev(self,get_error=False):
+        return [d.beam_kev(get_error=get_error) for d in self.data]
+    
+    # ======================================================================= #
+    def get_pulse_s(self):
+        return [d.get_pulse_s() for d in self.data]
         
 # ========================================================================== #
 class blist(list):
