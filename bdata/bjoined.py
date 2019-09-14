@@ -323,9 +323,16 @@ class blist(list):
         # fetch from top level
         try:
             return getattr(object,name)
+
         # fetch from lower levels
         except AttributeError:
-            return blist([getattr(d,name) for d in self])
+            out = blist([getattr(d,name) for d in self])
+            
+            # if base level, return as array
+            if type(out[0]) in (float,int):
+                return np.array(out)
+            else:
+                return out
     
     # ======================================================================= #
     def __getitem__(self,name):
@@ -338,8 +345,13 @@ class blist(list):
         
         # fetch from lower levels
         except TypeError:
-            return blist([d[name] for d in self])
+            out = blist([d[name] for d in self])
 
+            # if base level, return as array
+            if type(out[0]) in (float,int):
+                return np.array(out)
+            else:
+                return out
         
 
 
