@@ -82,11 +82,6 @@ __doc__="""
     September 2019
 """
 
-# new warning
-def warn(message, category, filename, lineno, file=None, line=None):
-    return ': '.join(('bdata.py',category.__name__,str(message)))+'\n'
-warnings.formatwarning = warn
-
 # =========================================================================== #
 class bdata(object):
     """
@@ -158,6 +153,13 @@ class bdata(object):
                                                         
             "constant time between cycles"      :"const_t_btwn_cycl",
             "e1f const time between cycles"     :"const_t_btwn_cycl",
+            
+            "Custom var enabled"                :"customv_enable",
+            "Custom var read name"              :"customv_name_read",    
+            "Custom var write name"             :"customv_name_write",    
+            "Start custom scan"                 :"customv_scan_start",    
+            "Stop custom scan"                  :"customv_scan_stop",    
+            "Custom Increment"                  :"customv_scan_incr",
                                                         
             "DAQ drives sampleref"              :"smpl_ref_daq_drive",
             "DAQ service time (ms)"             :"service_t",
@@ -260,6 +262,7 @@ class bdata(object):
                                                     
             "/Magnet/mag_field"                         :"b_field",     
             "/Magnet/mag_read"                          :"mag_current",
+            "/Magnet/volts"                             :"mag_voltage",
             "/mass_flow/read_flow"                      :"mass_read",
             "/mass_flow/set_flow"                       :"mass_set",   
                                                     
@@ -353,6 +356,8 @@ class bdata(object):
             "ILE2:BIASTUBE:"                            :"biastube",
             "ILE2:BIASTUBE:V"                           :"biastube",
             "ILE2:BIASTUBE:VOL"                         :"biastube",
+             
+            "ILE2:DPPLR:CH0:HW:RDVOL"                   :"dopplertube",
              
             "ILE2A1:HH:CUR"                             :"hh_current",
             "ILE2A1:HH:RDCU"                            :"hh_current",
