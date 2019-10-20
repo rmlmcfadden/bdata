@@ -169,7 +169,11 @@ class bdata(object):
             "Enable helicity flipping"          :"hel_enable",
             "Enable RF"                         :"rf_enable",
             "enable sampleref mode"             :"smpl_ref_enable",
-                                                        
+            
+            "Field start (Gauss)"               :"field_start",
+            "Field stop (Gauss)"                :"field_stop",    
+            "Field inc (Gauss)"                 :"field_incr",
+            
             "frequency increment (Hz)"          :"freq_incr",
             "frequency start (Hz)"              :"freq_start",
             "frequency stop (Hz)"               :"freq_stop",
@@ -974,6 +978,8 @@ class bdata(object):
             for xlabel in self.hist.keys():
                 if 'cell' in xlabel.lower():    
                     break
+        elif self.mode == '1e':
+            xlabel = 'Magnet mA'
         
         return self.hist[xlabel].data
     
@@ -1326,7 +1332,7 @@ class bdata(object):
                 return out
         
         # 1F ------------------------------------------------------------------
-        elif self.mode in ('1f','1n','1w'):
+        elif self.mode in ('1f','1n','1w','1e'):
             
             # get xaxis label and data key
             if self.mode == '1f':
@@ -1335,6 +1341,8 @@ class bdata(object):
                 xlab = 'xpar'
             elif self.mode == '1n':
                 xlab = 'mV'
+            elif self.mode == '1e':
+                xlab = 'mA'
             
             # get bins to kill
             bin_ranges_str = further_options 
