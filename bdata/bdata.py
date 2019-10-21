@@ -440,7 +440,7 @@ class bdata(object):
                 
                 # let users know what happened
                 warnings.warn('Run %d (%d) not found '% (run_number,year)+\
-                              'locally. Fetched and saved to %s '%bd._mud_data+\
+                              'locally. Fetched and saved to %s '%directory+\
                               'from musr.ca.',
                               category=Warning)
                         
