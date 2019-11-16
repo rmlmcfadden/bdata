@@ -76,10 +76,10 @@ class mdata(object):
         """Constructor. Reads file."""
         
         # Open file ----------------------------------------------------------
-        fh = mp.open_read(filename)
-        
-        if fh < 0: 
-            raise RuntimeError("Open file %s failed. " % filename)
+        try:
+            fh = mp.open_read(filename)
+        except RuntimeError:
+            raise RuntimeError("Open file %s failed. " % filename) from None
         try:
             # Read run description
             self.exp = mp.get_exp_number(fh)
@@ -87,6 +87,7 @@ class mdata(object):
             self.duration = mp.get_elapsed_seconds(fh)
             self.start_time = mp.get_start_time(fh)
             self.end_time = mp.get_end_time(fh)
+            # ~ self.field = mp.get_field(fh)
             
             try:
                 self.title = str(mp.get_title(fh))
