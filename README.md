@@ -15,10 +15,10 @@ Beta-data package.
 
 ## Contents
 
-* [`mdata`](#mdata) [object]: access general MUD files
+* [`mdata`](#mdata) [object]: access general MUD files, provides special containers
 * [`bdata`](#bdata) [object]: access BNMR MUD files
 * [`bjoined`](#bjoined) [object]: combine `bdata` objects
-* [`life`](#life) [`bdict` object]: dictionary of probe lifetimes. 
+* [`life`](#life) [`mdict` object]: dictionary of probe lifetimes. 
 * [`mudpy`](#mudpy) [C wrapper]: python access to MUD C functions
 
 # [mdata](https://github.com/dfujim/bdata/blob/master/bdata/mdata.py)
