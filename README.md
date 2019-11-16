@@ -86,9 +86,9 @@ b = bdata(0,filename='filename.msr') # read file from local memory, run number u
 
 | Signature | Description |
 | -------- | -------- |
-| `asym(option="",omit="",rebin=1,hist_select='',nbm=False)`     | Calculate asymmetry. See [docstring](https://github.com/dfujim/bdata/blob/481ab42cdd39a86266431176a3853e354ea385aa/bdata/bdata.py#L996-L1158).     |
-| `beam_kev()`     | Get beam implantation energy in keV     |
-| `get_pulse_s()`     | Get beam pulse duration in s     |
+| [`asym(option="",omit="",rebin=1,hist_select='',nbm=False)`](https://github.com/dfujim/bdata/blob/64495ec255cd4a0a6aee6f8f8b97607adef73e88/bdata/bdata.py#L903)     | Calculate asymmetry. |
+| [`beam_kev(get_error=False)`](https://github.com/dfujim/bdata/blob/64495ec255cd4a0a6aee6f8f8b97607adef73e88/bdata/bdata.py#L1316)     | Get beam implantation energy in keV     |
+| [`get_pulse_s()`](https://github.com/dfujim/bdata/blob/64495ec255cd4a0a6aee6f8f8b97607adef73e88/bdata/bdata.py#L1353)     | Get beam pulse duration in s     |
 
 ## Misc Features
 
@@ -126,7 +126,7 @@ In addtion to the [`bdata`](#bdata) functions, `bjoined` also provides:
 
 | Signature | Description |
 | -------- | -------- |
-| `asym_mean(*asym_args,**asym_kwargs)`     | Take weighted mean of individual asymmetries. Arguments are passed to `bdata.asym()`   |
+| [`asym_mean(*asym_args,**asym_kwargs)`](https://github.com/dfujim/bdata/blob/64495ec255cd4a0a6aee6f8f8b97607adef73e88/bdata/bjoined.py#L237)     | Take weighted mean of individual asymmetries. Arguments are passed to `bdata.asym()`   |
 
 
 ## Misc Features
