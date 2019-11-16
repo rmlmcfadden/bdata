@@ -29,7 +29,7 @@ __doc__="""
         Special Rules For Attributes
         
             If an attribute is not found in mdata, it will look for the 
-            attribute in the mdict objects in the order: hist, ivar
+            attribute in the mdict objects in the order: hist, ivar, sclr
             This second-level attribute search is much slower than regular 
             access.
             
@@ -45,8 +45,10 @@ __doc__="""
 class mdata(object):
     """
         Data fields
-            area            str, name of spectrometer
+            apparatus       str, name of spectrometer
+            area            str, name of area data was taken
             das             str, data aquisition software
+            description     str, run description
             duration        int, length of run
             end_date        str, end of run human-readable string
             end_time        int, end of run epoch time 
@@ -56,7 +58,7 @@ class mdata(object):
             ivar            mhist, independent variables
             lab             str, facility name
             method          str, name of data collection method
-            mode            str, run mode
+            mode            str, run mode (insert)
             orientation     str, sample orientation
             run             int, run number
             sample          str, sample name
@@ -71,6 +73,69 @@ class mdata(object):
             __repr__
     """
     
+    # link object attributes with mudpy function (attribute:function)
+    # must have a title attribute
+    description_attribute_functions = { 
+                            'description':mp.get_description,
+                            'exp':mp.get_exp_number,
+                            'run':mp.get_run_number,
+                            'duration':mp.get_elapsed_seconds,
+                            'start_time':mp.get_start_time,
+                            'end_time':mp.get_end_time,
+                            'title':mp.get_title,
+                            'lab':mp.get_lab,
+                            'area':mp.get_area,
+                            'method':mp.get_method,
+                            'apparatus':mp.get_apparatus,
+                            'mode':mp.get_insert,
+                            'sample':mp.get_sample,
+                            'orientation':mp.get_orientation,
+                            'das':mp.get_das,
+                            'experimenter':mp.get_experimenter,
+                            'temperature':mp.get_temperature,
+                            'field':mp.get_field,
+                            }
+    
+    histogram_attribute_functions = {
+                            'title':mp.get_hist_title,
+                            'htype':mp.get_hist_type,
+                            'data':mp.get_hist_data,
+                            'n_bytes':mp.get_hist_n_bytes,
+                            'n_bins':mp.get_hist_n_bins,
+                            'n_events':mp.get_hist_n_events,
+                            'fs_per_bin':mp.get_hist_fs_per_bin,
+                            's_per_bin':mp.get_hist_sec_per_bin,
+                            't0_ps':mp.get_hist_t0_ps,
+                            't0_bin':mp.get_hist_t0_bin,
+                            'good_bin1':mp.get_hist_good_bin1,
+                            'good_bin2':mp.get_hist_good_bin2,
+                            'background1':mp.get_hist_background1,
+                            'background2':mp.get_hist_background2,
+                            }
+    
+    scaler_attribute_functions = {
+                            'counts':mp.get_scaler_counts,
+                            'title':mp.get_scaler_label,
+                            }   
+    
+    variable_attribute_functions = {
+                            'low':mp.get_ivar_low,
+                            'high':mp.get_ivar_high,
+                            'mean':mp.get_ivar_mean,
+                            'std':mp.get_ivar_std,
+                            'skew':mp.get_ivar_skewness,
+                            'title':mp.get_ivar_name,
+                            'description':mp.get_ivar_description,
+                            'units':mp.get_ivar_units,
+                            }
+    
+    comment_attribute_functions = {
+                            'title':mp.get_comment_title,
+                            'time':mp.get_comment_time,
+                            'author':mp.get_comment_author,
+                            'body':mp.get_comment_body,
+                            }
+                
     # ======================================================================= #    
     def __init__(self,filename):
         """Constructor. Reads file."""
@@ -82,117 +147,59 @@ class mdata(object):
             raise RuntimeError("Open file %s failed. " % filename) from None
         try:
             # Read run description
-            self.exp = mp.get_exp_number(fh)
-            self.run = mp.get_run_number(fh)
-            self.duration = mp.get_elapsed_seconds(fh)
-            self.start_time = mp.get_start_time(fh)
-            self.end_time = mp.get_end_time(fh)
-            # ~ self.field = mp.get_field(fh)
-            
-            try:
-                self.title = str(mp.get_title(fh))
-                self.lab = str(mp.get_lab(fh))
-                self.area = str(mp.get_area(fh))
-                self.method = str(mp.get_method(fh))
-                self.sample = str(mp.get_sample(fh))
-                self.orientation = str(mp.get_orientation(fh))
-                self.das = str(mp.get_das(fh))
-                self.mode = str(mp.get_insert(fh))
-                self.experimenter = str(mp.get_experimenter(fh))
-            except UnicodeEncodeError:
-                self.title = mp.get_title(fh)
-                self.lab = mp.get_lab(fh)
-                self.area = mp.get_area(fh)
-                self.method = mp.get_method(fh)
-                self.sample = mp.get_sample(fh)
-                self.orientation = mp.get_orientation(fh)
-                self.das = mp.get_das(fh)
-                self.mode = mp.get_insert(fh)
-                self.experimenter = mp.get_experimenter(fh)
+            for attr,func in self.description_attribute_functions.items():
+                try:
+                    setattr(self,attr,func(fh))
+                except RuntimeError:
+                    pass
             
             # Read histograms
-            n_hist = mp.get_hists(fh)[1]
-            self.hist = mdict()
-            for i in range(1,n_hist+1):
-                
-                try:
-                    title = str(mp.get_hist_title(fh,i))
-                except UnicodeEncodeError:
-                    title = mp.get_hist_title(fh,i)
-                
-                histogram = mhist()
-                histogram.title = title
-                
-                histogram.id_number = i
-                histogram.htype = mp.get_hist_type(fh,i)
-                
-                histogram.data = mp.get_hist_data(fh,i)
-                
-                histogram.n_bytes = mp.get_hist_n_bytes(fh,i)
-                histogram.n_bins = mp.get_hist_n_bins(fh,i)
-                histogram.n_events = mp.get_hist_n_events(fh,i)
-                
-                histogram.fs_per_bin = mp.get_hist_fs_per_bin(fh,i)
-                histogram.s_per_bin = mp.get_hist_sec_per_bin(fh,i)
-                histogram.t0_ps = mp.get_hist_t0_ps(fh,i)
-                histogram.t0_bin = mp.get_hist_t0_bin(fh,i)
-                
-                histogram.good_bin1 = mp.get_hist_good_bin1(fh,i)
-                histogram.good_bin2 = mp.get_hist_good_bin2(fh,i)
-                histogram.background1 = mp.get_hist_background1(fh,i)
-                histogram.background2 = mp.get_hist_background2(fh,i)
-                
-                self.hist[title] = histogram
-                
+            self._read_mdict(fh=fh,
+                             get_n=mp.get_hists,
+                             attr_dict=self.histogram_attribute_functions,
+                             attr_name='hist',
+                             obj_class=mhist
+                             )
+            
             # Read scalers
-            # ~ n_scaler = mp.get_scalers(fh)[1]
-            # ~ self.sclr = mdict()
-            # ~ for i in range(1,n_scaler+1):
+            self._read_mdict(fh=fh,
+                             get_n=mp.get_scalers,
+                             attr_dict=self.scaler_attribute_functions,
+                             attr_name='sclr',
+                             obj_class=mscaler
+                             )
             
-                
-                # ~ scaler = mscaler()
-                # ~ scaler.counts = mp.get_scaler_counts(fh,i)
-                # ~ scaler.id_number = i
-                # ~ try:
-                    # ~ scaler.title = str(mp.get_scaler_label(fh,i))
-                # ~ except UnicodeEncodeError as e:
-                    # ~ scaler.title = repr(e)
-                # ~ self.sclr[scaler.title] = scaler
-           
             # Read independent variables
-            n_var = mp.get_ivars(fh)[1]
-            self.ivar = mdict()
-            for i in range(1,n_var+1):
-                
-                variable = mvar()
-                variable.id_number = i
-                variable.low = mp.get_ivar_low(fh,i)
-                variable.high = mp.get_ivar_high(fh,i)
-                variable.mean = mp.get_ivar_mean(fh,i)
-                variable.std = mp.get_ivar_std(fh,i)
-                variable.skew = mp.get_ivar_skewness(fh,i)
-                
-                try:
-                    variable.title = str(mp.get_ivar_name(fh,i))
-                    variable.description = str(\
-                                                mp.get_ivar_description(fh,i))
-                    variable.units = str(mp.get_ivar_units(fh,i))
-                except UnicodeEncodeError:
-                    variable.title = mp.get_ivar_name(fh,i)
-                    variable.description =mp.get_ivar_description(fh,i)
-                    variable.units = mp.get_ivar_units(fh,i)
-            
-                self.ivar[variable.title] = variable
-        
+            self._read_mdict(fh=fh,
+                             get_n=mp.get_ivars,
+                             attr_dict=self.variable_attribute_functions,
+                             attr_name='ivar',
+                             obj_class=mvar
+                             )
+           
+            # Read comments
+            self._read_mdict(fh=fh,
+                             get_n=mp.get_comments,
+                             attr_dict=self.comment_attribute_functions,
+                             attr_name='comments',
+                             obj_class=mcomment
+                             )
+                    
         # Close file ----------------------------------------------------------
         finally:
             mp.close_read(fh)
         
         # set the date
-        self.start_date = time.ctime(self.start_time)
-        self.end_date = time.ctime(self.end_time)
-        self.year = time.gmtime(self.start_time).tm_year
-        
+        try:
+            self.start_date = time.ctime(self.start_time)
+            self.year = time.gmtime(self.start_time).tm_year
+        except AttributeError:
+            pass
+            
+        try:
+            self.end_date = time.ctime(self.end_time)
+        except AttributeError:
+            pass
         
     # ======================================================================= #
     def __getattr__(self,name):
@@ -203,8 +210,12 @@ class mdata(object):
         except AttributeError as err:
             
             # fetching of second level
-            if hasattr(self.hist,name): return getattr(self.hist,name)
-            if hasattr(self.ivar,name): return getattr(self.ivar,name)
+            if hasattr(self,'hist') and hasattr(self.hist,name):
+                return getattr(self.hist,name)
+            if hasattr(self,'ivar') and hasattr(self.ivar,name): 
+                return getattr(self.ivar,name)
+            if hasattr(self,'sclr') and hasattr(self.sclr,name): 
+                return getattr(self.sclr,name)
                     
             # nothing worked - raise error
             raise AttributeError(err) from None
@@ -241,6 +252,36 @@ class mdata(object):
             return s
         else:
             return self.__class__.__name__ + "()"
+    
+    # ======================================================================= #
+    def _read_mdict(self,fh,get_n,attr_dict,attr_name,obj_class):
+        """
+            Read all of a type of objects from MUD file and set its attributes, 
+            place in mdict. 
+            
+            fh:         file header
+            get_n:      mudpy function which gets the number of objects in the file
+            attr_dict:  dictionary which links attribute name and mudpy function
+            attr_name:  main attribute name. Ex: hist, scaler, or ivar
+            obj_class:  object class to make
+        """
+        try:
+            n = get_n(fh)[1]
+        except RuntimeError:
+            pass
+        else:
+            setattr(self,attr_name,mdict())
+            for i in range(1,n+1):
+                
+                obj = obj_class()
+                obj.id_number = i
+                
+                for attr,func in attr_dict.items():
+                    try:
+                        setattr(obj,attr,func(fh,i))
+                    except RuntimeError:
+                        pass
+                getattr(self,attr_name)[obj.title] = obj
         
 # =========================================================================== #
 # DATA CONTAINERS
@@ -364,45 +405,23 @@ class mdict(dict):
         return list(self.keys())
 
 # =========================================================================== #
-class mvar(mcontainer):
+class mcomment(mcontainer):
     """
-        Independent variable associated with bdata object.
+        Comment with mdata object.
         
         Data fields:
             id_number
-            low
-            high
-            mean
-            std
-            skew
+            author
+            body
             title
-            description
-            units
+            time
     """
-        
-    __slots__ = ('id_number', 'low', 'high', 'mean', 'std', 'skew', 'title', 
-                 'description', 'units')
-
-    def _get_val(self): return self.mean
-            
-# =========================================================================== #
-class mscaler(mcontainer):
-    """
-        Scaler associated with bdata object.
-        
-        Data fields:
-            id_number
-            title
-            counts
-    """
-    __slots__ = ('id_number','title','counts')
+    __slots__ = ('id_number','author', 'body', 'title', 'time')
     
-    def _get_val(self): return self.counts
-        
 # =========================================================================== #
 class mhist(mcontainer):
     """
-        Histogram associated with bdata object.
+        Histogram associated with mdata object.
         
         Data fields:
             id_number
@@ -429,6 +448,20 @@ class mhist(mcontainer):
     def _get_val(self):     return self.data
     def astype(self,type):  return self.data.astype(type)
     
+# =========================================================================== #
+class mscaler(mcontainer):
+    """
+        Scaler associated with mdata object.
+        
+        Data fields:
+            id_number
+            title
+            counts
+    """
+    __slots__ = ('id_number','title','counts')
+    
+    def _get_val(self): return self.counts
+        
 # ========================================================================== #
 class mlist(list):
     """
@@ -474,6 +507,26 @@ class mlist(list):
                 return np.array(out)
             else:
                 return out
+
+# =========================================================================== #
+class mvar(mcontainer):
+    """
+        Independent variable associated with bdata object.
         
+        Data fields:
+            id_number
+            low
+            high
+            mean
+            std
+            skew
+            title
+            description
+            units
+    """
+        
+    __slots__ = ('id_number', 'low', 'high', 'mean', 'std', 'skew', 'title', 
+                 'description', 'units')
 
-
+    def _get_val(self): return self.mean
+            
