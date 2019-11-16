@@ -409,7 +409,7 @@ def get_hist_data(file_handle,hist_id_number):
     cdef array.array a = array.array('i',[0]*nbins)
     MUD_getHistData(file_handle,hist_id_number,&a.data.as_ints[0])
     cdef int[:] ca = a
-    return np.array(ca)
+    return np.array(ca,dtype=int)
 
 def get_hist_data_pointer(file_handle,hist_id_number):
     print "Pointers not available in python. Please use get_hist_data."
