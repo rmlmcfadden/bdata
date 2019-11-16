@@ -15,13 +15,58 @@ Beta-data package.
 
 ## Contents
 
+* [`mdata`](#mdata) [object]: access general MUD files
 * [`bdata`](#bdata) [object]: access BNMR MUD files
 * [`bjoined`](#bjoined) [object]: combine `bdata` objects
 * [`life`](#life) [`bdict` object]: dictionary of probe lifetimes. 
 * [`mudpy`](#mudpy) [C wrapper]: python access to MUD C functions
 
+# [mdata](https://github.com/dfujim/bdata/blob/master/bdata/mdata.py)
+mud-data object. The mdata object is a data container designed for easy reading of any MUD file, regardless of experiment type or mesurement method. 
+
+## Object Map
+
+**Signature**: 
+
+`mdata(filename)`
+
+Example: `mud = mdata('filename.msr')`
+
+
+## Misc Features
+
+### Representation
+
+   Representation has been nicely formatted so that typing the object 
+   name into the interpreter produces nice output. 
+
+### Operators
+
+   mvar, mscaler, and mhist objects allow for arithmatic or logic 
+   operators to be used, where the value used in the operation is the 
+   mean, count, or data array respectively. 
+
+   Example:    `mud.ivar['BNMR:HVBIAS:POS:RDVOL'] + 1`
+   is equivalent to 
+               `mud.ivar['BNMR:HVBIAS:POS:RDVOL'].mean + 1`
+
+### Special Rules For Attributes
+
+   If an attribute is not found in mdata, it will look for the 
+   attribute in the bdict objects in the order: hist, ivar.
+   This second-level attribute search is much slower than regular 
+   access.
+
+   mdict objects all allow assignment and fetching of dictionary keys 
+   as if they were attributes. Note that one can replace `+` with `p`,
+   and `-` with `m` to allow fetching of histograms. 
+
+   Example: `mud.hist.Bp`, `mud.hist['B+']`, `mud.Bp` all have the 
+            exact same output, with the last being much slower than 
+            the others.
+
 # [bdata](https://github.com/dfujim/bdata/blob/master/bdata/bdata.py)
-Beta-data object. The bdata object is a data container with some basic analysis capabilities, designed to read out [MUD](http://musr.ca/mud/mud_fmt.html) data files and to provide user-friendly access to the file headers and provide asymmetry calculations. 
+Beta-data object, inherits from [`mdata`](#mdata). The bdata object is a data container with some basic analysis capabilities, designed to read out [MUD](http://musr.ca/mud/mud_fmt.html) data files and to provide user-friendly access to the file headers and provide asymmetry calculations. 
 
 ## Object Map
 
@@ -45,38 +90,18 @@ b = bdata(0,filename='filename.msr') # read file from local memory, run number u
 | `beam_kev()`     | Get beam implantation energy in keV     |
 | `get_pulse_s()`     | Get beam pulse duration in s     |
 
-
 ## Misc Features
 
-### Representation
-
-   Representation has been nicely formatted so that typing the object 
-   name into the interpreter produces nice output. 
-
-### Operators
-
-   bvar, bscaler, and bhist objects allow for arithmatic or logic 
-   operators to be used, where the value used in the operation is the 
-   mean, count, or data array respectively. 
-
-   Example:    `b.ppg.bias15 + 1`
-   is equivalent to 
-               `b.ppg.bias15.mean + 1`
+In addition to those provided by [`mdata`](#mdata).
 
 ### Special Rules For Attributes
 
    If an attribute is not found in bdata, it will look for the 
-   attribute in the bdict objects in the order: camp, epics, ppg, hist.
+   attribute in the mdict objects in the order: camp, epics, ppg, hist.
    This second-level attribute search is much slower than regular 
    access.
 
-   bdict objects all allow assignment and fetching of dictionary keys 
-   as if they were attributes. Note that one can replace `+` with `p`,
-   and `-` with `m` to allow fetching of histograms. 
 
-   Example: `b.ppg.beam_on`, `b.ppg['beam_on']`, `b.beam_on` all have the 
-            exact same output, with the last being much slower than 
-            the others.
 
 # [bjoined](https://github.com/dfujim/bdata/blob/master/bdata/bjoined.py)
 
@@ -114,7 +139,7 @@ In addtion to the [`bdata`](#bdata) functions, `bjoined` also provides:
    bjnd.camp
    ```
    
-   we get a list of `bdict` objects. We can access the magnetic field strength as follows: 
+   we get a list of `mdict` objects. We can access the magnetic field strength as follows: 
    
    ```python
    bjnd.camp.b_field
