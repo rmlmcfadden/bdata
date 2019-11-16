@@ -1,36 +1,38 @@
-# Python object for reading msr data files, in particular with respect to BNMR. 
+# Python object for reading bnmr and bnqr msr data files. 
 # Requires use of the mudpy package.
 # Derek Fujimoto
 # July 2017
 
 import bdata as bd
-import bdata.mudpy as mp
 import numpy as np
 import pandas as pd
-import os, time, glob
+import os, glob
 import datetime, warnings, requests
+
+from bdata.mdata import mdata,mdict,mvar,mhist
 
 __doc__="""
     Beta-data module. The bdata object is largely a data container, designed to 
-    read out the MUD data files and to provide user-friendly access to reliably 
-    corrected BNMR/BNQR data. Data files are read either from a directory 
-    specified by environment variable (see below), or from a passed filename 
-    for easy external user access. In this case, data files can be downloaded 
-    from musr.ca. The MUD data file is read and closed on object construction. 
+    read out the MUD data files and to provide user-friendly access to 
+    BNMR/BNQR data. Data files are read either from a directory specified by 
+    environment variable (see below), or from a passed filename for easy 
+    external user access. In this case, data files can be downloaded from 
+    musr.ca. The MUD data file is read and closed on object construction. 
     
     Signature: bdata(run_number,year=None,filename='')
     
     Example usage ------------------------------------------------------------
     
-        bd = bdata(40001)               # read run 40001 from the current year. 
-        bd = bdata(40001,year=2009)     # read run 40001 from year 2009.
-        bd = bdata(0,filename='file.msr') # read file from local memory, run 
-                                            number unused 
+        import bdata as bd
+        b = bd.bdata(40001)                 # read run 40001 from current year. 
+        b = bd.bdata(40001,year=2009)       # read run 40001 from year 2009.
+        b = bd.bdata(0,filename='file.msr') # read file from local memory, run 
+                                              number unused.
     Methods ------------------------------------------------------------------
     
-        bd.asym()       # calculate asymmetry. See bdata.asym docstring.     
-        bd.beam_kev()   # returns beam energy in keV
-        pulse_off_s()   # pulse-off time for SLR measurements: 
+        b.asym()            # calculate asymmetry. See bdata.asym docstring.     
+        b.beam_kev()        # returns beam energy in keV
+        b.pulse_off_s()     # pulse-off time for SLR measurements: 
 
     Setup --------------------------------------------------------------------
     
@@ -55,94 +57,70 @@ __doc__="""
         
         Operators
             
-            bvar, bscaler, and bhist objects allow for arithmatic or logic 
+            mvar, mscaler, and mhist objects allow for arithmatic or logic 
             operators to be used, where the value used in the operation is the 
             mean, count, or data array respectively. 
             
-            Example:    bd.ppg.bias15 + 1       
+            Example:    b.ppg.bias15 + 1       
             is equivalent to 
-                        bd.ppg.bias15.mean + 1
+                        b.ppg.bias15.mean + 1
         
         Special Rules For Attributes
         
             If an attribute is not found in bdata, it will look for the 
-            attribute in the bdict objects in the order: camp, epics, ppg, hist.
+            attribute in the mdict objects in the order: camp, epics, ppg, hist.
             This second-level attribute search is much slower than regular 
             access.
             
-            bdict objects all allow assignment and fetching of dictionary keys 
+            mdict objects all allow assignment and fetching of dictionary keys 
             as if they were attributes. Note that one can replace "+" with "p",
             and "-" with "m" to allow fetching of histograms. 
         
-            Example: bd.ppg.beam_on, bd.ppg['beam_on'], bd.beam_on all have the 
+            Example: b.ppg.beam_on, bd.ppg['beam_on'], bd.beam_on all have the 
                      exact same output, with the last being much slower than 
                      the others.
     
     Derek Fujimoto
-    September 2019
+    Nov 2019
 """
 
 # =========================================================================== #
-class bdata(object):
+class bdata(mdata):
     """
         Class fields 
             dkeys
             evar_bnmr
             evar_bnqr
-        
-        Data fields using raw values: 
-            exp
-            run
-            duration
-            start_time
-            end_time
-            title
-            lab
-            area
-            method
-            sample
-            orientation
-            das
-            mode
-            experimenter
-        
-        Data fields using lists of objects (see docstrings for fields):
-            hist_list
-            scaler_list
-            var_list
             
-        Data fields using dictionaries of objects (by name/title):
+        Data fields
             ppg
             epics
             camp
-            hist
-            sclr
-            
-        Calculated or converted data fields
-            year
-            start_date  (human-readable)
-            end_date    (human-readable)
-            
+            + inherited fields from mdata
+                        
         Public functions
             asym
             beam_kev
-            fields
-            help
             pulse_off_s
             
         Private worker functions
             __init__
             __getattr__
             __repr__
+            __setattr__
             _get_area_data
             _get_asym_hel
             _get_asym_comb
+            _get_asym_alpha
+            _get_asym_alpha_tag
+            _get_1f_sum_scans
+            _get_2e_asym
+            _get_ppg
+            _get_xhist
             _rebin
-            
     """
     
-    # set nice dictionary keys based on 2017 titles and names, for independent
-    # variables
+    # set nice dictionary keys 
     dkeys = {
         
         # PPG (just the stuff after the last "/")
@@ -444,112 +422,18 @@ class bdata(object):
                               'from musr.ca.',
                               category=Warning)
                         
-        # Open file ----------------------------------------------------------
-        fh = mp.open_read(filename)
+        # Open and read file
+        super().__init__(filename)
         
-        if fh < 0: 
-            raise RuntimeError("Open file %s failed. " % filename)
-        try:
-            # Read run description
-            self.exp = mp.get_exp_number(fh)
-            self.run = mp.get_run_number(fh)
-            self.duration = mp.get_elapsed_seconds(fh)
-            self.start_time = mp.get_start_time(fh)
-            self.end_time = mp.get_end_time(fh)
-            
-            try:
-                self.title = str(mp.get_title(fh))
-                self.lab = str(mp.get_lab(fh))
-                self.area = str(mp.get_area(fh))
-                self.method = str(mp.get_method(fh))
-                self.sample = str(mp.get_sample(fh))
-                self.orientation = str(mp.get_orientation(fh))
-                self.das = str(mp.get_das(fh))
-                self.mode = str(mp.get_insert(fh))
-                self.experimenter = str(mp.get_experimenter(fh))
-            except UnicodeEncodeError:
-                self.title = mp.get_title(fh)
-                self.lab = mp.get_lab(fh)
-                self.area = mp.get_area(fh)
-                self.method = mp.get_method(fh)
-                self.sample = mp.get_sample(fh)
-                self.orientation = mp.get_orientation(fh)
-                self.das = mp.get_das(fh)
-                self.mode = mp.get_insert(fh)
-                self.experimenter = mp.get_experimenter(fh)
-            
-            # Read histograms
-            n_hist = mp.get_hists(fh)[1]
-            self.hist_list = []
-            for i in range(1,n_hist+1):
-                self.hist_list.append(bhist())
-                self.hist_list[-1].id_number = i
-                self.hist_list[-1].htype = mp.get_hist_type(fh,i)
-                
-                self.hist_list[-1].data = mp.get_hist_data(fh,i)
-                
-                self.hist_list[-1].n_bytes = mp.get_hist_n_bytes(fh,i)
-                self.hist_list[-1].n_bins = mp.get_hist_n_bins(fh,i)
-                self.hist_list[-1].n_events = mp.get_hist_n_events(fh,i)
-                
-                self.hist_list[-1].fs_per_bin = mp.get_hist_fs_per_bin(fh,i)
-                self.hist_list[-1].s_per_bin = mp.get_hist_sec_per_bin(fh,i)
-                self.hist_list[-1].t0_ps = mp.get_hist_t0_ps(fh,i)
-                self.hist_list[-1].t0_bin = mp.get_hist_t0_bin(fh,i)
-                
-                self.hist_list[-1].good_bin1 = mp.get_hist_good_bin1(fh,i)
-                self.hist_list[-1].good_bin2 = mp.get_hist_good_bin2(fh,i)
-                self.hist_list[-1].background1 = mp.get_hist_background1(fh,i)
-                self.hist_list[-1].background2 = mp.get_hist_background2(fh,i)
-                
-                try:
-                    self.hist_list[-1].title = str(mp.get_hist_title(fh,i))
-                except UnicodeEncodeError:
-                    self.hist_list[-1].title = mp.get_hist_title(fh,i)
-                
-            # Read scalers
-            #~ n_scaler = mp.get_scalers(fh)[1]
-            #~ self.scaler_list = []
-            #~ for i in range(1,n_scaler+1):
-                #~ self.scaler_list.append(bscaler())
-                #~ self.scaler_list[-1].counts = mp.get_scaler_counts(fh,i)
-                #~ self.scaler_list[-1].id_number = i
-                #~ try:
-                    #~ self.scaler_list[-1].title = str(mp.get_scaler_label(fh,i))
-                #~ except UnicodeEncodeError as e:
-                    #~ self.scaler_list[-1].title = repr(e)
-           
-            # Read independent variables
-            n_var = mp.get_ivars(fh)[1]
-            self.var_list = []
-            for i in range(1,n_var+1):
-                self.var_list.append(bvar())
-                self.var_list[-1].id_number = i
-                self.var_list[-1].low = mp.get_ivar_low(fh,i)
-                self.var_list[-1].high = mp.get_ivar_high(fh,i)
-                self.var_list[-1].mean = mp.get_ivar_mean(fh,i)
-                self.var_list[-1].std = mp.get_ivar_std(fh,i)
-                self.var_list[-1].skew = mp.get_ivar_skewness(fh,i)
-                
-                try:
-                    self.var_list[-1].title = str(mp.get_ivar_name(fh,i))
-                    self.var_list[-1].description = str(\
-                                                mp.get_ivar_description(fh,i))
-                    self.var_list[-1].units = str(mp.get_ivar_units(fh,i))
-                except UnicodeEncodeError:
-                    self.var_list[-1].title = mp.get_ivar_name(fh,i)
-                    self.var_list[-1].description =mp.get_ivar_description(fh,i)
-                    self.var_list[-1].units = mp.get_ivar_units(fh,i)
-            
-        # Close file ----------------------------------------------------------
-        finally:
-            mp.close_read(fh)
+        # cast histogram data to floats
+        for key,hist in self.hist.items():
+            self.hist[key].data = hist.data.astype(np.float64)
         
         # Sort independent variables into dictionaries by title
-        self.ppg = bdict()
-        self.camp = bdict()
-        self.epics = bdict()
-        for v in self.var_list: 
+        self.ppg = mdict()
+        self.camp = mdict()
+        self.epics = mdict()
+        for v in self.ivar.values(): 
             try:
                 if 'PPG' in v.title:
                     self.ppg[bdata.dkeys[v.title.split("/")[-1]]] = v
@@ -562,25 +446,8 @@ class bdata(object):
                                 "Data in list, but not sorted to dict."
                     warnings.warn(message,RuntimeWarning,stacklevel=2)
                     
-        # Sort histograms into dictionaries by title and convert to doubles
-        self.hist = bdict()
-        for h in self.hist_list:
-            self.hist[h.title] = h
-            self.hist[h.title].data = self.hist[h.title].data.astype(float)
-        
-        # Sort scalers into dictionaries by title
-        #~ self.sclr = bdict()
-        #~ for s in self.scaler_list:
-            #~ new_key = s.title.split("%")[-1].replace(" ","")
-            #~ self.sclr[new_key] = s
-            
-        # set the date
-        self.start_date = time.ctime(self.start_time)
-        self.end_date = time.ctime(self.end_time)
-        self.year = time.gmtime(self.start_time).tm_year
-    
         # prevent overwriting of attributes
-        self.__initialised = True
+        self._bdata_initialised = True
 
     # ======================================================================= #
     def __getattr__(self,name):
@@ -613,10 +480,19 @@ class bdata(object):
             for key in dkeys:
                 if key[0] == '_': continue
                 
-                if not hasattr(d[key],'__iter__') or d[key].__class__ == bdict:
+                # exceptions
+                if key in ('ivar',):
+                    items.append([key,d[key].__class__])                
+                    
+                # non iterables and mdict objects
+                elif not hasattr(d[key],'__iter__') or d[key].__class__ == mdict:
                     items.append([key,d[key]])                
+                
+                # strings
                 elif d[key].__class__ == str:
                     items.append([key,d[key]])                
+                
+                # misc objects
                 else:
                     items.append([key,d[key].__class__])
                 
@@ -626,7 +502,7 @@ class bdata(object):
             return s
         else:
             return self.__class__.__name__ + "()"
-    
+        
     # ======================================================================= #
     def __setattr__(self,name,value):
         """Allow setting attributes only when initializing"""
@@ -640,7 +516,7 @@ class bdata(object):
             raise AttributeError('Object is readonly')
         else:
             dict.__setattr__(self, name, value)
-        
+    
     # ======================================================================= #
     def _get_area_data(self,nbm=False):
         """Get histogram list based on area type. 
@@ -858,7 +734,7 @@ class bdata(object):
                                "proper locations")
             
         # setup output
-        out = bdict()
+        out = mdict()
         out['freq'] = freq
         out['time'] = time
             
@@ -1280,7 +1156,7 @@ class bdata(object):
                 return np.vstack([time,self._rebin(h[1],rebin)])
 
             elif option == 'helicity': # -------------------------------------
-                out = bdict()
+                out = mdict()
                 out['p'] = self._rebin(h[0],rebin)
                 out['n'] = self._rebin(h[1],rebin)
                 out['time_s'] = time
@@ -1307,7 +1183,7 @@ class bdata(object):
                     else:
                         raise err
                 
-                out = bdict()
+                out = mdict()
                 out['p_wiA'] = self._rebin(asym[0][0],rebin)
                 out['n_wiA'] = self._rebin(asym[0][1],rebin)
                 out['p_noA'] = self._rebin(asym[1][0],rebin)
@@ -1324,7 +1200,7 @@ class bdata(object):
             else:
                 c = np.array(self._get_asym_comb(d))
                 
-                out = bdict()
+                out = mdict()
                 out['p'] = self._rebin(h[0],rebin)
                 out['n'] = self._rebin(h[1],rebin)
                 out['c'] = self._rebin(c,rebin)  
@@ -1373,7 +1249,7 @@ class bdata(object):
             # mode switching
             if option =='raw':
                 a = self._get_asym_hel(d)
-                out = bdict()
+                out = mdict()
                 out['p'] = np.array(a[0])
                 out['n'] = np.array(a[1])
                 out[xlab] = np.array(freq)
@@ -1390,7 +1266,7 @@ class bdata(object):
             # swtich between remaining modes
             if option == 'helicity':
                 a = self._get_asym_hel(d)
-                out = bdict()
+                out = mdict()
                 out['p'] = self._rebin(a[0],rebin)
                 out['n'] = self._rebin(a[1],rebin)
                 out[xlab] = np.array(freq)
@@ -1411,7 +1287,7 @@ class bdata(object):
                 ah = self._get_asym_hel(d)
                 ac = self._get_asym_comb(d)
                 
-                out = bdict()
+                out = mdict()
                 out['p'] = self._rebin(ah[0],rebin)
                 out['n'] = self._rebin(ah[1],rebin)
                 out['c'] = self._rebin(ac,rebin)  
@@ -1485,196 +1361,9 @@ class bdata(object):
                     "or beam_on") from None
         return dwelltime*beam_on/1000.
     
-# =========================================================================== #
-# DATA CONTAINERS
-# =========================================================================== #
-class bcontainer(object):
-    """
-        Provides common functions for data containers
-        
-        _get_val(): return the value needed to do the various operators. 
-                    Define in child classes
-    """
-
-    def __repr__(self):
-        if list(self.__slots__):
-            m = max(map(len,self.__slots__)) + 1
-            s = ''
-            s += '\n'.join([k.rjust(m) + ': ' + repr(getattr(self,k))
-                              for k in sorted(self.__slots__)])
-            return s
-        else:
-            return self.__class__.__name__ + "()"
-
-    # arithmatic operators
-    def __add__(self,other):        return self._get_val()+other
-    def __sub__(self,other):        return self._get_val()-other
-    def __mul__(self,other):        return self._get_val()*other
-    def __div__(self,other):        return self._get_val()/other
-    def __floordiv__(self,other):   return self._get_val()//other
-    def __mod__(self,other):        return self._get_val()%other
-    def __divmod__(self,other):     return divmod(self._get_val(),other)
-    def __pow__(self,other):        return pow(self._get_val(),other)
-    def __lshift__(self,other):     return self._get_val()<<other
-    def __rshift__(self,other):     return self._get_val()>>other
-    def __neg__(self):              return -self._get_val()
-    def __pos__(self):              return +self._get_val()
-    def __abs__(self):              return abs(self._get_val())
-    def __invert__(self):           return ~self._get_val()
-    def __round__(self):            return round(self._get_val())
-    
-    # casting operators
-    def __complex__(self):          return complex(self._get_val())
-    def __int__(self):              return int(self._get_val())
-    def __float__(self):            return float(self._get_val())
-    def __str__(self):              return str(self._get_val())
-    
-    # logic operators
-    def __eq__(self,other):     
-        if isinstance(other,bvar):  return self==other
-        else:                       return self._get_val()==other
-    def __lt__(self,other):     
-        if isinstance(other,bvar):  return self._get_val()<other._get_val()
-        else:                       return self._get_val()<other
-    def __le__(self,other):
-        if isinstance(other,bvar):  return self._get_val()<=other._get_val()
-        else:                       return self._get_val()<=other
-    def __gt__(self,other):
-        if isinstance(other,bvar):  return self._get_val()>other._get_val()
-        else:                       return self._get_val()>other
-    def __ge__(self,other):
-        if isinstance(other,bvar):  return self._get_val()>=other._get_val()
-        else:                       return self._get_val()>=other
-    
-    def __and__(self,other):
-        if isinstance(other,bvar):  return self&other
-        else:                       return self._get_val()&other
-    def __xor__(self,other):
-        if isinstance(other,bvar):  return self^other
-        else:                       return self._get_val()^other
-    def __or__(self,other):
-        if isinstance(other,bvar):  return self|other
-        else:                       return self._get_val()|other
-    
-    # reflected operators
-    def __radd__(self,other):       return self.__add__(other)        
-    def __rsub__(self,other):       return self.__sub__(other)        
-    def __rmul__(self,other):       return self.__mul__(other)     
-    def __rdiv__(self,other):       return self.__div__(other)    
-    def __rfloordiv__(self,other):  return self.__floordiv__(other)
-    def __rmod__(self,other):       return self.__mod__(other)      
-    def __rdivmod__(self,other):    return self.__divmod__(other)
-    def __rpow__(self,other):       return self.__pow__(other)      
-    def __rlshift__(self,other):    return self.__lshift__(other)
-    def __rrshift__(self,other):    return self.__rshift__(other)                          
-    def __rand__(self,other):       return self.__and__(other)
-    def __rxor__(self,other):       return self.__xor__(other)
-    def __ror__(self,other):        return self.__or__(other)    
-
-# =========================================================================== #
-class bdict(dict):
-    """
-        Provides common functions for dictionaries of data containers
-    """
-
-    def __getattr__(self, name):
-        try:
-            return self[name]
-        except KeyError as err:
-            name = name.replace('n','-').replace('p','+')
-            try:
-                return self[name]
-            except KeyError:
-                raise AttributeError(err) from None
-
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-    
-    def __repr__(self):
-        klist = list(self.keys())
-        if klist:
-            klist.sort()
-            s = self.__class__.__name__+': {'
-            for k in self.keys():
-                s+="'"+k+"'"+', '
-            s = s[:-2]
-            s+='}'
-            return s
-        else:
-            return self.__class__.__name__ + "()"
-    
-    def __dir__(self):
-        return list(self.keys())
-
-# =========================================================================== #
-class bvar(bcontainer):
-    """
-        Independent variable associated with bdata object.
-        
-        Data fields:
-            id_number
-            low
-            high
-            mean
-            std
-            skew
-            title
-            description
-            units
-    """
-        
-    __slots__ = ('id_number', 'low', 'high', 'mean', 'std', 'skew', 'title', 
-                 'description', 'units')
-
-    def _get_val(self): return self.mean
-            
-# =========================================================================== #
-class bscaler(bcontainer):
-    """
-        Scaler associated with bdata object.
-        
-        Data fields:
-            id_number
-            title
-            counts
-    """
-    __slots__ = ('id_number','title','counts')
-    
-    def _get_val(self): return self.counts
-        
-# =========================================================================== #
-class bhist(bcontainer):
-    """
-        Histogram associated with bdata object.
-        
-        Data fields:
-            id_number
-            htype 
-            title
-            data
-            n_bytes
-            n_bins
-            n_events
-            fs_per_bin
-            s_per_bin
-            t0_ps
-            t0_bin
-            good_bin1
-            good_bin2
-            background1
-            background2
-    """
-    
-    __slots__ = ('id_number', 'htype', 'title', 'data', 'n_bytes', 'n_bins', 
-                 'n_events', 'fs_per_bin', 's_per_bin', 't0_ps', 't0_bin', 
-                 'good_bin1', 'good_bin2', 'background1', 'background2')
-    
-    def _get_val(self):     return self.data
-    def astype(self,type):  return self.data.astype(type)
-    
 # set lifetimes for various particles in seconds, with errors (ref: rmlm slr_v2.cpp)
 # commented out isotopes with multiple decay products not taken into account by bfit
-life = bdict({
+life = mdict({
             "Li8"       :1.2096,    # http://journals.aps.org/prc/abstract/10.1103/PhysRevC.82.027309
             "Li8_err"   :0.0005, 
             "Li9"       :0.2572,    # http://journals.aps.org/prc/abstract/10.1103/PhysRevC.13.835

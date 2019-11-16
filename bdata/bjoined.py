@@ -1,7 +1,7 @@
 # Python object for math operations on bdata objects. 
 # Derek Fujimoto
 # Aug 2019
-from bdata import bdict,bhist
+from bdata.mdata import mdict,mhist,mlist
 from bdata import bdata
 import numpy as np
 import pandas as pd
@@ -38,7 +38,7 @@ class bjoined(bdata):
             # fetch from top level
             return getattr(object,name)
         except AttributeError:
-            return blist([getattr(d,name) for d in self.data])
+            return mlist([getattr(d,name) for d in self.data])
 
     # ======================================================================= #
     def __repr__(self):
@@ -54,10 +54,19 @@ class bjoined(bdata):
             for key in dkeys:
                 if key[0] == '_': continue
                 
-                if d[0][key].__class__ == bdict:
+                # exceptions
+                if key in ('ivar',):
+                    items.append([key,[di[key].__class__ for di in d]])
+                
+                # mdict objects
+                elif d[0][key].__class__ == mdict:
                     items.append([key,d[0][key]])
+                
+                # strings and non iterables
                 elif not hasattr(d[0][key],'__iter__') or d[0][key].__class__ == str:
                     items.append([key,[di[key] for di in d]])                
+                
+                # misc objects
                 else:
                     items.append([key,[di[key].__class__ for di in d]])
                 
@@ -91,7 +100,7 @@ class bjoined(bdata):
                       'htype')
         
         # make container
-        hist_joined = bdict()
+        hist_joined = mdict()
         
         # check if x values in histogram
         do_append = any([h in self.hist[0] for h in hist_xnames])
@@ -117,7 +126,7 @@ class bjoined(bdata):
                 x = np.concatenate(self.hist[xname].data)                
                 
             # make the object
-            hist_obj = bhist()
+            hist_obj = mhist()
             hist_obj.id_number = self.hist[0][name].id_number
             hist_obj.title = name
             hist_obj.n_bins = self.hist[0][name].n_bins
@@ -133,7 +142,7 @@ class bjoined(bdata):
         if do_append:
         
             # make the object
-            hist_obj = bhist()
+            hist_obj = mhist()
             hist_obj.id_number = self.hist[0][xname].id_number
             hist_obj.title = name
             hist_obj.n_bins = self.hist[0][xname].n_bins
@@ -244,7 +253,7 @@ class bjoined(bdata):
                 asym_list[i] = pd.DataFrame({'x':asym[0],'a':asym[1],'da':asym[2]})
             
             # dict return: (x,p:(a,da),...)
-            elif type(asym) is bdict:
+            elif type(asym) is mdict:
                 
                 # if entry is tuple, split into error and value
                 klist = list(asym.keys())
@@ -291,8 +300,8 @@ class bjoined(bdata):
                              values.values.T[0],
                              errors.values.T[0]])
         
-        elif type(asym) is bdict:
-            out = bdict()
+        elif type(asym) is mdict:
+            out = mdict()
             out[xk] = values.index
             for c in values.columns:
                 out[c] = (values[c].values,errors[c].values)
@@ -307,51 +316,3 @@ class bjoined(bdata):
     def get_pulse_s(self):
         return [d.get_pulse_s() for d in self.data]
         
-# ========================================================================== #
-class blist(list):
-    """
-        List object from which attributes/keys are accessed from each element, 
-        then returned as a list
-    """
-    
-    # ======================================================================= #
-    def __getattr__(self,name):
-        """
-            Get attribute of underlying data as a list.
-        """
-        
-        # fetch from top level
-        try:
-            return getattr(object,name)
-
-        # fetch from lower levels
-        except AttributeError:
-            out = blist([getattr(d,name) for d in self])
-            
-            # if base level, return as array
-            if type(out[0]) in (float,int):
-                return np.array(out)
-            else:
-                return out
-    
-    # ======================================================================= #
-    def __getitem__(self,name):
-        """
-            Get attribute of underlying data as a list.
-        """
-        # fetch from top level
-        try:
-            return list.__getitem__(self,name)
-        
-        # fetch from lower levels
-        except TypeError:
-            out = blist([d[name] for d in self])
-
-            # if base level, return as array
-            if type(out[0]) in (float,int):
-                return np.array(out)
-            else:
-                return out
-        
-
-
