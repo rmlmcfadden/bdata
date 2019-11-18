@@ -4,8 +4,19 @@ Beta-data package.
 
 ## Setup 
 
-* Install using pip: `pip install bdata`
-* OPTIONAL: Export the following environment variables to set the local data storage location (add to `.bashrc`):
+### Dependencies needed pre-install: 
+
+* python development version: `sudo apt-get install python3-dev` (on Ubuntu, for example)
+* Cython: `pip3 install Cython`
+* numpy: `pip3 install numpy`
+
+### Install 
+
+* Install using pip: `pip3 install bdata`
+
+#### Optional Configuration
+
+* For bdata: Export the following environment variables to set the local data storage location (add to `.bashrc`):
    Set `BNMR_ARCHIVE` and `BNQR_ARCHIVE` the following scheme points to the msr files:
    ```bash
       ${BNMR_ARCHIVE}/year/filename.msr
