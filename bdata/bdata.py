@@ -481,7 +481,7 @@ class bdata(mdata):
                 if key[0] == '_': continue
                 
                 # exceptions
-                if key in ('ivar',):
+                if key in ('ivar','sclr'):
                     items.append([key,d[key].__class__])                
                     
                 # non iterables and mdict objects

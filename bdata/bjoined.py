@@ -55,7 +55,7 @@ class bjoined(bdata):
                 if key[0] == '_': continue
                 
                 # exceptions
-                if key in ('ivar',):
+                if key in ('ivar','sclr'):
                     items.append([key,[di[key].__class__ for di in d]])
                 
                 # mdict objects
