@@ -1378,6 +1378,8 @@ life = mdict({
 #            "Mg29_err"  :0.17,   
             "Mg31"      :0.332,     # http://www.sciencedirect.com/science/article/pii/S0375947403018074
             "Mg31_err"  :0.029,   
-            "Ac230"     :121.8,     # N. E. Table of the isotopes, Brookhaven National Laboratory, Upton, New York, 2002.
-            "Ac234"     :40,        # N. E. Table of the isotopes, Brookhaven National Laboratory, Upton, New York, 2002.
+            "Ac230"     :175.76,    # http://isys01.triumf.ca/search/isotope/data/view?z=89&a=230&m=0
+            "Ac232"     :171.43,    # http://isys01.triumf.ca/search/isotope/data/view?z=89&a=232&m=0
+            "Ac234"     :63.49,     # https://www.sciencedirect.com/science/article/pii/0375947486900254
+            "Ac234_err" :10.1,      # https://www.sciencedirect.com/science/article/pii/0375947486900254
         })
