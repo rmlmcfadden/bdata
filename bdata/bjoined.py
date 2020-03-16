@@ -19,8 +19,10 @@ class bjoined(bdata):
             bdata_list:               list of bdata objects
         """
         
-        # set data
-        self.data = bdata_list
+        # sort by run number
+        runs = [b.run for b in bdata_list]
+        idx = np.argsort(runs)
+        self.data = np.array(bdata_list)[idx]
         
         # set some calculation-required parameters
         self._set_common('apparatus')
@@ -97,11 +99,6 @@ class bjoined(bdata):
         # these modes require appending scans rather than averaging
         hist_xnames = ('Frequency','x parameter',)
         
-        # set these fields to nan
-        nan_fields = ('background1','background2','good_bin1','good_bin2',
-                      't0_bin','t0_ps','s_per_bin','fs_per_bin','n_bytes',
-                      'htype')
-        
         # make container
         hist_joined = mdict()
         
@@ -114,48 +111,42 @@ class bjoined(bdata):
                 if xname in self.hist[0]: 
                     break
             
-        for name in hist_names:
+        for name in self.hist[0].keys():
             
-            # name doesn't exist
-            if name not in self.hist[0].keys(): continue
+            # no rule for combining histogram
+            if (name not in hist_names) and (name not in hist_xnames): continue
+            
+            # make the object                            
+            hist_obj = mhist()
+            
             
             # combine scan-less runs (just add the histogrms)
             if not do_append:
                 hist_data = np.sum(list(self.hist[name].data),axis=0)
             
             # combine runs with scans (append the data)
-            else:                
-                hist_data = np.concatenate(self.hist[name].data)
-                x = np.concatenate(self.hist[xname].data)                
-                
-            # make the object
-            hist_obj = mhist()
-            hist_obj.id_number = self.hist[0][name].id_number
-            hist_obj.title = name
-            hist_obj.n_bins = self.hist[0][name].n_bins
-            hist_obj.n_events = np.sum(list(self.hist[name].n_events))
-            hist_obj.data = hist_data
-                    
-            for f in nan_fields:    setattr(hist_obj,f,np.nan)
+            elif name in hist_xnames:                
+                hist_obj.data = np.concatenate(self.hist[xname].data)
+            else:
+                hist_obj.data = np.concatenate(self.hist[name].data)    
             
+            # set common histogram attributes
+            hist_obj.title = name
+            
+            for key in ('background1','background2','n_events','n_bytes'):
+                setattr(hist_obj,key,int(np.sum(getattr(self.hist[name],key))))
+                
+            for key in ('id_number','n_bins','good_bin1','good_bin2','t0_bin',
+                        't0_ps','s_per_bin','fs_per_bin','htype'):
+                
+                item = getattr(self.hist[name],key)
+                if all(item[0] == item):
+                    setattr(hist_obj,key,item[0])
+                else:
+                    setattr(hist_obj,key,np.nan)
+                
             # save in dictionary
             hist_joined[name] = hist_obj
-        
-        # make x histogram
-        if do_append:
-        
-            # make the object
-            hist_obj = mhist()
-            hist_obj.id_number = self.hist[0][xname].id_number
-            hist_obj.title = name
-            hist_obj.n_bins = self.hist[0][xname].n_bins
-            hist_obj.n_events = np.sum(list(self.hist[xname].n_events))
-            hist_obj.data = x
-            
-            for f in nan_fields:    setattr(hist_obj,f,np.nan)
-            
-            # save in dictionary
-            hist_joined[xname] = hist_obj
         
         self.hist_joined = hist_joined
     
