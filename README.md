@@ -28,7 +28,8 @@ Beta-data package.
 
 * [`mdata`](#mdata) [object]: access general MUD files, provides special containers
 * [`bdata`](#bdata) [object]: access BNMR MUD files
-* [`bjoined`](#bjoined) [object]: combine `bdata` objects
+* [`bjoined`](#bjoined) [object]: append `bdata` objects
+* [`bmerged`](#bmerged) [object]: combine `bdata` objects
 * [`life`](#life) [`mdict` object]: dictionary of probe lifetimes. 
 * [`mudpy`](#mudpy) [C wrapper]: python access to MUD C functions
 
@@ -116,7 +117,7 @@ In addition to those provided by [`mdata`](#mdata).
 
 # [bjoined](https://github.com/dfujim/bdata/blob/master/bdata/bjoined.py)
 
-Object for combining bdata objects. Attribute access works through lists (see examples below). Histogram counts are summed over to emulate data taken within a single run. bdata asymmetry calculations operate on these summed histograms. Additional functionality for proper weighted  means of asymmetries of the invididual runs is also given.
+Object for appending bdata objects. Attribute access works through lists (see examples below). Histogram counts are summed over to emulate data taken within a single run. bdata asymmetry calculations operate on these summed histograms. Additional functionality for proper weighted  means of asymmetries of the invididual runs is also given.
 
 ## Object Map
 
@@ -169,6 +170,23 @@ In addtion to the [`bdata`](#bdata) functions, `bjoined` also provides:
    ```
    
    with some small penalty to run time.
+   
+# [bmerged](https://github.com/dfujim/bdata/blob/master/bdata/bmerged.py)
+
+Object for combining bdata objects. Unlike [`bjoined`](#bjoined), `bmerged` should look and behave more or less identically to the [`bdata`](#bdata) object. In this way, runs can be combined and replaced in existing code with little modification. Histograms are combined in the same was as [`bjoined`](#bjoined): counts are summed over to emulate data taken within a single run. [`bdata`](#bdata) asymmetry calculations operate on these summed histograms. 
+
+## Object Map
+
+**Signature**: 
+
+`bmerged(bdata_list)`
+
+Examples:
+    
+```python
+blist = [bdata(r,year=2019) for r in range(40010,40013)] # read runs 40010-40012
+bjnd = bmerged(blist)                                    # combine these runs
+```
    
 # [life](https://github.com/dfujim/bdata/blob/481ab42cdd39a86266431176a3853e354ea385aa/bdata/bdata.py#L1663-L1682)
 
