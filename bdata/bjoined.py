@@ -23,9 +23,11 @@ class bjoined(bdata):
         self.data = bdata_list
         
         # set some calculation-required parameters
-        self._set_common('mode')
-        self._set_common('area')
         self._set_common('apparatus')
+        self._set_common('area')
+        self._set_common('lab')
+        self._set_common('mode')
+        self._set_common('sample')
         
         # combine the histograms
         self._combine_hist()
