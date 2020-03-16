@@ -489,7 +489,7 @@ class bdata(mdata):
                     items.append([key,d[key]])                
                 
                 # strings
-                elif d[key].__class__ == str:
+                elif d[key].__class__ in (str,np.str_):
                     items.append([key,d[key]])                
                 
                 # misc objects
