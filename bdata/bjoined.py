@@ -11,6 +11,7 @@ class bjoined(bdata):
         Object to store lists or the combination of bdata objects. 
         
         data:                   list of bdata objects    
+        hist_joined:            combined histograms
     """
     
     # ======================================================================= #
@@ -29,7 +30,6 @@ class bjoined(bdata):
         self._set_common('area')
         self._set_common('lab')
         self._set_common('mode')
-        self._set_common('sample')
         
         # combine the histograms
         self._combine_hist()
@@ -75,7 +75,6 @@ class bjoined(bdata):
                 else:
                     items.append([key,[di[key].__class__ for di in d]])
                 
-                            
             m = max(map(len,dkeys)) + 1
             s = '\n'.join([k.rjust(m)+': '+repr(v) for k, v in sorted(items)])
             return s
@@ -118,7 +117,6 @@ class bjoined(bdata):
             
             # make the object                            
             hist_obj = mhist()
-            
             
             # combine scan-less runs (just add the histogrms)
             if not do_append:
