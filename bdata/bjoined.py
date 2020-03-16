@@ -25,6 +25,7 @@ class bjoined(bdata):
         # set some calculation-required parameters
         self._set_common('mode')
         self._set_common('area')
+        self._set_common('apparatus')
         
         # combine the histograms
         self._combine_hist()
@@ -310,9 +311,9 @@ class bjoined(bdata):
         
     # ======================================================================= #
     def beam_kev(self,get_error=False):
-        return [d.beam_kev(get_error=get_error) for d in self.data]
+        return np.asarray([d.beam_kev(get_error=get_error) for d in self.data])
     
     # ======================================================================= #
     def get_pulse_s(self):
-        return [d.get_pulse_s() for d in self.data]
+        return np.asarray([d.get_pulse_s() for d in self.data])
         
