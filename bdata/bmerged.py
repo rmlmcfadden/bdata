@@ -15,6 +15,7 @@ class bmerged(bdata):
         bdata object on completion
     """
 
+    epsilon = 1e-20     # avoid divide by zero when averaging 
 
     # ======================================================================= #
     def __init__(self,bdata_list):
@@ -49,10 +50,8 @@ class bmerged(bdata):
             keys = list(getattr(bdata_list[0],top).keys())
             x = mlist([getattr(b,top) for b in bdata_list])
             for key in keys:
-                var = mvar()    
-                for attr in var.__slots__:
-                    setattr(var,attr,self._combine_values(attr,getattr(x[key],attr)))
-                d[key] = var
+                d[key] = self._combine_var(x[key])
+                
             setattr(self,top,d)
             
         # combine the histograms
@@ -140,7 +139,7 @@ class bmerged(bdata):
     # ======================================================================= #
     def _combine_values(self,name,x):
         """
-            Combine and return attributes of underlying data 
+            Combine data array
             
             name:   key associated with attribute
             x:      array of values to combine
@@ -150,13 +149,7 @@ class bmerged(bdata):
             
             x = np.asarray(x)
             
-            if name == 'mean':          return np.mean(x)
-            elif name == 'std':         return (np.sum(x**2)**0.5)/len(x)
-            elif name == 'skew':        return np.nan
-            elif name == 'high':        return np.max(x)
-            elif name == 'low':         return np.min(x)
-            
-            elif name == 'duration':    return int(np.sum(x))
+            if name == 'duration':    return int(np.sum(x))
                           
             elif name in ('end_date',
                           'end_time'):  return x[-1]
@@ -181,15 +174,55 @@ class bmerged(bdata):
                           'method',
                           'mode',
                           'orientation',
-                          'sample',
-                          'units',
                           'description',
+                          'sample',
                           'title',
-                          'id_number',
-                          'exp',
-                          'title'):
+                          'exp'):
                 if all(x == x[0]):      return x[0]
                 else:                   return 'non-matching ("' + str(x[0]) + \
                                                '" + others)'
+            else:
+                raise RuntimeError('Attribute %s not accounted for' % name)
         else:
             return x
+    
+    # ======================================================================= #
+    def _combine_var(self,varlist):
+        """
+            Combine variable
+            
+            x: list of mvar objects
+        """
+        
+        # make new variable
+        var = mvar()    
+        
+        # get lists of mean and std
+        avg = np.array([v.mean for v in varlist])
+        std = np.array([v.std for v in varlist])
+        
+        # no div by zero
+        std += self.epsilon
+        
+        # weighted mean 
+        var.mean = np.average(avg,weights=1/std**2)
+        var.std = 1/np.sum(1/std**2)**0.5
+        
+        # don't know what to do with the skew
+        var.skew = np.nan
+        
+        # min and max
+        var.high = np.max([v.high for v in varlist])
+        var.low = np.min([v.low for v in varlist])
+        
+        # things which should be the same across all elements
+        for name in ('units', 'description', 'title', 'id_number'):
+                
+            x = np.array([getattr(v,name) for v in varlist])
+                            
+            if all(x == x[0]):      
+                setattr(var,name,x[0])
+            else:                   
+                setattr(var,name,'non-matching ("%s" + others)' % str(x[0]))
+
+        return var
