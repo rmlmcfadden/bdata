@@ -151,7 +151,7 @@ class bmerged(bdata):
             x = np.asarray(x)
             
             if name == 'mean':          return np.mean(x)
-            elif name == 'std':         return np.sum(x**2)**0.5
+            elif name == 'std':         return (np.sum(x**2)**0.5)/len(x)
             elif name == 'skew':        return np.nan
             elif name == 'high':        return np.max(x)
             elif name == 'low':         return np.min(x)
