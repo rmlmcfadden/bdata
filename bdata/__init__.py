@@ -7,6 +7,6 @@ from bdata import mudpy
 import os
 
 __all__ = ['bdata','mudpy','bjoined','mdata','bmerged']
-__version__ = '5.1.2'
+__version__ = '5.1.3'
 __author__ = 'Derek Fujimoto'
 _mud_data = os.path.join(os.environ['HOME'],'.mdata')
