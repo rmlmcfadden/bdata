@@ -57,6 +57,18 @@ class bmerged(bdata):
             
         # combine the histograms
         self._combine_hist(bdata_list)
+        
+        # checks
+        if '2' in self.mode:
+            dwelltime = np.array([b.ppg.dwelltime.mean for b in bdata_list])
+            beam_off = np.array([b.ppg.beam_off.mean for b in bdata_list])
+            beam_on = np.array([b.ppg.beam_on.mean for b in bdata_list])
+            
+            if any(dwelltime[0] != dwelltime) or any(beam_off[0] != beam_off) \
+                or any(beam_on[0] != beam_on):
+                raise RuntimeError('%s run has varying ppg ' % self.mode+\
+                    'parameters and dwelltimes. Cannot combine histograms.')
+            
     
     # ======================================================================= #
     def _combine_hist(self,bdata_list):
@@ -99,11 +111,9 @@ class bmerged(bdata):
                         
             # combine scan-less runs (just add the histogrms)
             if not do_append:
-                hist_data = np.sum(list(hist[name].data),axis=0)
+                hist_obj.data = np.sum(list(hist[name].data),axis=0)
             
             # combine runs with scans (append the data)
-            elif name in hist_xnames:                
-                hist_obj.data = np.concatenate(hist[xname].data)
             else:
                 hist_obj.data = np.concatenate(hist[name].data)    
             
