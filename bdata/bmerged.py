@@ -206,7 +206,12 @@ class bmerged(bdata):
         
         # weighted mean 
         var.mean = np.average(avg,weights=1/std**2)
-        var.std = 1/np.sum(1/std**2)**0.5
+        
+        # stdev of weighted mean
+        if all(std == self.epsilon): 
+            var.std = 0.0
+        else:
+            var.std = 1/np.sum(1/std**2)**0.5
         
         # don't know what to do with the skew
         var.skew = np.nan
