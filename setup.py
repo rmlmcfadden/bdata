@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="bdata",
-    version="5.1.3",
+    version="6.0.0",
     author="Derek Fujimoto",
     author_email="fujimoto@phas.ubc.ca",
     description="BNMR/BNQR MUD file reader and asymmetry calculator",
@@ -25,6 +25,6 @@ setuptools.setup(
         "Operating System :: MacOS",
         "Development Status :: 5 - Production/Stable",
     ],
-    install_requires=['mudpy>=0.1.0','numpy>=1.14','requests>=2.22.0','pandas>=0.25'],
+    install_requires=['mud-py>=0.1.0','numpy>=1.14','requests>=2.22.0','pandas>=0.25'],
 )
 
