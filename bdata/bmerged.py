@@ -4,7 +4,7 @@
 # Mar 2020
 
 from bdata import bdata
-from bdata.mdata import mdict,mhist,mlist,mvar
+from mudpy.containers import mdict,mhist,mlist,mvar
 import numpy as np
 import pandas as pd
 import re

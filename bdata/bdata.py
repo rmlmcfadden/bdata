@@ -9,7 +9,8 @@ import pandas as pd
 import os, glob
 import datetime, warnings, requests
 
-from bdata.mdata import mdata,mdict,mvar,mhist
+from mudpy import mdata
+from mudpy.containers import mdict,mvar,mhist
 
 __doc__="""
     Beta-data module. The bdata object is largely a data container, designed to 

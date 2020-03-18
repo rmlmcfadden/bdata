@@ -1,7 +1,7 @@
 # Python object for math operations on bdata objects. 
 # Derek Fujimoto
 # Aug 2019
-from bdata.mdata import mdict,mhist,mlist
+from mudpy.containers import mdict,mhist,mlist
 from bdata import bdata
 import numpy as np
 import pandas as pd
