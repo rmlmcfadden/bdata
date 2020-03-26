@@ -160,7 +160,6 @@ class bdata(mdata):
             "init mode file"                    :"init_mode",
             "init mode"                         :"init_mode",
                                                         
-            "Helicity flip sleep (ms)"          :"hel_sleep",
             "helicity flip sleep (ms)"          :"hel_sleep",
             "Helicity flip sleep(ms)"           :"hel_sleep",
                                                                                                     
@@ -249,10 +248,10 @@ class bdata(mdata):
             "/mass_flow/read_flow"                      :"mass_read",
             "/mass_flow/set_flow"                       :"mass_set",   
                                                     
-            "/needle-valve/set_position"                :"needle_set",
             "/needle-valve/read_position"               :"needle_read",
-            "/Needle_Valve/set_position"                :"needle_set",
             "/Needle/read_position"                     :"needle_pos",
+            "/needle-valve/set_position"                :"needle_set",
+            "/Needle_Valve/set_position"                :"needle_set",
             "/Needle/set_position"                      :"needle_set",
             
             "/PVac/adc_read"                            :"vac",
@@ -360,6 +359,9 @@ class bdata(mdata):
     def __init__(self,run_number,year=None,filename=""):
         """Constructor. Reads file, stores and sorts data."""
             
+        # convert dkeys keys to lower case
+        bdata.dkeys = {k.lower():i for k,i in self.dkeys.items()}
+            
         # Get the current year
         if year is None:   year = datetime.datetime.now().year
         
@@ -437,14 +439,15 @@ class bdata(mdata):
         for v in self.ivar.values(): 
             try:
                 if 'PPG' in v.title:
-                    self.ppg[bdata.dkeys[v.title.split("/")[-1]]] = v
+                    self.ppg[bdata.dkeys[v.title.split("/")[-1].lower()]] = v
                 elif v.title[0] == "/":
-                    self.camp[bdata.dkeys[v.title]] = v
+                    self.camp[bdata.dkeys[v.title.lower()]] = v
                 else:
-                    self.epics[bdata.dkeys[v.title]] = v
+                    self.epics[bdata.dkeys[v.title.lower()]] = v
             except (KeyError,IndexError):
-                    message = '"' + v.title + '" not found in dkeys. '+\
+                    message = '"%s" not found in dkeys ("%s" in "%s"). ' +\
                                 "Data in list, but not sorted to dict."
+                    message = message % (v.title,v.description,v.units)
                     warnings.warn(message,RuntimeWarning,stacklevel=2)
                     
         # prevent overwriting of attributes
