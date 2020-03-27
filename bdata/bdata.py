@@ -436,20 +436,55 @@ class bdata(mdata):
         self.ppg = mdict()
         self.camp = mdict()
         self.epics = mdict()
-        for v in self.ivar.values(): 
-            try:
-                if 'PPG' in v.title:
-                    self.ppg[bdata.dkeys[v.title.split("/")[-1].lower()]] = v
-                elif v.title[0] == "/":
-                    self.camp[bdata.dkeys[v.title.lower()]] = v
-                else:
-                    self.epics[bdata.dkeys[v.title.lower()]] = v
-            except (KeyError,IndexError):
-                    message = '"%s" not found in dkeys ("%s" in "%s"). ' +\
-                                "Data in list, but not sorted to dict."
-                    message = message % (v.title,v.description,v.units)
-                    warnings.warn(message,RuntimeWarning,stacklevel=2)
-                    
+        
+        if hasattr(self,'ivar'):
+            
+            for v in self.ivar.values(): 
+                try:
+                    if 'PPG' in v.title:
+                        self.ppg[bdata.dkeys[v.title.split("/")[-1].lower()]] = v
+                    elif v.title[0] == "/":
+                        self.camp[bdata.dkeys[v.title.lower()]] = v
+                    else:
+                        self.epics[bdata.dkeys[v.title.lower()]] = v
+                except (KeyError,IndexError):
+                        message = '"%s" not found in dkeys ("%s" in "%s"). ' +\
+                                    "Data in list, but not sorted to dict."
+                        message = message % (v.title,v.description,v.units)
+                        warnings.warn(message,RuntimeWarning,stacklevel=2)
+            
+        # Add missing run mode for old runs
+        if year < 2005 and not self.mode and self.method == 'TI-bNMR':
+            self.mode = '1f' 
+            
+        # Fix inconsistent area for old runs
+        if year == 2003 and self.area == 'ISAC':
+            if self.run >= 45000:
+                self.area = 'BNQR'
+            else:
+                self.area = 'BNMR'
+            
+        # Fix histogram titles for old runs
+        if year == 2003 and 'FREQ' in self.hist.keys(): 
+            keymap = {'FREQ':'Frequency',
+                      'Bp':'B+',
+                      'Fp':'F+',
+                      'Bm':'B-',
+                      'Fm':'F-',
+                      'FluM':'FluM2',
+                      'PolLp':'L+',
+                      'PolRp':'R+',
+                      'PolLm':'L-',
+                      'PolRm':'R-',
+                      'NBMBp':'NBMB+',
+                      'NBMFp':'NBMF+',
+                      'NBMBm':'NBMB-',
+                      'NBMFm':'NBMF-',
+                      }
+            self.hist = mdict({i:self.hist[k] for k,i in keymap.items()})
+            for k in self.hist.keys():
+                self.hist[k].title = k
+            
         # prevent overwriting of attributes
         self._bdata_initialised = True
 
@@ -1128,11 +1163,19 @@ class bdata(mdata):
         # SLR -----------------------------------------------------------------
         if self.mode in ("20",'2h'):
             
+            # get the number of prebeam bins
+            try:
+                n_prebeam = int(self._get_ppg('prebeam'))
+            
+            # some old runs don't log prebeam values
+            except KeyError:
+                pass
+            
             # remove negative count values, delete prebeam entries
-            n_prebeam = int(self._get_ppg('prebeam'))
-            for i in range(len(d)):
-                d[i][d[i]<0] = 0.
-                d[i] = np.delete(d[i],np.arange(n_prebeam))
+            else:
+                for i in range(len(d)):
+                    d[i][d[i]<0] = 0.
+                    d[i] = np.delete(d[i],np.arange(n_prebeam))
 
             # do alpha background subtractions
             if self.mode == '2h':    
