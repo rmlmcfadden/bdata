@@ -126,8 +126,10 @@ class bdata(mdata):
         
         # PPG (just the stuff after the last "/")
             "e20 beam on dwelltimes"            :"beam_on",
+            "e00 beam on dwelltimes"            :"beam_on",
             "e20  beam off dwelltimes"          :"beam_off",
             "e20 beam off dwelltimes"           :"beam_off",   
+            "e00 beam off dwelltimes"           :"beam_off",   
             "beam off time (ms)"                :"beam_off_ms",
                                                         
             "constant time between cycles"      :"const_t_btwn_cycl",
@@ -185,6 +187,7 @@ class bdata(mdata):
                                                         
             "PPG mode"                          :"mode",     
             "e20 prebeam dwelltimes"            :"prebeam", 
+            "e00 prebeam dwelltimes"            :"prebeam", 
             "psm onef enabled"                  :"onef_enable",
             "psm onef scale factor"             :"onef_scale",
             "psm fREF enabled"                  :"fref_enable",
@@ -197,6 +200,7 @@ class bdata(mdata):
             "Ref tuning freq (Hz)"              :"ref_tune_freq",
             "Ref tuning frequency (Hz)"         :"ref_tune_freq",
             "e20 rf frequency (Hz)"             :"freq",
+            "e00 rf frequency (Hz)"             :"freq",
             "RFon delay (dwelltimes)"           :"rf_on_delay",
             "num RF on delays (dwell times)"    :"rf_on_delay",
             "RFon duration (dwelltimes)"        :"rf_on",
