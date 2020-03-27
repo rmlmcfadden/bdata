@@ -254,6 +254,7 @@ class bdata(mdata):
                                                     
             "/needle-valve/read_position"               :"needle_read",
             "/Needle/read_position"                     :"needle_pos",
+            "/Needle/motor_position"                    :"needle_pos",
             "/needle-valve/set_position"                :"needle_set",
             "/Needle_Valve/set_position"                :"needle_set",
             "/Needle/set_position"                      :"needle_set",
