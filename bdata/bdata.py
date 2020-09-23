@@ -247,6 +247,7 @@ class bdata(mdata):
             "/lock-in/Y"                                :"lockin_y",
                                                     
             "/Magnet/mag_field"                         :"b_field",     
+            "/Magnet/mag_set"                           :"b_field_setpt",     
             "/Magnet/mag_read"                          :"mag_current",
             "/Magnet/volts"                             :"mag_voltage",
             "/mass_flow/read_flow"                      :"mass_read",
