@@ -5,6 +5,6 @@ from bdata.bmerged import bmerged
 import os
 
 __all__ = ['bdata','bjoined','bmerged']
-__version__ = '6.0.1'
+__version__ = '6.0.2'
 __author__ = 'Derek Fujimoto'
 _mud_data = os.path.join(os.environ['HOME'],'.bdata')
