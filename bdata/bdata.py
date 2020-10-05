@@ -249,6 +249,7 @@ class bdata(mdata):
             "/Magnet/mag_field"                         :"b_field",     
             "/Magnet/mag_set"                           :"b_field_setpt",     
             "/Magnet/mag_read"                          :"mag_current",
+            "/Magnet/controls/sys_status"               :"mag_ctrl_status",
             "/Magnet/volts"                             :"mag_voltage",
             "/mass_flow/read_flow"                      :"mass_read",
             "/mass_flow/set_flow"                       :"mass_set",   
