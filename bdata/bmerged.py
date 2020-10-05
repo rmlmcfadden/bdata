@@ -68,7 +68,6 @@ class bmerged(bdata):
                 raise RuntimeError('%s run has varying ppg ' % self.mode+\
                     'parameters and dwelltimes. Cannot combine histograms.')
             
-    
     # ======================================================================= #
     def _combine_hist(self,bdata_list):
         """
