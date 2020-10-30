@@ -1183,6 +1183,11 @@ class bdata(mdata):
                 for i in range(len(d)):
                     d[i][d[i]<0] = 0.
                     d[i] = np.delete(d[i],np.arange(n_prebeam))
+                    
+                    # check that preabeams were set correctly 
+                    # (in 2019 some NQR run are off by one)
+                    if d[i][0] < 20:
+                        d[i] = np.delete(d[i],[0])
 
             # do alpha background subtractions
             if self.mode == '2h':    
