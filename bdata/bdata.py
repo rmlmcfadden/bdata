@@ -1180,15 +1180,28 @@ class bdata(mdata):
             
             # remove negative count values, delete prebeam entries
             else:
+                
+                bad_ppg_prebeam = False
                 for i in range(len(d)):
                     d[i][d[i]<0] = 0.
                     d[i] = np.delete(d[i],np.arange(n_prebeam))
                     
-                    # check that preabeams were set correctly 
+                    # check that prebeams were set correctly 
                     # (in 2019 some NQR run are off by one)
                     if d[i][0] < 20:
+                        bad_ppg_prebeam = True
+                
+                # if prebeams not set properly, remove the first bin (off by one error)
+                if bad_ppg_prebeam:
+                    warnings.warn("%d.%d: Detected a " % (self.year,self.run)+\
+                        'mismatch between the ppg prebeams setting and the '+\
+                        'histogram counts. Removing an extra bin to account '+\
+                        'for a prebeam off-by-one error (known to exist for '+\
+                        '2018-2020 B-NQR 20 and 2e runs)')
+                                                    
+                    for i in range(len(d)):
                         d[i] = np.delete(d[i],[0])
-
+                        
             # do alpha background subtractions
             if self.mode == '2h':    
                 for i in range(len(d_alpha)):
