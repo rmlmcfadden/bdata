@@ -10,7 +10,7 @@ import os, glob
 import datetime, warnings, requests
 
 from mudpy import mdata
-from mudpy.containers import mdict,mvar,mhist
+from mudpy.containers import mdict, mvar, mhist
 
 __doc__="""
     Beta-data module. The bdata object is largely a data container, designed to 
@@ -20,14 +20,14 @@ __doc__="""
     external user access. In this case, data files can be downloaded from 
     musr.ca. The MUD data file is read and closed on object construction. 
     
-    Signature: bdata(run_number,year=None,filename='')
+    Signature: bdata(run_number, year=None, filename='')
     
     Example usage ------------------------------------------------------------
     
         import bdata as bd
         b = bd.bdata(40001)                 # read run 40001 from current year. 
-        b = bd.bdata(40001,year=2009)       # read run 40001 from year 2009.
-        b = bd.bdata(0,filename='file.msr') # read file from local memory, run 
+        b = bd.bdata(40001, year=2009)       # read run 40001 from year 2009.
+        b = bd.bdata(0, filename='file.msr') # read file from local memory, run 
                                               number unused.
     Methods ------------------------------------------------------------------
     
@@ -74,7 +74,7 @@ __doc__="""
             access.
             
             mdict objects all allow assignment and fetching of dictionary keys 
-            as if they were attributes. Note that one can replace "+" with "p",
+            as if they were attributes. Note that one can replace "+" with "p", 
             and "-" with "m" to allow fetching of histograms. 
         
             Example: b.ppg.beam_on, bd.ppg['beam_on'], bd.beam_on all have the 
@@ -125,235 +125,314 @@ class bdata(mdata):
     dkeys = {
         
         # PPG (just the stuff after the last "/")
-            "e20 beam on dwelltimes"            :"beam_on",
-            "e00 beam on dwelltimes"            :"beam_on",
-            "e20  beam off dwelltimes"          :"beam_off",
+            "e20 beam on dwelltimes"            :"beam_on", 
+            "e00 beam on dwelltimes"            :"beam_on", 
+            "e20  beam off dwelltimes"          :"beam_off", 
             "e20 beam off dwelltimes"           :"beam_off",   
             "e00 beam off dwelltimes"           :"beam_off",   
-            "beam off time (ms)"                :"beam_off_ms",
+            "beam off time (ms)"                :"beam_off_ms", 
                                                         
-            "constant time between cycles"      :"const_t_btwn_cycl",
-            "e1f const time between cycles"     :"const_t_btwn_cycl",
+            "constant time between cycles"      :"const_t_btwn_cycl", 
+            "e1f const time between cycles"     :"const_t_btwn_cycl", 
             
-            "Custom var enabled"                :"customv_enable",
+            "Custom var enabled"                :"customv_enable", 
             "Custom var read name"              :"customv_name_read",    
             "Custom var write name"             :"customv_name_write",    
             "Start custom scan"                 :"customv_scan_start",    
             "Stop custom scan"                  :"customv_scan_stop",    
-            "Custom Increment"                  :"customv_scan_incr",
+            "Custom Increment"                  :"customv_scan_incr", 
                                                         
-            "DAQ drives sampleref"              :"smpl_ref_daq_drive",
-            "DAQ service time (ms)"             :"service_t",
-            "Dwell time (ms)"                   :"dwelltime",
-            "Bin width (ms)"                    :"dwelltime",
+            "DAQ drives sampleref"              :"smpl_ref_daq_drive", 
+            "DAQ service time (ms)"             :"service_t", 
+            "Dwell time (ms)"                   :"dwelltime", 
+            "Bin width (ms)"                    :"dwelltime", 
                                                         
-            "Enable helicity flipping"          :"hel_enable",
-            "Enable RF"                         :"rf_enable",
-            "enable sampleref mode"             :"smpl_ref_enable",
+            "Enable helicity flipping"          :"hel_enable", 
+            "Enable RF"                         :"rf_enable", 
+            "enable sampleref mode"             :"smpl_ref_enable", 
             
-            "Field start (Gauss)"               :"field_start",
+            "Field start (Gauss)"               :"field_start", 
             "Field stop (Gauss)"                :"field_stop",    
-            "Field inc (Gauss)"                 :"field_incr",
+            "Field inc (Gauss)"                 :"field_incr", 
             
-            "frequency increment (Hz)"          :"freq_incr",
-            "frequency start (Hz)"              :"freq_start",
-            "frequency stop (Hz)"               :"freq_stop",
+            "frequency increment (Hz)"          :"freq_incr", 
+            "frequency start (Hz)"              :"freq_start", 
+            "frequency stop (Hz)"               :"freq_stop", 
             
-            "init mode file"                    :"init_mode",
-            "init mode"                         :"init_mode",
+            "init mode file"                    :"init_mode", 
+            "init mode"                         :"init_mode", 
                                                         
-            "helicity flip sleep (ms)"          :"hel_sleep",
-            "Helicity flip sleep(ms)"           :"hel_sleep",
+            "helicity flip sleep (ms)"          :"hel_sleep", 
+            "Helicity flip sleep(ms)"           :"hel_sleep", 
                                                                                                     
-            "NaVolt start (volts)"              :"volt_start",
-            "NaVolt stop (volts)"               :"volt_stop",
-            "NaVolt inc (volts)"                :"volt_incr",
+            "NaVolt start (volts)"              :"volt_start", 
+            "NaVolt stop (volts)"               :"volt_stop", 
+            "NaVolt inc (volts)"                :"volt_incr", 
                                                         
-            "num bins"                          :"nbins",
-            "num cycles per supercycle"         :"ncycles",
-            "Number dwelltimes per freq"        :"ndwell_per_f",
-            "number of midbnmr regions"         :"nregion",
-            "num post RF beamOn dwelltimes"     :"ndwell_post_on",
+            "num bins"                          :"nbins", 
+            "num cycles per supercycle"         :"ncycles", 
+            "Number dwelltimes per freq"        :"ndwell_per_f", 
+            "number of midbnmr regions"         :"nregion", 
+            "num post RF beamOn dwelltimes"     :"ndwell_post_on", 
                                    
-            "Param X Start"                     :'xstart',
-            "Param X Stop"                      :'xstop',
-            "Param X Incr"                      :'xincr',
-            "Constant param Y"                  :'yconst',
+            "Param X Start"                     :'xstart', 
+            "Param X Stop"                      :'xstop', 
+            "Param X Incr"                      :'xincr', 
+            "Constant param Y"                  :'yconst', 
             
-            "f1 frequency function"             :"freqfn_f1",
-            "f2 frequency function"             :"freqfn_f2",
-            "f3 frequency function"             :"freqfn_f3",
-            "f4 frequency function"             :"freqfn_f4",
+            "f1 frequency function"             :"freqfn_f1", 
+            "f2 frequency function"             :"freqfn_f2", 
+            "f3 frequency function"             :"freqfn_f3", 
+            "f4 frequency function"             :"freqfn_f4", 
                                                         
             "PPG mode"                          :"mode",     
             "e20 prebeam dwelltimes"            :"prebeam", 
             "e00 prebeam dwelltimes"            :"prebeam", 
-            "psm onef enabled"                  :"onef_enable",
-            "psm onef scale factor"             :"onef_scale",
-            "psm fREF enabled"                  :"fref_enable",
-            "psm fREF scale factor"             :"fref_scale",
+            "psm onef enabled"                  :"onef_enable", 
+            "psm onef scale factor"             :"onef_scale", 
+            "psm fREF enabled"                  :"fref_enable", 
+            "psm fREF scale factor"             :"fref_scale", 
             "psm scale factor"                  :"psm_scale", 
             "psm scaler factor"                 :"psm_scale", 
                                                         
-            "randomize freq increments"         :"rand_freq_incr",
-            "Randomize freq values"             :"rand_freq_val",
-            "Ref tuning freq (Hz)"              :"ref_tune_freq",
-            "Ref tuning frequency (Hz)"         :"ref_tune_freq",
-            "e20 rf frequency (Hz)"             :"freq",
-            "e00 rf frequency (Hz)"             :"freq",
-            "RFon delay (dwelltimes)"           :"rf_on_delay",
-            "num RF on delays (dwell times)"    :"rf_on_delay",
-            "RFon duration (dwelltimes)"        :"rf_on",
-            "RF on time (ms)"                   :"rf_on_ms",
-            "RF enabled"                        :"rf_enable",
+            "randomize freq increments"         :"rand_freq_incr", 
+            "Randomize freq values"             :"rand_freq_val", 
+            "Ref tuning freq (Hz)"              :"ref_tune_freq", 
+            "Ref tuning frequency (Hz)"         :"ref_tune_freq", 
+            "e20 rf frequency (Hz)"             :"freq", 
+            "e00 rf frequency (Hz)"             :"freq", 
+            "RFon delay (dwelltimes)"           :"rf_on_delay", 
+            "num RF on delays (dwell times)"    :"rf_on_delay", 
+            "RFon duration (dwelltimes)"        :"rf_on", 
+            "RF on time (ms)"                   :"rf_on_ms", 
+            "RF enabled"                        :"rf_enable", 
             
-            "Single tone simulated"             :"sgle_tone_sim",
+            "Single tone simulated"             :"sgle_tone_sim", 
                                                         
-            "use defaults for midbnmr"          :"defaults",
+            "use defaults for midbnmr"          :"defaults", 
              
         # CAMP
-            "/biasV/input1"                             :"rb_cell_bias_set",
-            "/biasV/output1"                            :"rb_cell_bias_read",
+            "/biasV/input1"                             :"rb_cell_bias_set", 
+            "/biasV/output1"                            :"rb_cell_bias_read", 
         
-            "/CryoEx_MassFlow/read_flow"                :"cryo_read",
-            "/CryoEx_MassFlow/set_flow"                 :"cryo_set",
-            "/Cryo_level/He_level"                      :"cryo_he",
-            "/Cryo_level/N2_level"                      :"cryo_n2",
+            "/CryoEx_MassFlow/read_flow"                :"cryo_read", 
+            "/CryoEx_MassFlow/set_flow"                 :"cryo_set", 
+            "/Cryo_level/He_level"                      :"cryo_he", 
+            "/Cryo_level/N2_level"                      :"cryo_n2", 
             "/cryo_lift/set_position"                   :"clift_set",  
-            "/cryo_lift/read_position"                  :"clift_read",
+            "/cryo_lift/read_position"                  :"clift_read", 
             
-            "/Cryo_oven/current_read_1"                 :"oven_current",
-            "/Cryo_oven/output_1/D"                     :"oven_out_d",
-            "/Cryo_oven/output_1/I"                     :"oven_out_i",
-            "/Cryo_oven/output_1/P"                     :"oven_out_p",
-            "/Cryo_oven/read_A"                         :"oven_readA",
-            "/Cryo_oven/read_B"                         :"oven_readB",
-            "/Cryo_oven/read_C"                         :"oven_readC",
-            "/Cryo_oven/read_D"                         :"oven_readD",
-            "/Cryo_oven/setpoint_1"                     :"oven_set1",
+            "/Cryo_oven/current_read_1"                 :"oven_current", 
+            "/Cryo_oven/output_1/D"                     :"oven_out_d", 
+            "/Cryo_oven/output_1/I"                     :"oven_out_i", 
+            "/Cryo_oven/output_1/P"                     :"oven_out_p", 
+            "/Cryo_oven/read_A"                         :"oven_readA", 
+            "/Cryo_oven/read_B"                         :"oven_readB", 
+            "/Cryo_oven/read_C"                         :"oven_readC", 
+            "/Cryo_oven/read_D"                         :"oven_readD", 
+            "/Cryo_oven/setpoint_1"                     :"oven_set1", 
                         
-            "/Dac0/dac_set"                             :"dac_set",
-            "/dac/dac_set"                              :"dac_set",
-            "/Dewar/He_level"                           :"he_level",
+            "/Dac0/dac_set"                             :"dac_set", 
+            "/dac/dac_set"                              :"dac_set", 
+            "/Dewar/He_level"                           :"he_level", 
              
-            "/flow_set/output"                          :"flow_set_out",
+            "/flow_set/output"                          :"flow_set_out", 
                                                     
-            "/He_flow/read_flow"                        :"he_read",
-            "/He_flow/set_flow"                         :"he_set",
+            "/He_flow/read_flow"                        :"he_read", 
+            "/He_flow/set_flow"                         :"he_set", 
                                                     
-            "/lock-in/R"                                :"lockin_r",
-            "/lock-in/theta"                            :"lockin_theta",
-            "/lock-in/X"                                :"lockin_x",
-            "/lock-in/Y"                                :"lockin_y",
+            "/lock-in/R"                                :"lockin_r", 
+            "/lock-in/theta"                            :"lockin_theta", 
+            "/lock-in/X"                                :"lockin_x", 
+            "/lock-in/Y"                                :"lockin_y", 
                                                     
             "/Magnet/mag_field"                         :"b_field",     
             "/Magnet/mag_set"                           :"b_field_setpt",     
-            "/Magnet/mag_read"                          :"mag_current",
-            "/Magnet/controls/sys_status"               :"mag_ctrl_status",
-            "/Magnet/volts"                             :"mag_voltage",
-            "/mass_flow/read_flow"                      :"mass_read",
+            "/Magnet/mag_read"                          :"mag_current", 
+            "/Magnet/controls/sys_status"               :"mag_ctrl_status", 
+            "/Magnet/volts"                             :"mag_voltage", 
+            "/mass_flow/read_flow"                      :"mass_read", 
             "/mass_flow/set_flow"                       :"mass_set",   
                                                     
-            "/needle-valve/read_position"               :"needle_read",
-            "/Needle/read_position"                     :"needle_pos",
-            "/Needle/motor_position"                    :"needle_pos",
-            "/needle-valve/set_position"                :"needle_set",
-            "/Needle_Valve/set_position"                :"needle_set",
-            "/Needle/set_position"                      :"needle_set",
+            "/needle-valve/read_position"               :"needle_read", 
+            "/Needle/read_position"                     :"needle_pos", 
+            "/Needle/motor_position"                    :"needle_pos", 
+            "/needle-valve/set_position"                :"needle_set", 
+            "/Needle_Valve/set_position"                :"needle_set", 
+            "/Needle/set_position"                      :"needle_set", 
             
-            "/PVac/adc_read"                            :"vac",
+            "/PVac/adc_read"                            :"vac", 
                                                     
-            "/rfamp/fwd_max"                            :"rfamp_fwd",
-            "/rfamp/fwd_power"                          :"rfamp_fpwr",
-            "/rfamp/refl_max"                           :"rfamp_rfl",
-            "/rfamp/RF_gain"                            :"rfamp_rfgain",
-            "/rf_level_cont/dac_set"                    :"rf_dac",
+            "/rfamp/fwd_max"                            :"rfamp_fwd", 
+            "/rfamp/fwd_power"                          :"rfamp_fpwr", 
+            "/rfamp/refl_max"                           :"rfamp_rfl", 
+            "/rfamp/RF_gain"                            :"rfamp_rfgain", 
+            "/rf_level_cont/dac_set"                    :"rf_dac", 
                                                     
-            "/Sample/current_read_1"                    :"smpl_current",
-            "/Sample/current_read"                      :"smpl_current",
-            "/Sample1/current_read"                     :"smpl_current",
-            "/Sample/read_A"                            :"smpl_read_A",
-            "/Sample1/read_A"                           :"smpl_read_A",
-            "/Sample/read_B"                            :"smpl_read_B",
-            "/Sample1/read_B"                           :"smpl_read_B",
-            "/adc0/adc_read"                            :"smpl_read_B",
-            "/Sample/read_C"                            :"smpl_read_C",
-            "/Sample/read_D"                            :"smpl_read_D",
-            "/Sample/set_current"                       :"smpl_set_current",
-            "/Sample/setpoint"                          :"smpl_set",
-            "/Sample1/setpoint"                         :"smpl_set",
-            "/Sample/setpoint_1"                        :"smpl_set",
-            "/sample2/heat_range"                       :"smpl2_heat",
-            "/sample2/sample_read"                      :"smpl2_read",
-            "/sample_volts/reading"                     :"smpl_volts",
-            "/Shield/read_1"                            :"shield_read1",
-            "/signal_gen/amplitude"                     :"sig_gen_amp",
-            "/signal_gen/frequency"                     :"sig_gen_freq",
-            "/signal_gen/power_level"                   :"sig_gen_pwr",
-            "/signal_gen/rf_on"                         :"sig_gen_rfon",
-            "/stealth/fwd_max"                          :"stealth_fwd_max",
-            "/stealth/fwd_power"                        :"stealth_fwd_pwr",
-            "/stealth/rev_max"                          :"stealth_rev_max",
-            "/stealth/rev_power"                        :"stealth_rev_pwr",
+            "/Sample/current_read_1"                    :"smpl_current", 
+            "/Sample/current_read"                      :"smpl_current", 
+            "/Sample1/current_read"                     :"smpl_current", 
+            "/Sample/read_A"                            :"smpl_read_A", 
+            "/Sample1/read_A"                           :"smpl_read_A", 
+            "/Sample/read_B"                            :"smpl_read_B", 
+            "/Sample1/read_B"                           :"smpl_read_B", 
+            "/adc0/adc_read"                            :"smpl_read_B", 
+            "/Sample/read_C"                            :"smpl_read_C", 
+            "/Sample/read_D"                            :"smpl_read_D", 
+            "/Sample/set_current"                       :"smpl_set_current", 
+            "/Sample/setpoint"                          :"smpl_set", 
+            "/Sample1/setpoint"                         :"smpl_set", 
+            "/Sample/setpoint_1"                        :"smpl_set", 
+            "/sample2/heat_range"                       :"smpl2_heat", 
+            "/sample2/sample_read"                      :"smpl2_read", 
+            "/sample_volts/reading"                     :"smpl_volts", 
+            "/Shield/read_1"                            :"shield_read1", 
+            "/signal_gen/amplitude"                     :"sig_gen_amp", 
+            "/signal_gen/frequency"                     :"sig_gen_freq", 
+            "/signal_gen/power_level"                   :"sig_gen_pwr", 
+            "/signal_gen/rf_on"                         :"sig_gen_rfon", 
+            "/stealth/fwd_max"                          :"stealth_fwd_max", 
+            "/stealth/fwd_power"                        :"stealth_fwd_pwr", 
+            "/stealth/rev_max"                          :"stealth_rev_max", 
+            "/stealth/rev_power"                        :"stealth_rev_pwr", 
             
         # EPICS
-            "BNMR:HVBIAS:P"                             :"nmr_bias",
-            "BNMR:HVBIAS:PO"                            :"nmr_bias",
-            "BNMR:HVBIAS:POS"                           :"nmr_bias",
-            "BNMR:HVBIAS:POS:"                          :"nmr_bias",
-            "BNMR:HVBIAS:POS:R"                         :"nmr_bias",
-            "BNMR:HVBIAS:POS:RDVO"                      :"nmr_bias",
-            "BNMR:HVBIAS:POS:RDVOL"                     :"nmr_bias",
-            "BNMR:HVBIAS:POS:RDVOL1"                    :"nmr_bias",
+            "BNMR:HVBIAS:P"                             :"nmr_bias", 
+            "BNMR:HVBIAS:PO"                            :"nmr_bias", 
+            "BNMR:HVBIAS:POS"                           :"nmr_bias", 
+            "BNMR:HVBIAS:POS:"                          :"nmr_bias", 
+            "BNMR:HVBIAS:POS:R"                         :"nmr_bias", 
+            "BNMR:HVBIAS:POS:RDVO"                      :"nmr_bias", 
+            "BNMR:HVBIAS:POS:RDVOL"                     :"nmr_bias", 
+            "BNMR:HVBIAS:POS:RDVOL1"                    :"nmr_bias", 
                                                   
-            "BNMR:HVBIAS:N"                             :"nmr_bias_n",
-            "BNMR:HVBIAS:NE"                            :"nmr_bias_n",
-            "BNMR:HVBIAS:NEG"                           :"nmr_bias_n",
-            "BNMR:HVBIAS:NEG:"                          :"nmr_bias_n",
-            "BNMR:HVBIAS:NEG:R"                         :"nmr_bias_n",
-            "BNMR:HVBIAS:NEG:RDVO"                      :"nmr_bias_n",
-            "BNMR:HVBIAS:NEG:RDVOL"                     :"nmr_bias_n",
-            "BNMR:HVBIAS:NEG:RDVOL1"                    :"nmr_bias_n",
+            "BNMR:HVBIAS:N"                             :"nmr_bias_n", 
+            "BNMR:HVBIAS:NE"                            :"nmr_bias_n", 
+            "BNMR:HVBIAS:NEG"                           :"nmr_bias_n", 
+            "BNMR:HVBIAS:NEG:"                          :"nmr_bias_n", 
+            "BNMR:HVBIAS:NEG:R"                         :"nmr_bias_n", 
+            "BNMR:HVBIAS:NEG:RDVO"                      :"nmr_bias_n", 
+            "BNMR:HVBIAS:NEG:RDVOL"                     :"nmr_bias_n", 
+            "BNMR:HVBIAS:NEG:RDVOL1"                    :"nmr_bias_n", 
                                                   
-            "BNQR:HVBIAS:RD"                            :"nqr_bias",
-            "BNQR:HVBIAS:RDVOL"                         :"nqr_bias",
+            "BNQR:HVBIAS:RD"                            :"nqr_bias", 
+            "BNQR:HVBIAS:RDVOL"                         :"nqr_bias", 
                                                   
             "ITE:BIAS:RDVO"                             :"target_bias",  
             "ITE:BIAS:RDVOL"                            :"target_bias",  
             "ITE:BIAS:RDVOLER"                          :"target_bias",  
-            "ITE:BIAS:RDVOLVOL"                         :"target_bias",
-            "ITW:BIAS:R"                                :"target_bias",
-            "ITW:BIAS:RD"                               :"target_bias",
-            "ITW:BIAS:RDV"                              :"target_bias",
-            "ITW:BIAS:RDVO"                             :"target_bias",
-            "ITW:BIAS:RDVOL"                            :"target_bias",
-            "ITW:BIAS:RDVOL1"                           :"target_bias",
-            "ITW:BIAS:RDVOLVOL"                         :"target_bias",
+            "ITE:BIAS:RDVOLVOL"                         :"target_bias", 
+            "ITW:BIAS:R"                                :"target_bias", 
+            "ITW:BIAS:RD"                               :"target_bias", 
+            "ITW:BIAS:RDV"                              :"target_bias", 
+            "ITW:BIAS:RDVO"                             :"target_bias", 
+            "ITW:BIAS:RDVOL"                            :"target_bias", 
+            "ITW:BIAS:RDVOL1"                           :"target_bias", 
+            "ITW:BIAS:RDVOLVOL"                         :"target_bias", 
                                                   
-            "ILE2:BIAS15:R"                             :"bias15",
-            "ILE2:BIAS15:RD"                            :"bias15",
-            "ILE2:BIAS15:RDV"                           :"bias15",
+            "ILE2:BIAS15:R"                             :"bias15", 
+            "ILE2:BIAS15:RD"                            :"bias15", 
+            "ILE2:BIAS15:RDV"                           :"bias15", 
             "ILE2:BIAS15:RDVO"                          :"bias15",    
-            "ILE2:BIAS15:RDVOL"                         :"bias15",
+            "ILE2:BIAS15:RDVOL"                         :"bias15", 
                                                   
-            "ILE2:LAS:RDPO"                             :"las_pwr",
-            "ILE2:LAS:RDPOW"                            :"las_pwr",
-            "ILE2:LAS:RDPOWE"                           :"las_pwr",
-            "ILE2:LAS:RDPOWER"                          :"las_pwr",
-            "ILE2:LAS:RDPOWERL"                         :"las_pwr",
+            "ILE2:LAS:RDPO"                             :"las_pwr", 
+            "ILE2:LAS:RDPOW"                            :"las_pwr", 
+            "ILE2:LAS:RDPOWE"                           :"las_pwr", 
+            "ILE2:LAS:RDPOWER"                          :"las_pwr", 
+            "ILE2:LAS:RDPOWERL"                         :"las_pwr", 
              
-            "ILE2:BIASTUBE:"                            :"biastube",
-            "ILE2:BIASTUBE:V"                           :"biastube",
-            "ILE2:BIASTUBE:VOL"                         :"biastube",
+            "ILE2:BIASTUBE:"                            :"biastube", 
+            "ILE2:BIASTUBE:V"                           :"biastube", 
+            "ILE2:BIASTUBE:VOL"                         :"biastube", 
              
-            "ILE2:DPPLR:CH0:HW:RDVOL"                   :"dopplertube",
+            "ILE2:DPPLR:CH0:HW:RDVOL"                   :"dopplertube", 
              
-            "ILE2A1:HH:CUR"                             :"hh_current",
-            "ILE2A1:HH:RDCU"                            :"hh_current",
-            "ILE2A1:HH:RDCUR"                           :"hh_current",
-            "ILE2A1:HH3:RDCUR"                          :"hh_current",
+            "ILE2A1:HH:CUR"                             :"hh_current", 
+            "ILE2A1:HH:RDCU"                            :"hh_current", 
+            "ILE2A1:HH:RDCUR"                           :"hh_current", 
+            "ILE2A1:HH3:RDCUR"                          :"hh_current", 
             "":""
             }
+    
+    
+    option = {  ''                      :'',
+                
+                'adif'                  :'alpha_diffusion',
+                'ad'                    :'alpha_diffusion',
+                'adiff'                 :'alpha_diffusion',
+                'alpha_diffusion'       :'alpha_diffusion',
+                
+                'atag'                  :'alpha_tagged',
+                'at'                    :'alpha_tagged',
+                'alpha_tagged'          :'alpha_tagged',
+                
+                'b'                     :'backward_counter',
+                'bck'                   :'backward_counter',
+                'backward_counter'      :'backward_counter',
+                'left'                  :'backward_counter',
+                'left_counter'          :'backward_counter',
+                
+                'c'                     :'combined',
+                'com'                   :'combined',
+                'combined'              :'combined',
+                
+                'cntr'                  :'counter',
+                'counter'               :'counter',
+                
+                'dif_c'                 :'difference_combined', 
+                'dc'                    :'difference_combined', 
+                'difference_combined'   :'difference_combined', 
+                
+                'dif_h'                 :'difference_helicity',
+                'dh'                    :'difference_helicity',
+                'difference_helicity'   :'difference_helicity',
+                
+                'f'                     :'forward_counter',
+                'fwd'                   :'forward_counter',
+                'forward_counter'       :'forward_counter',
+                'right'                 :'forward_counter',
+                'right_counter'         :'forward_counter',
+                
+                '+'                     :'positive', 
+                'up'                    :'positive', 
+                'u'                     :'positive', 
+                'p'                     :'positive',
+                'pos'                   :'positive', 
+                'positive'              :'positive',
+                
+                '-'                     :'negative',
+                'down'                  :'negative', 
+                'd'                     :'negative',
+                'n'                     :'negative',
+                'neg'                   :'negative',
+                'negative'              :'negative',
+                
+                'h'                     :'helicity',
+                'hel'                   :'helicity',
+                'helicity'              :'helicity',
+                
+                'r'                     :'raw',
+                'raw'                   :'raw',
+                
+                'raw_c'                 :'raw_combined',
+                'rc'                    :'raw_combined',
+                'raw_combined'          :'raw_combined',
+                
+                'raw_h'                 :'raw_helicity',
+                'rh'                    :'raw_helicity',
+                'raw_helicity'          :'raw_helicity',
+                
+                'sl_c'                  :'slope_combined',
+                'slc'                   :'slope_combined', 
+                'sc'                    :'slope_combined',
+                'slope_combined'        :'slope_combined',
+                
+                'sl_h'                  :'slope_helicity',
+                'slh'                   :'slope_helicity',
+                'sh'                    :'slope_helicity',
+                'slope_helicity'        :'slope_helicity',
+    }
     
     # set environment variable same to get data archive location
     # should point to something like
@@ -363,11 +442,11 @@ class bdata(mdata):
     evar_bnqr = "BNQR_ARCHIVE"
     
     # ======================================================================= #
-    def __init__(self,run_number,year=None,filename=""):
+    def __init__(self, run_number, year=None, filename=""):
         """Constructor. Reads file, stores and sorts data."""
             
         # convert dkeys keys to lower case
-        bdata.dkeys = {k.lower():i for k,i in self.dkeys.items()}
+        bdata.dkeys = {k.lower():i for k, i in self.dkeys.items()}
             
         # Get the current year
         if year is None:   year = datetime.datetime.now().year
@@ -388,7 +467,7 @@ class bdata(mdata):
                 
                 use_default_dir = not self.evar_bnmr in os.environ
                 if use_default_dir:
-                    directory = os.path.join(bd._mud_data,spect_dir)
+                    directory = os.path.join(bd._mud_data, spect_dir)
                 else:
                     directory = os.environ[self.evar_bnmr]
                     
@@ -396,24 +475,24 @@ class bdata(mdata):
                 
                 use_default_dir = not self.evar_bnqr in os.environ
                 if use_default_dir:
-                    directory = os.path.join(bd._mud_data,spect_dir)
+                    directory = os.path.join(bd._mud_data, spect_dir)
                 else:
                     directory = os.environ[self.evar_bnqr]
                     
             # finalize file name
             run = '%06d.msr' % run_number
-            filename = os.path.join(directory,str(year),run)
+            filename = os.path.join(directory, str(year), run)
             
             # if file does not exist, try to fetch from web
             if not os.path.isfile(filename):
                 
                 # make directory 
-                os.makedirs(os.path.join(directory,str(year)),exist_ok=True)
+                os.makedirs(os.path.join(directory, str(year)), exist_ok=True)
                 
                 # make url
-                url = '/'.join(('http://musr.ca/mud/data',
-                                spect_dir.upper(),
-                                str(year),
+                url = '/'.join(('http://musr.ca/mud/data', 
+                                spect_dir.upper(), 
+                                str(year), 
                                 run))
             
                 # get data
@@ -423,20 +502,20 @@ class bdata(mdata):
                                 'Attempted download from musr.ca failed.')
                 
                 # write to file
-                with open(filename,'wb') as fid:
+                with open(filename, 'wb') as fid:
                     fid.write(webfile.content)
                 
                 # let users know what happened
-                warnings.warn('Run %d (%d) not found '% (run_number,year)+\
+                warnings.warn('Run %d (%d) not found '% (run_number, year)+\
                               'locally. Fetched and saved to %s '%directory+\
-                              'from musr.ca.',
+                              'from musr.ca.', 
                               category=Warning)
                         
         # Open and read file
         super().__init__(filename)
         
         # cast histogram data to floats
-        for key,hist in self.hist.items():
+        for key, hist in self.hist.items():
             self.hist[key].data = hist.data.astype(np.float64)
         
         # Sort independent variables into dictionaries by title
@@ -444,7 +523,7 @@ class bdata(mdata):
         self.camp = mdict()
         self.epics = mdict()
         
-        if hasattr(self,'ivar'):
+        if hasattr(self, 'ivar'):
             
             for v in self.ivar.values(): 
                 try:
@@ -454,11 +533,11 @@ class bdata(mdata):
                         self.camp[bdata.dkeys[v.title.lower()]] = v
                     else:
                         self.epics[bdata.dkeys[v.title.lower()]] = v
-                except (KeyError,IndexError):
+                except (KeyError, IndexError):
                         message = '"%s" not found in dkeys ("%s" in "%s"). ' +\
                                     "Data in list, but not sorted to dict."
-                        message = message % (v.title,v.description,v.units)
-                        warnings.warn(message,RuntimeWarning,stacklevel=2)
+                        message = message % (v.title, v.description, v.units)
+                        warnings.warn(message, RuntimeWarning, stacklevel=2)
             
         # Add missing run mode for old runs
         if year < 2005 and not self.mode and self.method == 'TI-bNMR':
@@ -473,22 +552,22 @@ class bdata(mdata):
             
         # Fix histogram titles for old runs
         if year == 2003 and 'FREQ' in self.hist.keys(): 
-            keymap = {'FREQ':'Frequency',
-                      'Bp':'B+',
-                      'Fp':'F+',
-                      'Bm':'B-',
-                      'Fm':'F-',
-                      'FluM':'FluM2',
-                      'PolLp':'L+',
-                      'PolRp':'R+',
-                      'PolLm':'L-',
-                      'PolRm':'R-',
-                      'NBMBp':'NBMB+',
-                      'NBMFp':'NBMF+',
-                      'NBMBm':'NBMB-',
-                      'NBMFm':'NBMF-',
+            keymap = {'FREQ':'Frequency', 
+                      'Bp':'B+', 
+                      'Fp':'F+', 
+                      'Bm':'B-', 
+                      'Fm':'F-', 
+                      'FluM':'FluM2', 
+                      'PolLp':'L+', 
+                      'PolRp':'R+', 
+                      'PolLm':'L-', 
+                      'PolRm':'R-', 
+                      'NBMBp':'NBMB+', 
+                      'NBMFp':'NBMF+', 
+                      'NBMBm':'NBMB-', 
+                      'NBMFm':'NBMF-', 
                       }
-            self.hist = mdict({i:self.hist[k] for k,i in keymap.items()})
+            self.hist = mdict({i:self.hist[k] for k, i in keymap.items()})
             for k in self.hist.keys():
                 self.hist[k].title = k
             
@@ -496,18 +575,18 @@ class bdata(mdata):
         self._bdata_initialised = True
 
     # ======================================================================= #
-    def __getattr__(self,name):
+    def __getattr__(self, name):
         
         try:
             # fetch from top level
-            return getattr(object,name)
+            return getattr(object, name)
         except AttributeError as err:
             
             # fetching of second level
-            if hasattr(self.camp,name): return getattr(self.camp,name)
-            if hasattr(self.epics,name):return getattr(self.epics,name)
-            if hasattr(self.ppg,name):  return getattr(self.ppg,name)
-            if hasattr(self.hist,name): return getattr(self.hist,name)
+            if hasattr(self.camp, name): return getattr(self.camp, name)
+            if hasattr(self.epics, name):return getattr(self.epics, name)
+            if hasattr(self.ppg, name):  return getattr(self.ppg, name)
+            if hasattr(self.hist, name): return getattr(self.hist, name)
                     
             # nothing worked - raise error
             raise AttributeError(err) from None
@@ -527,30 +606,30 @@ class bdata(mdata):
                 if key[0] == '_': continue
                 
                 # exceptions
-                if key in ('ivar','sclr'):
-                    items.append([key,d[key].__class__])                
+                if key in ('ivar', 'sclr'):
+                    items.append([key, d[key].__class__])                
                     
                 # non iterables and mdict objects
-                elif not hasattr(d[key],'__iter__') or d[key].__class__ == mdict:
-                    items.append([key,d[key]])                
+                elif not hasattr(d[key], '__iter__') or d[key].__class__ == mdict:
+                    items.append([key, d[key]])                
                 
                 # strings
-                elif d[key].__class__ in (str,np.str_):
-                    items.append([key,d[key]])                
+                elif d[key].__class__ in (str, np.str_):
+                    items.append([key, d[key]])                
                 
                 # misc objects
                 else:
-                    items.append([key,d[key].__class__])
+                    items.append([key, d[key].__class__])
                 
                             
-            m = max(map(len,dkeys)) + 1
+            m = max(map(len, dkeys)) + 1
             s = '\n'.join([k.rjust(m)+': '+repr(v) for k, v in sorted(items)])
             return s
         else:
             return self.__class__.__name__ + "()"
         
     # ======================================================================= #
-    def __setattr__(self,name,value):
+    def __setattr__(self, name, value):
         """Allow setting attributes only when initializing"""
         
         # this test allows attributes to be set in the __init__ method
@@ -564,45 +643,80 @@ class bdata(mdata):
             dict.__setattr__(self, name, value)
     
     # ======================================================================= #
-    def _get_area_data(self,nbm=False):
+    def _get_area_data(self, nbm=False):
         """Get histogram list based on area type. 
-        List pattern: [type1_hel+,type1_hel-,type2_hel+,type2_hel-]
+        List pattern: [type1_hel+, type1_hel-, type2_hel+, type2_hel-]
         where type1/2 = F/B or R/L in that order.
         """
         
         hist = self.hist
         
         if self.mode == '1n' or nbm:
-            data = [hist['NBMF+'].data,\
-                    hist['NBMF-'].data,\
-                    hist['NBMB+'].data,\
+            data = [hist['NBMF+'].data, \
+                    hist['NBMF-'].data, \
+                    hist['NBMB+'].data, \
                     hist['NBMB-'].data]
             
         elif self.area == 'BNMR':
-            data = [hist['F+'].data,\
-                    hist['F-'].data,\
-                    hist['B+'].data,\
+            data = [hist['F+'].data, \
+                    hist['F-'].data, \
+                    hist['B+'].data, \
                     hist['B-'].data]
         
         elif self.area == 'BNQR':
-            data = [hist['R+'].data,\
-                    hist['R-'].data,\
-                    hist['L+'].data,\
+            data = [hist['R+'].data, \
+                    hist['R-'].data, \
+                    hist['L+'].data, \
                     hist['L-'].data]
         else:
             data = []
         
         if self.mode == '2h':
-            data.extend([hist['AL1+'].data,hist['AL1-'].data,
-                         hist['AL0+'].data,hist['AL0-'].data,
-                         hist['AL3+'].data,hist['AL3-'].data,
-                         hist['AL2+'].data,hist['AL2-'].data])
+            data.extend([hist['AL1+'].data, hist['AL1-'].data, 
+                         hist['AL0+'].data, hist['AL0-'].data, 
+                         hist['AL3+'].data, hist['AL3-'].data, 
+                         hist['AL2+'].data, hist['AL2-'].data])
         
         # copy
         return [np.copy(d) for d in data]
 
     # ======================================================================= #
-    def _get_asym_hel(self,d):
+    def _get_asym_cntr(self, d):
+        """
+            Find the asymmetry of each counter using the asymmetries. 
+        """
+        
+        # get data [1+ 1- 2+ 2-] ---> [1+ 1- 2+  2-]
+        d0 = d[0]; d1 = d[1]; d2 = d[2]; d3 = d[3]
+
+        # pre-calcs
+        denom1 = d0+d1; 
+        denom2 = d2+d3
+        
+        # check for div by zero
+        denom1[denom1==0] = np.nan          
+        denom2[denom2==0] = np.nan
+        
+        # asymmetries in both helicities
+        asym = [(d0-d1)/denom1, 
+                (d2-d3)/denom2]
+                    
+        # errors 
+        # https://www.wolframalpha.com/input/?i=%E2%88%9A(F*(derivative+of+((F-B)%2F(F%2BB))+with+respect+to+F)%5E2+%2B+B*(derivative+of+((F-B)%2F(F%2BB))+with+respect+to+B)%5E2)
+        asym_err = [2*np.sqrt(d0*d1/np.power(denom1, 3)), 
+                    2*np.sqrt(d2*d3/np.power(denom2, 3))]
+        
+        # remove nan            
+        for i in range(2):
+            asym[i][np.isnan(asym[i])] = 0.
+            asym_err[i][np.isnan(asym_err[i])] = 0.
+        
+        # exit
+        return [[asym[0], asym_err[0]],  
+                [asym[1], asym_err[1]]]  
+    
+    # ======================================================================= #
+    def _get_asym_hel(self, d):
         """
             Find the asymmetry of each helicity. 
         """
@@ -619,13 +733,13 @@ class bdata(mdata):
         denom2[denom2==0] = np.nan
         
         # asymmetries in both helicities
-        asym_hel = [(d0-d1)/denom1,
+        asym_hel = [(d0-d1)/denom1, 
                     (d2-d3)/denom2]
                     
         # errors 
         # https://www.wolframalpha.com/input/?i=%E2%88%9A(F*(derivative+of+((F-B)%2F(F%2BB))+with+respect+to+F)%5E2+%2B+B*(derivative+of+((F-B)%2F(F%2BB))+with+respect+to+B)%5E2)
-        asym_hel_err = [2*np.sqrt(d0*d1/np.power(denom1,3)),
-                        2*np.sqrt(d2*d3/np.power(denom2,3))]
+        asym_hel_err = [2*np.sqrt(d0*d1/np.power(denom1, 3)), 
+                        2*np.sqrt(d2*d3/np.power(denom2, 3))]
         
         # remove nan            
         for i in range(2):
@@ -633,11 +747,11 @@ class bdata(mdata):
             asym_hel_err[i][np.isnan(asym_hel_err[i])] = 0.
         
         # exit
-        return [[asym_hel[0],asym_hel_err[0]],  
-                [asym_hel[1],asym_hel_err[1]]]  
+        return [[asym_hel[0], asym_hel_err[0]],  
+                [asym_hel[1], asym_hel_err[1]]]  
                 
     # ======================================================================= #
-    def _get_asym_comb(self,d):
+    def _get_asym_comb(self, d):
         """
         Find the combined asymmetry for slr runs. Elegant 4-counter method.
         """
@@ -667,10 +781,10 @@ class bdata(mdata):
         asym_comb[np.isnan(asym_comb)] = 0.
         asym_comb_err[np.isnan(asym_comb_err)] = 0.
         
-        return [asym_comb,asym_comb_err]
+        return [asym_comb, asym_comb_err]
 
     # ======================================================================= #
-    def _get_asym_alpha(self,a,b):
+    def _get_asym_alpha(self, a, b):
         """
             Find alpha diffusion ratios from cryo oven with alpha detectors. 
             a: list of alpha detector histograms (each helicity)
@@ -684,10 +798,10 @@ class bdata(mdata):
             a = a[:2]
             
         # sum counts in alpha detectors
-        asum = np.sum(a,axis=0)
+        asum = np.sum(a, axis=0)
         
         # sum counts in beta detectors
-        bsum = np.sum(b,axis=0)
+        bsum = np.sum(b, axis=0)
         
         # check for dividing by zero 
         asum[asum == 0] = np.nan
@@ -699,10 +813,10 @@ class bdata(mdata):
         # errors
         dasym = asym*np.sqrt(1/asum + 1/bsum)
         
-        return [asym,dasym]
+        return [asym, dasym]
 
     # ======================================================================= #
-    def _get_asym_alpha_tag(self,a,b):
+    def _get_asym_alpha_tag(self, a, b):
         """
             Find asymmetry from cryo oven with alpha detectors. 
             a: list of alpha detector histograms (each helicity)  
@@ -726,12 +840,12 @@ class bdata(mdata):
         com_reg =       self._get_asym_comb(b)
 
         # make output
-        return (hel_coin,hel_no_coin,hel_reg,com_coin,com_no_coin,com_reg)
+        return (hel_coin, hel_no_coin, hel_reg, com_coin, com_no_coin, com_reg)
 
     # ======================================================================= #
-    def _get_1f_sum_scans(self,d,freq):
+    def _get_1f_sum_scans(self, d, freq):
         """
-            Sum counts in each frequency bin over 1f scans. 
+            Sum counts in each frequency bin over 1f scans, excluding zero. 
         """
         
         # make data frame
@@ -743,7 +857,25 @@ class bdata(mdata):
         x = df.index.values
         d = df.values.T
         
-        return (x,d)
+        return (x, d)
+        
+    # ======================================================================= #
+    def _get_1f_mean_scans(self, d, freq):
+        """
+            Average counts in each frequency bin over 1f scans. 
+        """
+        
+        # make data frame
+        df = pd.DataFrame({i:d[i] for i in range(len(d))})
+        df['x'] = freq
+        
+        # combine scans: values with same frequency 
+        df = df.groupby('x').apply(lambda i: i[i>0].mean())
+        df.drop('x', axis='columns', inplace=True)
+        x = df.index.values
+        d = df.values.T
+        
+        return (x, d)
         
     # ======================================================================= #
     def _get_2e_asym(self):
@@ -755,8 +887,8 @@ class bdata(mdata):
         # get needed PPG parameters for splitting 1D histos into 2D histos
         try:        
             # get frequency vector
-            freq = np.arange(self._get_ppg('freq_start'),\
-                        self._get_ppg('freq_stop')+self._get_ppg('freq_incr'),\
+            freq = np.arange(self._get_ppg('freq_start'), \
+                        self._get_ppg('freq_stop')+self._get_ppg('freq_incr'), \
                         self._get_ppg('freq_incr'))
                              
             # number of dwelltimes per frequency bin 
@@ -788,15 +920,15 @@ class bdata(mdata):
         data = np.array(self._get_area_data()) # [[fp], [fm], [bp], [bm]]
         
         # discared initial bad bins, and beam-off trailing bins
-        data = data[:,start_bin:len(freq)*ndwell+start_bin]
+        data = data[:, start_bin:len(freq)*ndwell+start_bin]
         
         # split data by frequency
         nsplit = len(data[0])/ndwell
         
-        fp = np.array(np.split(data[0],nsplit))
-        fm = np.array(np.split(data[1],nsplit))
-        bp = np.array(np.split(data[2],nsplit))
-        bm = np.array(np.split(data[3],nsplit))
+        fp = np.array(np.split(data[0], nsplit))
+        fm = np.array(np.split(data[1], nsplit))
+        bp = np.array(np.split(data[2], nsplit))
+        bm = np.array(np.split(data[3], nsplit))
         
         # get raw asymmetries 
         asym_p_2cntr = (bp-fp)/(bp+fp)      # two counter
@@ -810,14 +942,14 @@ class bdata(mdata):
         asym_4cntr_err = r*np.sqrt(1./bp+1./bm+1./fp+1./fm)/((r+1)**2)
 
         # save to output
-        out['raw_p'] = np.array([asym_p_2cntr,asym_p_2cntr_err])
-        out['raw_n'] = np.array([asym_m_2cntr,asym_m_2cntr_err])
-        out['raw_c'] = np.array([asym_4cntr,asym_4cntr_err])
+        out['raw_p'] = np.array([asym_p_2cntr, asym_p_2cntr_err])
+        out['raw_n'] = np.array([asym_m_2cntr, asym_m_2cntr_err])
+        out['raw_c'] = np.array([asym_4cntr, asym_4cntr_err])
 
-        # wrap asymmetry arrays into one for calculations [p,m,4]
+        # wrap asymmetry arrays into one for calculations [p, m, 4]
         # indexing is now [pm4][freq][time bin]
         asym     = np.array([asym_p_2cntr,    asym_m_2cntr,    asym_4cntr])
-        asym_err = np.array([asym_p_2cntr_err,asym_m_2cntr_err,asym_4cntr_err])
+        asym_err = np.array([asym_p_2cntr_err, asym_m_2cntr_err, asym_4cntr_err])
 
         # compute differenced asymmetries via slopes from weighted least squares 
         # minimization.
@@ -835,18 +967,18 @@ class bdata(mdata):
         
             # sum over values i < mid_time_i within each asymmetry and frequency 
             # Indexing: [pm4][freq]
-            w_pre   = np.sum(w  [:,:,:mid_time_i],2)    
-            wx_pre  = np.sum(wx [:,:,:mid_time_i],2)
-            wy_pre  = np.sum(wy [:,:,:mid_time_i],2)
-            wxy_pre = np.sum(wxy[:,:,:mid_time_i],2)
-            wxx_pre = np.sum(wxx[:,:,:mid_time_i],2)
+            w_pre   = np.sum(w  [:, :, :mid_time_i], 2)    
+            wx_pre  = np.sum(wx [:, :, :mid_time_i], 2)
+            wy_pre  = np.sum(wy [:, :, :mid_time_i], 2)
+            wxy_pre = np.sum(wxy[:, :, :mid_time_i], 2)
+            wxx_pre = np.sum(wxx[:, :, :mid_time_i], 2)
             
             # sum over values i > mid_time_i
-            w_pst   = np.sum(w  [:,:,-mid_time_i:],2)
-            wx_pst  = np.sum(wx [:,:,-mid_time_i:],2)
-            wy_pst  = np.sum(wy [:,:,-mid_time_i:],2)
-            wxy_pst = np.sum(wxy[:,:,-mid_time_i:],2)
-            wxx_pst = np.sum(wxx[:,:,-mid_time_i:],2)
+            w_pst   = np.sum(w  [:, :, -mid_time_i:], 2)
+            wx_pst  = np.sum(wx [:, :, -mid_time_i:], 2)
+            wy_pst  = np.sum(wy [:, :, -mid_time_i:], 2)
+            wxy_pst = np.sum(wxy[:, :, -mid_time_i:], 2)
+            wxx_pst = np.sum(wxx[:, :, -mid_time_i:], 2)
             
             # calculate slopes and intercepts
             delta_pre = w_pre*wxx_pre - wx_pre**2
@@ -868,24 +1000,24 @@ class bdata(mdata):
                                       (dsl_pre**2 + dsl_pst**2) * mid_time**2)
             
             # save to output        
-            out['sl_p'] = np.array([asym_slopes[0],asym_slopes_err[0]])
-            out['sl_n'] = np.array([asym_slopes[1],asym_slopes_err[1]])
-            out['sl_c'] = np.array([asym_slopes[2],asym_slopes_err[2]])
+            out['sl_p'] = np.array([asym_slopes[0], asym_slopes_err[0]])
+            out['sl_n'] = np.array([asym_slopes[1], asym_slopes_err[1]])
+            out['sl_c'] = np.array([asym_slopes[2], asym_slopes_err[2]])
         
         # calculate asymmetry using differences
-        asym_diff = asym[:,:,mid_time_i+1] - asym[:,:,mid_time_i-1]
-        asym_diff_err = np.sqrt(asym_err[:,:,mid_time_i+1]**2+\
-                                asym_err[:,:,mid_time_i-1]**2)
+        asym_diff = asym[:, :, mid_time_i+1] - asym[:, :, mid_time_i-1]
+        asym_diff_err = np.sqrt(asym_err[:, :, mid_time_i+1]**2+\
+                                asym_err[:, :, mid_time_i-1]**2)
         
         # save to output
-        out['dif_p'] = np.array([asym_diff[0],asym_diff_err[0]])
-        out['dif_n'] = np.array([asym_diff[1],asym_diff_err[1]])
-        out['dif_c'] = np.array([asym_diff[2],asym_diff_err[2]])   
+        out['dif_p'] = np.array([asym_diff[0], asym_diff_err[0]])
+        out['dif_n'] = np.array([asym_diff[1], asym_diff_err[1]])
+        out['dif_c'] = np.array([asym_diff[2], asym_diff_err[2]])   
             
         return out
 
     # ======================================================================= #
-    def _get_ppg(self,name):
+    def _get_ppg(self, name):
         """Get ppg parameter mean value"""
         return self.ppg[name].mean
     
@@ -906,14 +1038,14 @@ class bdata(mdata):
         return self.hist[xlabel].data
     
     # ======================================================================= #
-    def _rebin(self,xdx,rebin):
+    def _rebin(self, xdx, rebin):
         """
             Rebin array x with weights 1/dx**2 by factor rebin.
             
             Inputs: 
-                xdx = [x,dx]
+                xdx = [x, dx]
                 rebin = int
-            Returns [x,dx] after rebinning. 
+            Returns [x, dx] after rebinning. 
         """
 
         x = xdx[0]
@@ -922,7 +1054,7 @@ class bdata(mdata):
         
         # easy end condition
         if rebin <= 1:
-            return (x,dx)
+            return (x, dx)
         
         # Rebin Discard unused bins
         lenx = len(x)
@@ -933,7 +1065,7 @@ class bdata(mdata):
         dx[dx==0] = np.inf
         
         # weighted mean
-        for i in np.arange(0,lenx,rebin):
+        for i in np.arange(0, lenx, rebin):
             w = 1./dx[i:i+rebin-1]**2
             wsum = np.sum(w)
             
@@ -943,13 +1075,13 @@ class bdata(mdata):
             else:
                 x_rebin.append(np.sum(x[i:i+rebin-1]*w)/wsum)
                 dx_rebin.append(1./wsum**0.5)
-        return np.array([x_rebin,dx_rebin])
+        return np.array([x_rebin, dx_rebin])
             
     # ======================================================================= #
-    def asym(self,option="",omit="",rebin=1,hist_select='',nbm=False):
+    def asym(self, option="", omit="", rebin=1, hist_select='', nbm=False):
         """Calculate and return the asymmetry for various run types. 
            
-        usage: asym(option="",omit="",rebin=1,hist_select='',nbm=False)
+        usage: asym(option="", omit="", rebin=1, hist_select='', nbm=False)
             
         Inputs:
             option:         see below for details
@@ -959,7 +1091,7 @@ class bdata(mdata):
                                 reduce array length by a factor of rebin. 
             hist_select:    string to specify which histograms get combined into 
                                 making the asymmetry calculation. Deliminate 
-                                with [,] or [;]. Histogram names cannot 
+                                with [, ] or [;]. Histogram names cannot 
                                 therefore contain either of these characters.
             nbm:            if True, use neutral beams in calculations
             
@@ -968,10 +1100,14 @@ class bdata(mdata):
             Split helicity      (NMR): (F-B)/(F+B) for each
             Combined helicity   (NMR): (r-1)/(r+1)
                 where r = sqrt([(B+)(F-)]/[(F+)(B-)])
+            Split counter       (NMR): (+ - -)/(+ + -) for each F, B
+            
+            
             
             Split helicity      (NQR): (R-L)/(R+L) for each
             Combined helicity   (NQR): (r-1)/(r+1)
                 where r = sqrt([(L+)(R-)]/[(R+)(L-)])
+            Split counter       (NMR): (+ - -)/(+ + -) for each R, L
             
             Alpha diffusion     (NQR) sum(AL0)/sum(L+R)
             Alpha tagged        (NQR) same as NQR, but using the tagged counters
@@ -984,17 +1120,17 @@ class bdata(mdata):
             
             for each helicity, then 
                                        |--|  |--|   paired counter location
-                        hist_select = 'F+,F-,B+,B-'
+                        hist_select = 'F+, F-, B+, B-'
                                         |-----|       paired helicities
                                            |-----|
             
             for alpha diffusion calculations append the two alpha counters
             
-                hist_select = 'R+,R-,L+,L-,A+,A-
+                hist_select = 'R+, R-, L+, L-, A+, A-
             
             for alpha tagged calculations do the following
             
-                hist_select = 'R+,R-,L+,L-,TR+,TR-,TL+,TL-,nTR+,nTR-,nTL+,nTL-'
+                hist_select = 'R+, R-, L+, L-, TR+, TR-, TL+, TL-, nTR+, nTR-, nTL+, nTL-'
                     
                 where TR is the right counter tagged (coincident) with alphas, 
                       TL is the left  counter tagged with alphas, 
@@ -1016,7 +1152,11 @@ class bdata(mdata):
                 Scan Combination:
                     Multiscans are considered as a single scan with long 
                     integration time. Histogram bins are summed according to 
-                    their frequency bin, errors are Poisson.
+                    their frequency bin, errors are Poissonian.
+                    
+                    In the case of split counter asymmetries, we take the mean
+                    of the non-zero counts in each bin, with errors treated still
+                    as Possionian.
             
             1N:
                 Same as 1F. Uses the neutral beam monitor values to calculate 
@@ -1033,7 +1173,7 @@ class bdata(mdata):
                     dif: let 0 be the index of the centermost scan in time. dif 
                         asymmetries are then calculated via raw[i+1]-raw[i-1], 
                         where "raw" is as calculated in the above line, for each 
-                        of the three types: +,-,combined 
+                        of the three types: +, -, combined 
                     sl: take a weighted least squares fit to the two bins prior 
                         and the two bins after the center bin (in time). For 
                         each find the value of the asymmetry at the center time 
@@ -1044,23 +1184,23 @@ class bdata(mdata):
             SLR DESCRIPTIONS --------------------------------------------------
             
             "":     dictionary of 2D numpy arrays keyed by 
-                        {"p","n","c","time_s"} for each helicity and combination 
-                        (val,err). Default return state for unrecognized options
-            "h":    dictionary 2D numpy arrays keyed by {"p","n","time_s"} for 
-                        each helicity (val,err).
-            "p":    2D np array of up helicity state [time_s,val,err].
-            "n":    2D np array of down helicity state [time_s,val,err].
-            "c":    2D np array of combined asymmetry [time_s,val,err].
-            "ad":   2D np array of alpha diffusion ratio [time_s,val,err].
-            "at":   dictionary of alpha tagged asymmetries key:[val,err]. 
+                        {"p", "n", "c", "time_s"} for each helicity and combination 
+                        (val, err). Default return state for unrecognized options
+            "h":    dictionary 2D numpy arrays keyed by {"p", "n", "time_s"} for 
+                        each helicity (val, err).
+            "p":    2D np array of up helicity state [time_s, val, err].
+            "n":    2D np array of down helicity state [time_s, val, err].
+            "c":    2D np array of combined asymmetry [time_s, val, err].
+            "ad":   2D np array of alpha diffusion ratio [time_s, val, err].
+            "at":   dictionary of alpha tagged asymmetries key:[val, err]. 
                     Keys:
                         
                         'time_s'               : 1D array of times in seconds   
-                        'p_wiA','n_wiA','c_wiA': coincident with alpha
-                        'p_noA','n_noA','c_noA': coincident with no alpha
-                        'p_noT','n_noT','c_noT': untagged
+                        'p_wiA', 'n_wiA', 'c_wiA': coincident with alpha
+                        'p_noA', 'n_noA', 'c_noA': coincident with no alpha
+                        'p_noT', 'n_noT', 'c_noT': untagged
                         
-                where p,n,c refer to pos helicity, neg helicity, combined 
+                where p, n, c refer to pos helicity, neg helicity, combined 
                 helicity respectively. Only in 2h mode. 
                         
             
@@ -1069,29 +1209,29 @@ class bdata(mdata):
                 all options can include a space deliminated list of bins or 
                 ranges of bins which will be omitted. ex: "raw 1 2 5-20 3"
             
-            "":     dictionary of 2D numpy arrays keyed by {p,n,c,freq} for each 
-                        helicity and combination [val,err]. Default return state 
+            "":     dictionary of 2D numpy arrays keyed by {p, n, c, freq} for each 
+                        helicity and combination [val, err]. Default return state 
                         for unrecognized options.
-            "r":    Dictionary of 2D numpy arrays keyed by {p,n} for each 
-                        helicity (val,err), but listed by bin, not combined by 
+            "r":    Dictionary of 2D numpy arrays keyed by {p, n} for each 
+                        helicity (val, err), but listed by bin, not combined by 
                         frequency. 
             "h":    get unshifted +/- helicity scan-combined asymmetries as a 
-                        dictionary {'p':(val,err),'n':(val,err),'freq'}
+                        dictionary {'p':(val, err), 'n':(val, err), 'freq'}
             "p":    get pos helicity states as tuple, combined by frequency 
-                        (freq,val,err)
+                        (freq, val, err)
             "n":    similar to p but for negative helicity states
-            "c":    get combined helicity states as tuple (freq,val,err)
+            "c":    get combined helicity states as tuple (freq, val, err)
             
                         
             2E DESCRIPTIONS ---------------------------------------------------
             
-            "sc":   get slope combined helicity states as tuple (freq,val,err)
-            "dc":   get difference combined helicity states as tuple (freq,val,err)
-            "rc":   get raw combined helicity states as tuple (freq,time,val,err)
+            "sc":   get slope combined helicity states as tuple (freq, val, err)
+            "dc":   get difference combined helicity states as tuple (freq, val, err)
+            "rc":   get raw combined helicity states as tuple (freq, time, val, err)
             
                 If no options, returns a dictionary with the keys: 
              
-            'dif_p':    [val,err][frequency] of pos. helicity asymmetry 
+            'dif_p':    [val, err][frequency] of pos. helicity asymmetry 
             'dif_n':    [ve][f] of negative helicity asymmetry
             'dif_c':    [ve][f] of combined helicity asymmetry
             
@@ -1110,33 +1250,21 @@ class bdata(mdata):
         """
         
         # check rebin factor
-        if type(rebin) not in (int,np.int64) or rebin < 1:
+        if type(rebin) not in (int, np.int64) or rebin < 1:
             raise RuntimeError('Rebinning factor must be int >= 1.')
         
         # check for additonal options (1F)
         if omit != '':
-            further_options = list(map(str.strip,omit.split(' ')))
+            further_options = list(map(str.strip, omit.split(' ')))
         else:
-            further_options = list(map(str.strip,option.split(' ')[1:]))
+            further_options = list(map(str.strip, option.split(' ')[1:]))
         option = option.split(' ')[0].strip()
         
         # Option reduction
         option = option.lower()
-        if option == ""                                     : pass
-        elif option in ('+','up','u','p','pos','positive')  : option = 'positive'
-        elif option in ('-','down','d','n','neg','negative'): option = 'negative'
-        elif option in ("c","com","combined")               : option = "combined"
-        elif option in ("h","hel","helicity")               : option = 'helicity'
-        elif option in ("r","raw")                          : option = 'raw'
-        elif option in ('adif','ad','adiff')                : option = 'alpha_diffusion'
-        elif option in ('atag','at')                        : option = 'alpha_tagged'
-        elif option in ('sl_c','slope_combined','slc','sc') : option = 'slope_combined'
-        elif option in ('dif_c','difference_combined','dc') : option = 'difference_combined'
-        elif option in ('raw_c','raw_combined','rc')        : option = 'raw_combined'
-        elif option in ('sl_h','slope_helicity','slh','sh') : option = 'slope_helicity'
-        elif option in ('dif_h','difference_helicity','dh') : option = 'difference_helicity'
-        elif option in ('raw_h','raw_helicity','rh')        : option = 'raw_helicity'
-        else:
+        try:
+            option = self.option[option]
+        except KeyError:
             raise RuntimeError("Option not recognized.")
         
         # get data
@@ -1144,14 +1272,14 @@ class bdata(mdata):
             
             # split into parts
             hist_select_temp = []
-            for histname in hist_select.split(','):
+            for histname in hist_select.split(', '):
                 hist_select_temp.extend(histname.split(';'))
             hist_select = [h.strip() for h in hist_select_temp]
             
             # check for user error
             if len(hist_select) < 4:
                 raise RuntimeError('hist_select must be a string of at least '+\
-                        'four [,]-seperated or [;]-seperated histogram names')
+                        'four [, ]-seperated or [;]-seperated histogram names')
             
             # get data
             d = [self.hist[h].data for h in hist_select]
@@ -1168,7 +1296,7 @@ class bdata(mdata):
             d = d[:4]
         
         # SLR -----------------------------------------------------------------
-        if self.mode in ("20",'2h'):
+        if self.mode in ("20", '2h'):
             
             # get the number of prebeam bins
             try:
@@ -1184,7 +1312,7 @@ class bdata(mdata):
                 bad_ppg_prebeam = False
                 for i in range(len(d)):
                     d[i][d[i]<0] = 0.
-                    d[i] = np.delete(d[i],np.arange(n_prebeam))
+                    d[i] = np.delete(d[i], np.arange(n_prebeam))
                     
                     # check that prebeams were set correctly 
                     # (in 2019 some NQR run are off by one)
@@ -1193,62 +1321,71 @@ class bdata(mdata):
                 
                 # if prebeams not set properly, remove the first bin (off by one error)
                 if bad_ppg_prebeam:
-                    warnings.warn("%d.%d: Detected a " % (self.year,self.run)+\
+                    warnings.warn("%d.%d: Detected a " % (self.year, self.run)+\
                         'mismatch between the ppg prebeams setting and the '+\
                         'histogram counts. Removing an extra bin to account '+\
                         'for a prebeam off-by-one error (known to exist for '+\
                         '2018-2020 B-NQR 20 and 2e runs)')
                                                     
                     for i in range(len(d)):
-                        d[i] = np.delete(d[i],[0])
+                        d[i] = np.delete(d[i], [0])
                         
             # do alpha background subtractions
             if self.mode == '2h':    
                 for i in range(len(d_alpha)):
                     d_alpha[i][d_alpha[i]<0] = 0.
-                    d_alpha[i] = np.delete(d_alpha[i],np.arange(n_prebeam))
+                    d_alpha[i] = np.delete(d_alpha[i], np.arange(n_prebeam))
                 
             # get helicity data
-            if option != 'combined':
+            if option not in ('combined', 'forward_counter', 'backward_counter'):
                 h = np.array(self._get_asym_hel(d))
+            elif option in ('forward_counter', 'backward_counter'):
+                h = np.array(self._get_asym_cntr(d))
                 
             # rebin time
             time = (np.arange(len(d[0]))+0.5)*self._get_ppg('dwelltime')/1000
             
             if rebin > 1:
                 len_t = len(time)
-                new_time = (np.average(time[i:i+rebin-1]) for i in np.arange(0,len_t,rebin))
-                time = np.fromiter(new_time,dtype=float,count=int(len_t/rebin))
+                new_time = (np.average(time[i:i+rebin-1]) for i in np.arange(0, len_t, rebin))
+                time = np.fromiter(new_time, dtype=float, count=int(len_t/rebin))
 
             # mode switching
-            if option == 'positive': # ---------------------------------------
-                return np.vstack([time,self._rebin(h[0],rebin)])
+            if option in ('positive', 'forward_counter'): # ---------------------------------------
+                return np.vstack([time, self._rebin(h[0], rebin)])
                 
-            elif option == 'negative': # -------------------------------------
-                return np.vstack([time,self._rebin(h[1],rebin)])
-
+            elif option in ('negative', 'backward_counter'): # -------------------------------------
+                return np.vstack([time, self._rebin(h[1], rebin)])
+            
             elif option == 'helicity': # -------------------------------------
                 out = mdict()
-                out['p'] = self._rebin(h[0],rebin)
-                out['n'] = self._rebin(h[1],rebin)
+                out['p'] = self._rebin(h[0], rebin)
+                out['n'] = self._rebin(h[1], rebin)
                 out['time_s'] = time
                 return out
-
+                
+            elif option == 'counter': # -------------------------------------
+                out = mdict()
+                out['fwd'] = self._rebin(h[0], rebin)
+                out['bck'] = self._rebin(h[1], rebin)
+                out['time_s'] = time
+                return out
+                
             elif option == 'combined': # -------------------------------------
                 c = np.array(self._get_asym_comb(d))
-                return np.vstack([time,self._rebin(c,rebin)])
+                return np.vstack([time, self._rebin(c, rebin)])
                 
             elif option == 'alpha_diffusion': # ------------------------------
                 try:
-                    asym = self._get_asym_alpha(d_alpha,d)
+                    asym = self._get_asym_alpha(d_alpha, d)
                 except UnboundLocalError as err:
                     if self.mode != '2h':
                         raise RuntimeError('Run is not in 2h mode.')
-                return np.vstack([time,self._rebin(asym,rebin)])
+                return np.vstack([time, self._rebin(asym, rebin)])
             
             elif option == 'alpha_tagged': # ---------------------------------
                 try:
-                    asym = self._get_asym_alpha_tag(d_alpha,d)  
+                    asym = self._get_asym_alpha_tag(d_alpha, d)  
                 except UnboundLocalError as err:
                     if self.mode != '2h':
                         raise RuntimeError('Run is not in 2h mode.')
@@ -1256,31 +1393,35 @@ class bdata(mdata):
                         raise err
                 
                 out = mdict()
-                out['p_wiA'] = self._rebin(asym[0][0],rebin)
-                out['n_wiA'] = self._rebin(asym[0][1],rebin)
-                out['p_noA'] = self._rebin(asym[1][0],rebin)
-                out['n_noA'] = self._rebin(asym[1][1],rebin)
-                out['p_noT'] = self._rebin(asym[2][0],rebin)
-                out['n_noT'] = self._rebin(asym[2][1],rebin)
-                out['c_wiA'] = self._rebin(asym[3],rebin)
-                out['c_noA'] = self._rebin(asym[4],rebin)
-                out['c_noT'] = self._rebin(asym[5],rebin)
+                out['p_wiA'] = self._rebin(asym[0][0], rebin)
+                out['n_wiA'] = self._rebin(asym[0][1], rebin)
+                out['p_noA'] = self._rebin(asym[1][0], rebin)
+                out['n_noA'] = self._rebin(asym[1][1], rebin)
+                out['p_noT'] = self._rebin(asym[2][0], rebin)
+                out['n_noT'] = self._rebin(asym[2][1], rebin)
+                out['c_wiA'] = self._rebin(asym[3], rebin)
+                out['c_noA'] = self._rebin(asym[4], rebin)
+                out['c_noT'] = self._rebin(asym[5], rebin)
                 out['time_s'] = time
                 
                 return out
             
             else:
+                h = np.array(self._get_asym_hel(d))
                 c = np.array(self._get_asym_comb(d))
+                ctr = np.array(self._get_asym_cntr(d))
                 
                 out = mdict()
-                out['p'] = self._rebin(h[0],rebin)
-                out['n'] = self._rebin(h[1],rebin)
-                out['c'] = self._rebin(c,rebin)  
+                out['p'] = self._rebin(h[0], rebin)
+                out['n'] = self._rebin(h[1], rebin)
+                out['fwd'] = self._rebin(ctr[0], rebin)
+                out['bck'] = self._rebin(ctr[1], rebin)
+                out['c'] = self._rebin(c, rebin)  
                 out['time_s'] = time
                 return out
         
         # 1F ------------------------------------------------------------------
-        elif self.mode in ('1f','1n','1w','1e'):
+        elif self.mode in ('1f', '1n', '1w', '1e'):
             
             # get xaxis label and data key
             if self.mode == '1f':
@@ -1301,7 +1442,7 @@ class bdata(mdata):
                 else:
                     one = int(b.split('-')[0])
                     two = int(b.split('-')[1])
-                    bin_ranges.extend(np.arange(one,two+1))
+                    bin_ranges.extend(np.arange(one, two+1))
             
             # kill bins
             for i in range(len(d)):
@@ -1326,56 +1467,80 @@ class bdata(mdata):
                 out['n'] = np.array(a[1])
                 out[xlab] = np.array(freq)
                 return out 
+            elif option in ('counter', 'forward_counter', 'backward_counter', ''):
+                freq_cntr, d_cntr = self._get_1f_mean_scans(d, freq)
             else:
-                freq,d = self._get_1f_sum_scans(d,freq)
+                freq, d = self._get_1f_sum_scans(d, freq)
                                        
             # rebin frequency
             if rebin>1:
                 len_f = len(freq)
-                newf = (np.average(freq[i:i+rebin-1]) for i in np.arange(0,len_f,rebin))
-                freq = np.fromiter(newf,dtype=float,count=int(np.ceil(len_f/rebin)))
+                newf = (np.average(freq[i:i+rebin-1]) for i in np.arange(0, len_f, rebin))
+                freq = np.fromiter(newf, dtype=float, count=int(np.ceil(len_f/rebin)))
                                        
             # swtich between remaining modes
             if option == 'helicity':
                 a = self._get_asym_hel(d)
                 out = mdict()
-                out['p'] = self._rebin(a[0],rebin)
-                out['n'] = self._rebin(a[1],rebin)
+                out['p'] = self._rebin(a[0], rebin)
+                out['n'] = self._rebin(a[1], rebin)
                 out[xlab] = np.array(freq)
                 return out
             
             elif option == 'positive':
                 a = self._get_asym_hel(d)
-                return np.vstack([freq,self._rebin(a[0],rebin)])
+                return np.vstack([freq, self._rebin(a[0], rebin)])
             
             elif option == 'negative':
                 a = self._get_asym_hel(d)
-                return np.vstack([freq,self._rebin(a[1],rebin)])
+                return np.vstack([freq, self._rebin(a[1], rebin)])
+            
+            elif option == 'counter':
+                a = self._get_asym_cntr(d_cntr)
+                out = mdict()
+                out['fwd'] = self._rebin(a[0], rebin)
+                out['bck'] = self._rebin(a[1], rebin)
+                out[xlab] = np.array(freq_cntr)
+                return out
+            
+            elif option == 'forward_counter':
+                a = self._get_asym_cntr(d_cntr)
+                return np.vstack([freq_cntr, self._rebin(a[0], rebin)])
+            
+            elif option == 'backward_counter':
+                a = self._get_asym_cntr(d_cntr)
+                return np.vstack([freq_cntr, self._rebin(a[1], rebin)])
             
             elif option in ['combined']:
                 a = self._get_asym_comb(d)
-                return np.vstack([freq,self._rebin(a,rebin)])
+                return np.vstack([freq, self._rebin(a, rebin)])
+                
             else:
                 ah = self._get_asym_hel(d)
                 ac = self._get_asym_comb(d)
+                ctr = self._get_asym_cntr(d_cntr)
                 
                 out = mdict()
-                out['p'] = self._rebin(ah[0],rebin)
-                out['n'] = self._rebin(ah[1],rebin)
-                out['c'] = self._rebin(ac,rebin)  
+                out['p'] = self._rebin(ah[0], rebin)
+                out['n'] = self._rebin(ah[1], rebin)
+                out['fwd'] = self._rebin(ctr[0], rebin)
+                out['bck'] = self._rebin(ctr[1], rebin)
+                out['c'] = self._rebin(ac, rebin)  
                 out[xlab] = np.array(freq)
+                out[xlab+'_cntr'] = np.array(freq_cntr)
+                
                 return out
             
         # 2E ------------------------------------------------------------------
-        elif self.mode in ('2e',):
+        elif self.mode in ('2e', ):
             adict = self._get_2e_asym()
             
             if option == 'slope_combined':  
-                return (adict['freq'],*adict['sl_c'])
+                return (adict['freq'], *adict['sl_c'])
             elif option == 'difference_combined':  
-                return (adict['freq'],*adict['dif_c'])
+                return (adict['freq'], *adict['dif_c'])
             elif option == 'raw_combined':  
-                return (adict['freq'],adict['time'],*adict['raw_c'])
+                return (adict['freq'], adict['time'], *adict['raw_c'])
             else:
                 return adict
         
@@ -1385,7 +1550,7 @@ class bdata(mdata):
             return
 
     # ======================================================================= #
-    def beam_kev(self,get_error=False):
+    def beam_kev(self, get_error=False):
         """
             Get the beam energy in kev, based on typical biases: 
                 itw (or ite bias) - bias15 - platform bias
@@ -1403,21 +1568,21 @@ class bdata(mdata):
             attr = 'mean'
         
         # get inital beam energy in keV
-        beam = getattr(epics.target_bias,attr)/1000.
+        beam = getattr(epics.target_bias, attr)/1000.
             
         # get RB cell voltage
-        bias15 = getattr(epics.bias15,attr)/1000.
+        bias15 = getattr(epics.bias15, attr)/1000.
         
         # get platform bias 
         if self.area == 'BNMR':
-            platform = getattr(epics.nmr_bias,attr)
+            platform = getattr(epics.nmr_bias, attr)
         elif self.area == 'BNQR':
-            platform = getattr(epics.nqr_bias,attr)/1000.
+            platform = getattr(epics.nqr_bias, attr)/1000.
         else:
             raise RuntimeError('Area not recognized')
         
         if get_error:
-            return np.sqrt(np.sum(np.square((beam,bias15,platform)))) # keV
+            return np.sqrt(np.sum(np.square((beam, bias15, platform)))) # keV
         else:
             return beam-bias15-platform # keV
     
