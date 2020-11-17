@@ -1467,8 +1467,11 @@ class bdata(mdata):
                 out['n'] = np.array(a[1])
                 out[xlab] = np.array(freq)
                 return out 
-            elif option in ('counter', 'forward_counter', 'backward_counter', ''):
+            elif option in ('counter', 'forward_counter', 'backward_counter'):
                 freq_cntr, d_cntr = self._get_1f_mean_scans(d, freq)
+            if option == '':
+                freq_cntr, d_cntr = self._get_1f_mean_scans(d, freq)
+                freq, d = self._get_1f_sum_scans(d, freq)
             else:
                 freq, d = self._get_1f_sum_scans(d, freq)
                                        
