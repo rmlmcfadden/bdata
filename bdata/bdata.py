@@ -1347,8 +1347,9 @@ class bdata(mdata):
             
             if rebin > 1:
                 len_t = len(time)
-                new_time = (np.average(time[i:i+rebin-1]) for i in np.arange(0, len_t, rebin))
-                time = np.fromiter(new_time, dtype=float, count=int(len_t/rebin))
+                new_t_idx = np.arange(0, len_t, rebin)
+                new_time = (np.average(time[i:i+rebin-1]) for i in new_t_idx)
+                time = np.fromiter(new_time, dtype=float, count=len(new_t_idx))
 
             # mode switching
             if option in ('positive', 'forward_counter'): # ---------------------------------------
