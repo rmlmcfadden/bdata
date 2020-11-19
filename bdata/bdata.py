@@ -1469,9 +1469,9 @@ class bdata(mdata):
                 out[xlab] = np.array(freq)
                 return out 
             elif option in ('counter', 'forward_counter', 'backward_counter'):
-                freq_cntr, d_cntr = self._get_1f_mean_scans(d, freq)
-            if option == '':
-                freq_cntr, d_cntr = self._get_1f_mean_scans(d, freq)
+                freq, d_cntr = self._get_1f_mean_scans(d, freq)
+            elif option == '':
+                _, d_cntr = self._get_1f_mean_scans(d, freq)
                 freq, d = self._get_1f_sum_scans(d, freq)
             else:
                 freq, d = self._get_1f_sum_scans(d, freq)
@@ -1504,16 +1504,16 @@ class bdata(mdata):
                 out = mdict()
                 out['fwd'] = self._rebin(a[0], rebin)
                 out['bck'] = self._rebin(a[1], rebin)
-                out[xlab] = np.array(freq_cntr)
+                out[xlab] = np.array(freq)
                 return out
             
             elif option == 'forward_counter':
                 a = self._get_asym_cntr(d_cntr)
-                return np.vstack([freq_cntr, self._rebin(a[0], rebin)])
+                return np.vstack([freq, self._rebin(a[0], rebin)])
             
             elif option == 'backward_counter':
                 a = self._get_asym_cntr(d_cntr)
-                return np.vstack([freq_cntr, self._rebin(a[1], rebin)])
+                return np.vstack([freq, self._rebin(a[1], rebin)])
             
             elif option in ['combined']:
                 a = self._get_asym_comb(d)
@@ -1531,7 +1531,6 @@ class bdata(mdata):
                 out['bck'] = self._rebin(ctr[1], rebin)
                 out['c'] = self._rebin(ac, rebin)  
                 out[xlab] = np.array(freq)
-                out[xlab+'_cntr'] = np.array(freq_cntr)
                 
                 return out
             
