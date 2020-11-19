@@ -1249,10 +1249,6 @@ class bdata(mdata):
             'sl_c':     [ve][f] combined helicity.
         """
         
-        # check rebin factor
-        if type(rebin) not in (int, np.int64) or rebin < 1:
-            raise RuntimeError('Rebinning factor must be int >= 1.')
-        
         # check for additonal options (1F)
         if omit != '':
             further_options = list(map(str.strip, omit.split(' ')))
