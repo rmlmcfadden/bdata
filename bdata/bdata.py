@@ -1190,6 +1190,10 @@ class bdata(mdata):
                         each helicity (val, err).
             "p":    2D np array of up helicity state [time_s, val, err].
             "n":    2D np array of down helicity state [time_s, val, err].
+            "f":    2D np array of forward counter [time_s, val, err].
+            "b":    2D np array of backward counter [time_s, val, err].
+            "l":    2D np array of left counter [time_s, val, err].
+            "r":    2D np array of right counter [time_s, val, err].
             "c":    2D np array of combined asymmetry [time_s, val, err].
             "ad":   2D np array of alpha diffusion ratio [time_s, val, err].
             "at":   dictionary of alpha tagged asymmetries key:[val, err]. 
@@ -1204,7 +1208,7 @@ class bdata(mdata):
                 helicity respectively. Only in 2h mode. 
                         
             
-            1F DESCRIPTIONS ---------------------------------------------------
+            1F/1N/1W DESCRIPTIONS ---------------------------------------------------
             
                 all options can include a space deliminated list of bins or 
                 ranges of bins which will be omitted. ex: "raw 1 2 5-20 3"
@@ -1220,6 +1224,10 @@ class bdata(mdata):
             "p":    get pos helicity states as tuple, combined by frequency 
                         (freq, val, err)
             "n":    similar to p but for negative helicity states
+            "f":    similar to p but for forward counter
+            "b":    similar to p but for backward counter
+            "l":    similar to p but for left counter
+            "r":    similar to p but for right counter
             "c":    get combined helicity states as tuple (freq, val, err)
             
                         
@@ -1363,8 +1371,14 @@ class bdata(mdata):
                 
             elif option == 'counter': # -------------------------------------
                 out = mdict()
-                out['fwd'] = self._rebin(h[0], rebin)
-                out['bck'] = self._rebin(h[1], rebin)
+                
+                if self.area == 'BNMR':
+                    out['f'] = self._rebin(h[0], rebin)
+                    out['b'] = self._rebin(h[1], rebin)
+                elif self.area == 'BNQR':
+                    out['r'] = self._rebin(h[0], rebin)
+                    out['l'] = self._rebin(h[1], rebin)
+                    
                 out['time_s'] = time
                 return out
                 
@@ -1411,8 +1425,14 @@ class bdata(mdata):
                 out = mdict()
                 out['p'] = self._rebin(h[0], rebin)
                 out['n'] = self._rebin(h[1], rebin)
-                out['fwd'] = self._rebin(ctr[0], rebin)
-                out['bck'] = self._rebin(ctr[1], rebin)
+                
+                if self.area == 'BNMR':
+                    out['f'] = self._rebin(h[0], rebin)
+                    out['b'] = self._rebin(h[1], rebin)
+                elif self.area == 'BNQR':
+                    out['r'] = self._rebin(h[0], rebin)
+                    out['l'] = self._rebin(h[1], rebin)
+                
                 out['c'] = self._rebin(c, rebin)  
                 out['time_s'] = time
                 return out
@@ -1498,8 +1518,14 @@ class bdata(mdata):
             elif option == 'counter':
                 a = self._get_asym_cntr(d_cntr)
                 out = mdict()
-                out['fwd'] = self._rebin(a[0], rebin)
-                out['bck'] = self._rebin(a[1], rebin)
+                
+                if self.area == 'BNMR':
+                    out['f'] = self._rebin(a[0], rebin)
+                    out['b'] = self._rebin(a[1], rebin)
+                elif self.area == 'BNQR':
+                    out['r'] = self._rebin(a[0], rebin)
+                    out['l'] = self._rebin(a[1], rebin)
+                    
                 out[xlab] = np.array(freq)
                 return out
             
@@ -1523,8 +1549,14 @@ class bdata(mdata):
                 out = mdict()
                 out['p'] = self._rebin(ah[0], rebin)
                 out['n'] = self._rebin(ah[1], rebin)
-                out['fwd'] = self._rebin(ctr[0], rebin)
-                out['bck'] = self._rebin(ctr[1], rebin)
+                
+                if self.area == 'BNMR':
+                    out['f'] = self._rebin(ctr[0], rebin)
+                    out['b'] = self._rebin(ctr[1], rebin)
+                elif self.area == 'BNQR':
+                    out['r'] = self._rebin(ctr[0], rebin)
+                    out['l'] = self._rebin(ctr[1], rebin)
+                
                 out['c'] = self._rebin(ac, rebin)  
                 out[xlab] = np.array(freq)
                 
