@@ -651,7 +651,7 @@ class bdata(mdata):
         
         hist = self.hist
         
-        if self.mode == '1n' or nbm:
+        if nbm:
             data = [hist['NBMF+'].data, \
                     hist['NBMF-'].data, \
                     hist['NBMB+'].data, \
