@@ -1334,6 +1334,10 @@ class bdata(mdata):
                     for i in range(len(d)):
                         d[i] = np.delete(d[i], [0])
                         
+                    if self.mode == '2h':
+                        for i in range(len(d_alpha)):
+                            d_alpha[i] = np.delete(d_alpha[i], [0])
+                        
             # do alpha background subtractions
             if self.mode == '2h':    
                 for i in range(len(d_alpha)):
