@@ -11,6 +11,7 @@ import datetime, warnings, requests
 
 from mudpy import mdata
 from mudpy.containers import mdict, mvar, mhist
+from iminuit import Minuit
 
 __doc__="""
     Beta-data module. The bdata object is largely a data container, designed to 
@@ -643,6 +644,40 @@ class bdata(mdata):
             dict.__setattr__(self, name, value)
     
     # ======================================================================= #
+    def _correct_deadtime(self, d, deadtime):
+        """
+            Apply deadtime correction based on bnmrfit physical script named
+            bnmr_fdt.pcm written by Jay and Zaher in June 2005
+            
+            d:          list of arrays for each counter as a function of time
+            deadtime:   float 
+        """
+        
+        # dwell time
+        tdwell = self.ppg['dwelltime'].mean * 0.001
+         
+        # time to do one scan
+        if '2' in self.mode:
+            tscan = tdwell * (self.ppg['beam_on'].mean + \
+                              self.ppg['beam_off'].mean + \
+                              self.ppg['prebeam'].mean) \
+                    + self.ppg['hel_sleep'].mean * 0.001
+
+            # number of scans
+            nscans = self.duration / tscan
+
+        elif '1' in self.mode:
+            nscans = self.ppg['nbins'].mean
+        
+        # time per bin
+        tbin = tdwell * nscans
+        
+        # apply correction 
+        dnew = [di / (1 - di/tbin*deadtime) for di in d]
+        
+        return dnew
+        
+    # ======================================================================= #
     def _get_area_data(self, nbm=False):
         """Get histogram list based on area type. 
         List pattern: [type1_hel+, type1_hel-, type2_hel+, type2_hel-]
@@ -1078,7 +1113,7 @@ class bdata(mdata):
         return np.array([x_rebin, dx_rebin])
             
     # ======================================================================= #
-    def asym(self, option="", omit="", rebin=1, hist_select='', nbm=False):
+    def asym(self, option="", omit="", rebin=1, hist_select='', nbm=False, deadtime=0):
         """Calculate and return the asymmetry for various run types. 
            
         usage: asym(option="", omit="", rebin=1, hist_select='', nbm=False)
@@ -1094,6 +1129,7 @@ class bdata(mdata):
                                 with [, ] or [;]. Histogram names cannot 
                                 therefore contain either of these characters.
             nbm:            if True, use neutral beams in calculations
+            deadtime:       detector deadtime used to correct counter values (s)
             
         Asymmetry calculation outline (with default detectors) ---------------
         
@@ -1137,10 +1173,11 @@ class bdata(mdata):
                      nTR is the right counter tagged with !alphas (absence of), 
                      nLR is the right counter tagged with !alphas, 
                                           
-                  
         Status of Data Corrections --------------------------------------------
             SLR/2H: 
                 Removes prebeam bins. 
+                
+                Provides the option of deadtime correction. Set to zero to disable.
                 
                 Rebinning: 
                     returned time is average time over rebin range
@@ -1148,6 +1185,8 @@ class bdata(mdata):
                 
             1F/1W: 
                 Allows manual removal of unwanted bins. 
+                
+                Provides the option of deadtime correction. Set to zero to disable.
                 
                 Scan Combination:
                     Multiscans are considered as a single scan with long 
@@ -1159,13 +1198,14 @@ class bdata(mdata):
                     as Possionian.
             
             1N:
-                Same as 1F. Uses the neutral beam monitor values to calculate 
-                asymetries in the same manner as the NMR calculation. 
+                Same as 1F. Use the neutral beam monitor values to calculate 
+                asymetries in the case of 8Li. 
              
             2E: 
                 Prebeam bin removal. 
                 Postbeam bin removal. Assumes beamoff time is 0. 
                 Splits saved 1D histograms into 2D.
+                Deadtime corrections are not yet available for this mode. 
                 
                 Asymmetry calculations: 
                     raw: calculated through differences method (as described in 
@@ -1293,12 +1333,12 @@ class bdata(mdata):
         else:
             d = self._get_area_data(nbm=nbm) # 1+ 2+ 1- 2-
             d_all = d
-            
-        # get alpha diffusion data
+                
+        # get alpha diffusion data and apply deadtime corrections
         if self.mode == '2h':
             d_alpha = d[4:]
             d = d[:4]
-        
+            
         # SLR -----------------------------------------------------------------
         if self.mode in ("20", '2h'):
             
@@ -1338,6 +1378,9 @@ class bdata(mdata):
                         for i in range(len(d_alpha)):
                             d_alpha[i] = np.delete(d_alpha[i], [0])
                         
+            # deadtime correction
+            d = self._correct_deadtime(d, deadtime)
+            
             # do alpha background subtractions
             if self.mode == '2h':    
                 for i in range(len(d_alpha)):
@@ -1453,6 +1496,9 @@ class bdata(mdata):
                 xlab = 'mV'
             elif self.mode == '1e':
                 xlab = 'mA'
+            
+            # deadtime correction
+            d = self._correct_deadtime(d, deadtime)
             
             # get bins to kill
             bin_ranges_str = further_options 
@@ -1621,6 +1667,59 @@ class bdata(mdata):
         else:
             return beam-bias15-platform # keV
     
+    # ======================================================================= #
+    def get_deadtime(self, dt=1e-9, search=True, return_minuit=False):
+        """
+            Get detector deadtime in s (TD mode only)
+            
+            Based on bnmrfit physical script named bnmr_fdt.pcm written by Jay 
+            and Zaher in June 2005
+            
+            dt_ns:  deadtime initial parameter in ns
+            search: if true, use minuit to search for the best deadtime value
+                    if false, calculate the chisquared associated with this deadtime
+            return_minuit: if true, return minuit object in the place of the deadtime value
+        """
+        
+        # check run mode
+        if '2' not in self.mode:
+            raise RuntimeError('Deadtimes only estimatable in time differentiated mode')
+        
+        # make chi2 function: compare the midpoint of the split helicity
+        # to the total average value, which is somewhere in the middle
+        def chi(dt_ns):
+            
+            # get split hel asym
+            asym = self.asym('h', deadtime=dt_ns*1e-9)
+            p, dp = asym['p']
+            n, dn = asym['n']
+            
+            # midpoints
+            midpts = 0.5*(p+n)
+            dmidpts = 0.5*np.sqrt(dp**2 + dn**2)
+            
+            # weighted average midpoint
+            avgmid = np.average(midpts, weights=1/dmidpts)
+            
+            # get chi2
+            return np.mean( ((midpts-avgmid)/dmidpts)**2 )
+        
+        # early end condition
+        if not search: 
+            return chi(dt*1e9)
+            
+        # search for best chi2
+        m = Minuit(chi, dt_ns = dt*1e9)
+        m.errordef = 1
+        m.errors['dt_ns'] = 1
+        m.limits['dt_ns'] = (0, None)
+        m.migrad()
+        
+        print(m.fmin)
+        
+        if return_minuit:   return m
+        else:               return m.values[0]*1e-9 
+        
     # ======================================================================= #
     def get_pulse_s(self):
         """Get pulse duration in seconds, for pulsed measurements."""
