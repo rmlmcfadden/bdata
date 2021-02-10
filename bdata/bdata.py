@@ -572,9 +572,6 @@ class bdata(mdata):
             for k in self.hist.keys():
                 self.hist[k].title = k
             
-        # prevent overwriting of attributes
-        self._bdata_initialised = True
-
     # ======================================================================= #
     def __getattr__(self, name):
         
@@ -629,20 +626,6 @@ class bdata(mdata):
         else:
             return self.__class__.__name__ + "()"
         
-    # ======================================================================= #
-    def __setattr__(self, name, value):
-        """Allow setting attributes only when initializing"""
-        
-        # this test allows attributes to be set in the __init__ method
-        if '_bdata__initialised' not in self.__dict__.keys(): 
-            return dict.__setattr__(self, name, value)
-            
-        # any normal attributes are handled normally
-        elif name in self.__dict__.keys():       
-            raise AttributeError('Object is readonly')
-        else:
-            dict.__setattr__(self, name, value)
-    
     # ======================================================================= #
     def _correct_deadtime(self, d, deadtime):
         """
@@ -1699,7 +1682,7 @@ class bdata(mdata):
             dmidpts = 0.5*np.sqrt(dp**2 + dn**2)
             
             # weighted average midpoint
-            avgmid = np.average(midpts, weights=1/dmidpts)
+            avgmid = np.average(midpts, weights=1/dmidpts**2)
             
             # get chi2
             return np.mean( ((midpts-avgmid)/dmidpts)**2 )
