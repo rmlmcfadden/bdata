@@ -1715,8 +1715,6 @@ class bdata(mdata):
         m.limits['dt_ns'] = (0, None)
         m.migrad()
         
-        print(m.fmin)
-        
         if return_minuit:   return m
         else:               return m.values[0]*1e-9 
         
