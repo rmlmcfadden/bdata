@@ -24,7 +24,7 @@ setuptools.setup(
         "Operating System :: MacOS",
         "Development Status :: 5 - Production/Stable",
     ],
-    install_requires=['cython>=0.28', 'numpy>=1.14', 'mud-py>=1.0.2', 
+    install_requires=['cython>=0.28', 'numpy>=1.14', 'mud-py>=1.1.0', 
                       'requests>=2.22.0', 'pandas>=0.25', 'iminuit>=2.3.0'],
 )
 
