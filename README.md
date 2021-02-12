@@ -52,7 +52,7 @@ b = bdata(0,filename='filename.msr') # read file from local memory, run number u
 | -------- | -------- |
 | [`asym(option="", omit="", rebin=1, hist_select='', nbm=False, deadtime=0)`](https://github.com/dfujim/bdata/blob/c5ec55c82b2380c538fbf615722bf08d8f4116c6/bdata/bdata.py#L1116-L1298) | Calculate asymmetry. |
 | [`beam_kev(get_error=False)`](https://github.com/dfujim/bdata/blob/c5ec55c82b2380c538fbf615722bf08d8f4116c6/bdata/bdata.py#L1634-L1640) | Get beam implantation energy in keV |
-| [`get_deadtime(dt=1e-9, search=True, return_minuit=False)`](https://github.com/dfujim/bdata/blob/c5ec55c82b2380c538fbf615722bf08d8f4116c6/bdata/bdata.py#L1671-L1682) | Get deadtime estimate in s |
+| [`get_deadtime(self, dt=1e-9, c=1, return_minuit=False, fixed='c')`](https://github.com/dfujim/bdata/blob/3197c29ab5a9a0290fa0ecee50cd5fe0c8ae538e/bdata/bdata.py#L1655-L1673) | Get deadtime estimate in s, scaling factor, or chi2 |
 | [`get_pulse_s()`](https://github.com/dfujim/bdata/blob/c5ec55c82b2380c538fbf615722bf08d8f4116c6/bdata/bdata.py#L1724-L1725) | Get beam pulse duration in s |
 
 ## Misc Features
@@ -65,8 +65,6 @@ In addition to those provided by [`mdata`](#mdata).
    attribute in the mdict objects in the order: camp, epics, ppg, hist.
    This second-level attribute search is much slower than regular 
    access.
-
-
 
 # [bjoined](https://github.com/dfujim/bdata/blob/master/bdata/bjoined.py)
 
@@ -92,7 +90,6 @@ In addtion to the [`bdata`](#bdata) functions, `bjoined` also provides:
 | Signature | Description |
 | -------- | -------- |
 | [`asym_mean(*asym_args,**asym_kwargs)`](https://github.com/dfujim/bdata/blob/64495ec255cd4a0a6aee6f8f8b97607adef73e88/bdata/bjoined.py#L237)     | Take weighted mean of individual asymmetries. Arguments are passed to `bdata.asym()`   |
-
 
 ## Misc Features
 
