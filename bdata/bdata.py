@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import os, glob
 import datetime, warnings, requests
+from bdata.exceptions import MinimizationError, InputError
 
 from mudpy import mdata
 from mudpy.containers import mdict, mvar, mhist
@@ -1292,7 +1293,7 @@ class bdata(mdata):
         try:
             option = self.option[option]
         except KeyError:
-            raise RuntimeError("Option not recognized.")
+            raise InputError("Option not recognized.")
         
         # get data
         if hist_select != '':
@@ -1305,7 +1306,7 @@ class bdata(mdata):
             
             # check for user error
             if len(hist_select) < 4:
-                raise RuntimeError('hist_select must be a string of at least '+\
+                raise InputError('hist_select must be a string of at least '+\
                         'four [, ]-seperated or [;]-seperated histogram names')
             
             # get data
@@ -1421,7 +1422,7 @@ class bdata(mdata):
                     asym = self._get_asym_alpha(d_alpha, d)
                 except UnboundLocalError as err:
                     if self.mode != '2h':
-                        raise RuntimeError('Run is not in 2h mode.')
+                        raise InputError('Run is not in 2h mode.')
                 return np.vstack([time, self._rebin(asym, rebin)])
             
             elif option == 'alpha_tagged': # ---------------------------------
@@ -1429,7 +1430,7 @@ class bdata(mdata):
                     asym = self._get_asym_alpha_tag(d_alpha, d)  
                 except UnboundLocalError as err:
                     if self.mode != '2h':
-                        raise RuntimeError('Run is not in 2h mode.')
+                        raise InputError('Run is not in 2h mode.')
                     else:
                         raise err
                 
@@ -1692,10 +1693,15 @@ class bdata(mdata):
             return chi(dt*1e9)
             
         # search for best chi2
-        m = Minuit(chi, dt_ns = dt*1e9)
+        m = Minuit(chi, dt_ns=dt*1e9)
         m.errordef = 1
         m.errors['dt_ns'] = 1
         m.limits['dt_ns'] = (0, None)
+        
+        # check if valid 
+        if not m.valid:
+            raise MinimizationError("Minuit failed to converge to a valid minimum")
+        
         m.migrad()
         
         if return_minuit:   return m
