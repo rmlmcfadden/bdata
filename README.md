@@ -50,9 +50,10 @@ b = bdata(0,filename='filename.msr') # read file from local memory, run number u
 
 | Signature | Description |
 | -------- | -------- |
-| [`asym(option="",omit="",rebin=1,hist_select='',nbm=False)`](https://github.com/dfujim/bdata/blob/64495ec255cd4a0a6aee6f8f8b97607adef73e88/bdata/bdata.py#L903)     | Calculate asymmetry. |
-| [`beam_kev(get_error=False)`](https://github.com/dfujim/bdata/blob/64495ec255cd4a0a6aee6f8f8b97607adef73e88/bdata/bdata.py#L1316)     | Get beam implantation energy in keV     |
-| [`get_pulse_s()`](https://github.com/dfujim/bdata/blob/64495ec255cd4a0a6aee6f8f8b97607adef73e88/bdata/bdata.py#L1353)     | Get beam pulse duration in s     |
+| [`asym(option="", omit="", rebin=1, hist_select='', nbm=False, deadtime=0)`](https://github.com/dfujim/bdata/blob/c5ec55c82b2380c538fbf615722bf08d8f4116c6/bdata/bdata.py#L1116-L1298) | Calculate asymmetry. |
+| [`beam_kev(get_error=False)`](https://github.com/dfujim/bdata/blob/c5ec55c82b2380c538fbf615722bf08d8f4116c6/bdata/bdata.py#L1634-L1640) | Get beam implantation energy in keV |
+| [`get_deadtime(dt=1e-9, search=True, return_minuit=False)`](https://github.com/dfujim/bdata/blob/c5ec55c82b2380c538fbf615722bf08d8f4116c6/bdata/bdata.py#L1671-L1682) | Get deadtime estimate in s |
+| [`get_pulse_s()`](https://github.com/dfujim/bdata/blob/c5ec55c82b2380c538fbf615722bf08d8f4116c6/bdata/bdata.py#L1724-L1725) | Get beam pulse duration in s |
 
 ## Misc Features
 
