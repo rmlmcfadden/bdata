@@ -1652,17 +1652,24 @@ class bdata(mdata):
             return beam-bias15-platform # keV
     
     # ======================================================================= #
-    def get_deadtime(self, dt=1e-9, search=True, return_minuit=False):
+    def get_deadtime(self, dt=1e-9, c=1, return_minuit=False, fixed='c'):
         """
             Get detector deadtime in s (TD mode only)
             
             Based on bnmrfit physical script named bnmr_fdt.pcm written by Jay 
             and Zaher in June 2005
             
-            dt_ns:  deadtime initial parameter in ns
-            search: if true, use minuit to search for the best deadtime value
-                    if false, calculate the chisquared associated with this deadtime
-            return_minuit: if true, return minuit object in the place of the deadtime value
+            dt:             deadtime initial parameter in s
+            c:              negative helicity scaling factor
+            return_minuit:  if true, return Minuit object, else return the 
+                            unfixed parameters
+            fixed:          if string fix that parameter, list fix those parameters
+                            
+            returns
+                
+                if return_minuit return Minuit object
+                if one parameter fixed, return the other parameter
+                if both parameters fixed, return the chi2 value
         """
         
         # check run mode
@@ -1671,7 +1678,7 @@ class bdata(mdata):
         
         # make chi2 function: compare the midpoint of the split helicity
         # to the total average value, which is somewhere in the middle
-        def chi(dt_ns):
+        def chi(dt_ns, c):
             
             # get split hel asym
             asym = self.asym('h', deadtime=dt_ns*1e-9)
@@ -1679,33 +1686,49 @@ class bdata(mdata):
             n, dn = asym['n']
             
             # midpoints
-            midpts = 0.5*(p+n)
-            dmidpts = 0.5*np.sqrt(dp**2 + dn**2)
+            midpts = 0.5*(p+c*n)
+            dmidpts2 = 0.25*(dp**2 + (c*dn)**2)
             
             # weighted average midpoint
-            avgmid = np.average(midpts, weights=1/dmidpts**2)
+            avgmid = np.average(midpts, weights=1/dmidpts2)
             
             # get chi2
-            return np.mean( ((midpts-avgmid)/dmidpts)**2 )
+            return np.mean( ((midpts-avgmid)**2)/dmidpts2 )
         
-        # early end condition
-        if not search: 
-            return chi(dt*1e9)
-            
+        
         # search for best chi2
-        m = Minuit(chi, dt_ns=dt*1e9)
+        m = Minuit(chi, dt_ns=dt*1e9, c=c)
         m.errordef = 1
-        m.errors['dt_ns'] = 1
         m.limits['dt_ns'] = (0, None)
+        
+        # fixing
+        if 'c' in fixed:    m.fixed['c'] = True
+        if 'dt' in fixed:   m.fixed['dt_ns'] = True
+        
+        # run minimization
+        m.migrad()
         
         # check if valid 
         if not m.valid:
+            print(m.fmin)
+            print(m.params)
             raise MinimizationError("Minuit failed to converge to a valid minimum")
         
-        m.migrad()
-        
-        if return_minuit:   return m
-        else:               return m.values[0]*1e-9 
+        # make output
+        if return_minuit:   
+            return m
+        else:      
+            output = []
+            if not m.fixed['dt_ns']:
+                output.append(m.values['dt_ns']*1e-9)
+            if not m.fixed['c']:
+                output.append(m.values['c'])
+            
+            # return
+            len_out = len(output)
+            if len_out == 0:    return m.fval           # all fixed: return chi2
+            elif len_out == 1:  return output[0]
+            else:               return np.array(output)
         
     # ======================================================================= #
     def get_pulse_s(self):
