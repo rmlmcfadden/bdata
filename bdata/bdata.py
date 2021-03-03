@@ -1516,7 +1516,14 @@ class bdata(mdata):
                 xlab = 'mA'
             
             # deadtime correction
-            d = self._correct_deadtime(d, deadtime)
+            try:
+                d = self._correct_deadtime(d, deadtime)
+            except KeyError:    # missing PPG parameter
+                if deadtime > 0:
+                    warnings.warn(
+                        "%d.%d: Missing PPG parameter(s), no deadtime correction applied" \
+                            % (self.year, self.run),
+                        Warning, stacklevel=2)
             
             # get bins to kill
             bin_ranges_str = further_options 
