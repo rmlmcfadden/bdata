@@ -671,22 +671,33 @@ class bdata(mdata):
             deadtime:   float 
         """
         
-        # dwell time
-        tdwell = self.ppg['dwelltime'].mean * 0.001
-         
-        # time to do one scan
-        if '2' in self.mode:
-            tscan = tdwell * (self.ppg['beam_on'].mean + \
-                              self.ppg['beam_off'].mean + \
-                              self.ppg['prebeam'].mean) \
-                    + self.ppg['hel_sleep'].mean * 0.001
-
-            # number of scans
-            nscans = self.duration / tscan
-
-        elif '1' in self.mode:
-            nscans = self.ppg['nbins'].mean
+        try:
         
+            # dwell time
+            tdwell = self.ppg['dwelltime'].mean * 0.001
+             
+            # time to do one scan
+            if '2' in self.mode:
+                tscan = tdwell * (self.ppg['beam_on'].mean + \
+                                  self.ppg['beam_off'].mean + \
+                                  self.ppg['prebeam'].mean) \
+                        + self.ppg['hel_sleep'].mean * 0.001
+
+                # number of scans
+                nscans = self.duration / tscan
+
+            elif '1' in self.mode:
+                nscans = self.ppg['nbins'].mean
+
+        # missing PPG parameters
+        except KeyError:    
+            if deadtime > 0:
+                warnings.warn(
+                    "%d.%d: Missing PPG parameter(s), no deadtime correction applied" \
+                        % (self.year, self.run),
+                    Warning, stacklevel=2)
+            return d
+            
         # time per bin
         tbin = tdwell * nscans
         
@@ -1516,14 +1527,7 @@ class bdata(mdata):
                 xlab = 'mA'
             
             # deadtime correction
-            try:
-                d = self._correct_deadtime(d, deadtime)
-            except KeyError:    # missing PPG parameter
-                if deadtime > 0:
-                    warnings.warn(
-                        "%d.%d: Missing PPG parameter(s), no deadtime correction applied" \
-                            % (self.year, self.run),
-                        Warning, stacklevel=2)
+            d = self._correct_deadtime(d, deadtime)
             
             # get bins to kill
             bin_ranges_str = further_options 
