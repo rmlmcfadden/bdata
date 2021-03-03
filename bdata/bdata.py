@@ -274,6 +274,7 @@ class bdata(mdata):
             "/Sample/current_read_1"                    :"smpl_current", 
             "/Sample/current_read"                      :"smpl_current", 
             "/Sample1/current_read"                     :"smpl_current", 
+            "/Sample/sample_read"                       :"smpl_read_A", 
             "/Sample/read_A"                            :"smpl_read_A", 
             "/Sample1/read_A"                           :"smpl_read_A", 
             "/Sample/read_B"                            :"smpl_read_B", 
@@ -357,7 +358,50 @@ class bdata(mdata):
             "":""
             }
     
+    # mapping from old run attributes to new run attributes
+    old_attr = {  
+        # histogram names
+            'FREQ'          :'Frequency', 
+            'Bp'            :'B+', 
+            'back+'         :'B+',
+            'Fp'            :'F+', 
+            'front+'        :'F+',
+            'Bm'            :'B-', 
+            'back-'         :'B-',
+            'Fm'            :'F-', 
+            'front-'        :'F-',
+            'FluM'          :'FluM2', 
+            'FluorMon2'     :'FluM2',
+            'PolLp'         :'L+', 
+            'PolLeft+'      :'L+',
+            'PolRp'         :'R+', 
+            'PolRight+'     :'R+', 
+            'PolLm'         :'L-',
+            'PolLeft-'      :'L-',
+            'PolRm'         :'R-', 
+            'PolRight-'     :'R-',
+            'NBMBp'         :'NBMB+', 
+            'NeutBmB+'      :'NBMB+',
+            'NBMFp'         :'NBMF+', 
+            'NeutBmF+'      :'NBMF+',
+            'NBMBm'         :'NBMB-', 
+            'NeutBmB-'      :'NBMB-',
+            'NBMFm'         :'NBMF-', 
+            'NeutBmF-'      :'NBMF-',
+        
+        # method to mode conversion
+            'TI-Bnmr'       :'1f',
+            'TI-bNMR'       :'1f',
+            
+            'TD-Bnmr'       :'20',
+            'TD-bNMR'       :'20',
+
+        # apparatus
+            'bnmr2'         :'BNMR',
+            'bnmr'          :'BNMR',
+        }
     
+    # options for asymmetry calculation
     option = {  ''                      :'',
                 
                 'adif'                  :'alpha_diffusion',
@@ -528,50 +572,40 @@ class bdata(mdata):
         if hasattr(self, 'ivar'):
             
             for v in self.ivar.values(): 
-                try:
-                    if 'PPG' in v.title:
-                        self.ppg[bdata.dkeys[v.title.split("/")[-1].lower()]] = v
-                    elif v.title[0] == "/":
-                        self.camp[bdata.dkeys[v.title.lower()]] = v
-                    else:
-                        self.epics[bdata.dkeys[v.title.lower()]] = v
-                except (KeyError, IndexError):
-                        message = '"%s" not found in dkeys ("%s" in "%s"). ' +\
-                                    "Data in list, but not sorted to dict."
-                        message = message % (v.title, v.description, v.units)
-                        warnings.warn(message, RuntimeWarning, stacklevel=2)
+                if 'PPG' in v.title:
+                    title = v.title.split("/")[-1].lower()
+                    self.ppg[bdata.dkeys.get(title, title)] = v
+                elif v.title[0] == "/":
+                    title = v.title.lower()
+                    self.camp[bdata.dkeys.get(title, title)] = v
+                else:
+                    title = v.title.lower()
+                    self.epics[bdata.dkeys.get(title, title)] = v
+                    
+                if title not in bdata.dkeys.keys():
+                        message = '%d.%d: "%s" not found in dkeys ("%s").'
+                        message = message % (self.year, self.run, v.title, v.description)
+                        warnings.warn(message, Warning, stacklevel=2)
             
-        # Add missing run mode for old runs
-        if year < 2005 and not self.mode and self.method == 'TI-bNMR':
-            self.mode = '1f' 
+        # Fix attributes for old runs
+        if year < 2005:
+            if not self.mode: 
+                self.mode = self.old_attr.get(self.method, self.method)
+            self.apparatus = self.old_attr.get(self.apparatus, self.apparatus)
             
-        # Fix inconsistent area for old runs
-        if year == 2003 and self.area == 'ISAC':
-            if self.run >= 45000:
-                self.area = 'BNQR'
-            else:
-                self.area = 'BNMR'
+            # histogram titles
+            hist = mdict()
             
-        # Fix histogram titles for old runs
-        if year == 2003 and 'FREQ' in self.hist.keys(): 
-            keymap = {'FREQ':'Frequency', 
-                      'Bp':'B+', 
-                      'Fp':'F+', 
-                      'Bm':'B-', 
-                      'Fm':'F-', 
-                      'FluM':'FluM2', 
-                      'PolLp':'L+', 
-                      'PolRp':'R+', 
-                      'PolLm':'L-', 
-                      'PolRm':'R-', 
-                      'NBMBp':'NBMB+', 
-                      'NBMFp':'NBMF+', 
-                      'NBMBm':'NBMB-', 
-                      'NBMFm':'NBMF-', 
-                      }
-            self.hist = mdict({i:self.hist[k] for k, i in keymap.items()})
             for k in self.hist.keys():
-                self.hist[k].title = k
+                newk = self.old_attr.get(k, k)
+                hist[newk] = self.hist[k]
+                hist[newk].title = newk
+            self.hist = hist
+        
+        # Fix inconsistent area for old runs
+        if self.area == 'ISAC':
+            if self.run >= 45000:   self.area = 'BNQR'
+            else:                   self.area = 'BNMR'
             
     # ======================================================================= #
     def __getattr__(self, name):
