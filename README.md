@@ -29,7 +29,7 @@ asymmetries or combining scans.
 
 ## [Contents](https://github.com/dfujim/bdata/wiki)
 
-* [`bdata`](https://github.com/dfujim/bdata/wiki/data) [object]: access β-NMR and β-NQR [MUD] files
+* [`bdata`](https://github.com/dfujim/bdata/wiki/bdata) [object]: access β-NMR and β-NQR [MUD] files
 * [`bjoined`](https://github.com/dfujim/bdata/wiki/bjoined) [object]: append `bdata` objects
 * [`bmerged`](https://github.com/dfujim/bdata/wiki/bmerged) [object]: combine `bdata` objects
 * [`life`](https://github.com/dfujim/bdata/wiki/life) [`mdict` object]: dictionary of probe lifetimes. 
