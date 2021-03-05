@@ -52,13 +52,13 @@ If you use [mudpy], [bdata], or [bfit] in your work, please cite:
 
 ### Dependencies
 
-The following packages/applications are needed prior to [bfit] installation:
+The following packages/applications are needed prior to [bdata] installation:
 - [Python] 3.6 or higher: a dynamically typed programming language. [[install](https://wiki.python.org/moin/BeginnersGuide/Download)]
 - [Cython] : [C]-language extensions for [Python]. [[install](https://cython.readthedocs.io/en/latest/src/quickstart/install.html)]
 - [NumPy] : array programming library for [Python]. [[install](https://numpy.org/install/)]
 
 
-and the following are handelled automatically when retrieving [bfit] from the [PyPI]:
+and the following are handelled automatically when retrieving [bdata] from the [PyPI]:
 
 - [iminuit] : a [Jupyter]-friendly [Python] interface for the [MINUIT2] library.
 - [mudpy] : data structures for parsing [TRIUMF] [MUD] files.
