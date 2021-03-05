@@ -27,6 +27,13 @@ in the analysis of β-NMR and β-NQR data. [bdata] has been written to fullfill 
 * Support analyses by providing common data manipulations, such as calculting 
 asymmetries or combining scans. 
 
+## [Contents](https://github.com/dfujim/bdata/wiki)
+
+* [`bdata`](https://github.com/dfujim/bdata/wiki/data) [object]: access β-NMR and β-NQR [MUD] files
+* [`bjoined`](https://github.com/dfujim/bdata/wiki/bjoined) [object]: append `bdata` objects
+* [`bmerged`](https://github.com/dfujim/bdata/wiki/bmerged) [object]: combine `bdata` objects
+* [`life`](https://github.com/dfujim/bdata/wiki/life) [`mdict` object]: dictionary of probe lifetimes. 
+
 ## Citing
 
 If you use [mudpy], [bdata], or [bfit] in your work, please cite:
@@ -101,14 +108,7 @@ export BNQR_ARCHIVE=/path/bnqr/
 
 If [bdata] cannot find the data, it will attempt to download the relavent [MUD] files 
 from the [archive] and store them in `$HOME/.bdata`.
-This is the default behaviour for [bdata] installed from [PyPI].
-
-## [Contents](https://github.com/dfujim/bdata/wiki)
-
-* [`bdata`](https://github.com/dfujim/bdata/wiki/data) [object]: access β-NMR and β-NQR [MUD] files
-* [`bjoined`](https://github.com/dfujim/bdata/wiki/bjoined) [object]: append `bdata` objects
-* [`bmerged`](https://github.com/dfujim/bdata/wiki/bmerged) [object]: combine `bdata` objects
-* [`life`](https://github.com/dfujim/bdata/wiki/life) [`mdict` object]: dictionary of probe lifetimes. 
+This is the default behaviour for [bdata] installed from [PyPI]
    
 
 [Python]: https://www.python.org/
