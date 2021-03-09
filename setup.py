@@ -6,10 +6,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="bdata",
-    version="6.2.6",
+    version="6.3.0",
     author="Derek Fujimoto",
     author_email="fujimoto@phas.ubc.ca",
-    description="BNMR/BNQR MUD file reader and asymmetry calculator",
+    description="β-NMR/β-NQR MUD file reader and asymmetry calculator",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/dfujim/bdata",
@@ -18,7 +18,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
-        "Programming Language :: Cython",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: POSIX :: Linux",
         "Operating System :: MacOS",
