@@ -630,7 +630,17 @@ class bdata(mdata):
             Nice printing of parameters.
         """
         
+        # get all attributes
         d = self.__dict__
+        
+        # add beam properties
+        try: 
+            d['beam_keV'] = self.beam_keV
+            d['beam_keV_err'] = self.beam_keV_err
+            d['pulse_s'] = self.pulse_s
+        except AttributeError: 
+            pass
+        
         dkeys = list(d.keys())
         if dkeys:
             items = []
@@ -661,6 +671,41 @@ class bdata(mdata):
         else:
             return self.__class__.__name__ + "()"
         
+    # ======================================================================= #
+    def _beam_kev(self, get_error=False):
+        """
+            Get the beam energy in kev, based on typical biases: 
+                itw (or ite bias) - bias15 - platform bias
+                
+            if get_error: fetch error in value, rather than value
+        """
+        
+        # get epics pointer
+        epics = self.epics
+        
+        # fetch stds
+        if get_error:   attr = 'std'
+        else:           attr = 'mean'
+        
+        # get inital beam energy in keV
+        beam = getattr(epics.target_bias, attr)/1000.
+            
+        # get Rb cell voltage
+        bias15 = getattr(epics.bias15, attr)/1000.
+        
+        # get platform bias 
+        if self.area == 'BNMR':
+            platform = getattr(epics.nmr_bias, attr)
+        elif self.area == 'BNQR':
+            platform = getattr(epics.nqr_bias, attr)/1000.
+        else:
+            raise RuntimeError('Area not recognized')
+        
+        if get_error:
+            return np.sqrt(np.sum(np.square((beam, bias15, platform)))) # keV
+        else:
+            return beam-bias15-platform # keV
+    
     # ======================================================================= #
     def _correct_deadtime(self, d, deadtime):
         """
@@ -1658,43 +1703,20 @@ class bdata(mdata):
         else:
             print("Unknown run type.")
             return
-
+            
     # ======================================================================= #
     def beam_kev(self, get_error=False):
-        """
-            Get the beam energy in kev, based on typical biases: 
-                itw (or ite bias) - bias15 - platform bias
-                
-            if get_error: fetch error in value, rather than value
-        """
-        
-        # get epics pointer
-        epics = self.epics
-        
-        # fetch stds
-        if get_error:
-            attr = 'std'
-        else:
-            attr = 'mean'
-        
-        # get inital beam energy in keV
-        beam = getattr(epics.target_bias, attr)/1000.
-            
-        # get RB cell voltage
-        bias15 = getattr(epics.bias15, attr)/1000.
-        
-        # get platform bias 
-        if self.area == 'BNMR':
-            platform = getattr(epics.nmr_bias, attr)
-        elif self.area == 'BNQR':
-            platform = getattr(epics.nqr_bias, attr)/1000.
-        else:
-            raise RuntimeError('Area not recognized')
-        
-        if get_error:
-            return np.sqrt(np.sum(np.square((beam, bias15, platform)))) # keV
-        else:
-            return beam-bias15-platform # keV
+        warnings.warn('beam_kev() will be depreciated in the next major '+\
+                      'release. Use beam_keV or beam_keV_err properties instead.', 
+                      Warning)
+                      
+        if get_error:   return self.beam_keV_err
+        else:           return self.beam_keV
+    
+    @property
+    def beam_keV(self):     return self._beam_kev()
+    @property
+    def beam_keV_err(self): return self._beam_kev(get_error=True)
     
     # ======================================================================= #
     def get_deadtime(self, dt=1e-9, c=1, return_minuit=False, fixed='c'):
@@ -1777,15 +1799,25 @@ class bdata(mdata):
         
     # ======================================================================= #
     def get_pulse_s(self):
+        warnings.warn('get_pulse_s() will be depreciated in the next major '+\
+                      'release. Use pulse_s property instead.', Warning)
+        return self.pulse_s
+        
+    @property
+    def pulse_s(self):        
         """Get pulse duration in seconds, for pulsed measurements."""
         
         try:
             dwelltime = self._get_ppg('dwelltime')
+        except KeyError:
+            raise AttributeError("Missing ppg parameter: dwelltime") from None
+        try:
             beam_on = self._get_ppg('beam_on')
-        except AttributeError:
-            raise AttributeError("Missing logged ppg parameter: dwelltime "+\
-                    "or beam_on") from None
+        except KeyError:
+            raise AttributeError("Missing ppg parameter: beam_on") from None
+                    
         return dwelltime*beam_on/1000.
+    
     
 # Dictinary of nuclear lifetimes for nuclei of interest as β-NMR probes.
 # Orginally adapted from the compilation in slr_v2.cpp (by R. M. L. McFadden).
