@@ -15,7 +15,8 @@ class bmerged(bdata):
         bdata object on completion
     """
 
-    epsilon = 1e-20     # avoid divide by zero when averaging 
+    # float machine epsilon - use later to avoid division by zero
+    epsilon = np.finfo(float).eps
 
     # ======================================================================= #
     def __init__(self,bdata_list):
@@ -200,7 +201,8 @@ class bmerged(bdata):
         avg = np.array([v.mean for v in varlist])
         std = np.array([v.std for v in varlist])
         
-        # no div by zero
+        # add the float machine epsilon to std to prevent division by zero in
+        # the calculation of the weighted mean
         std += self.epsilon
         
         # weighted mean 
