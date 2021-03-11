@@ -722,7 +722,7 @@ class bdata(mdata):
             tdwell = self.ppg['dwelltime'].mean * 0.001
              
             # time to do one scan
-            if '0' in self.mode:
+            if self.mode in ("20", "2h", "00"):
                 tscan = tdwell * (self.ppg['beam_on'].mean + \
                                   self.ppg['beam_off'].mean + \
                                   self.ppg['prebeam'].mean) \
